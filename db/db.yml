@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  postgres:
+    build:
+      dockerfile: Dockerfile.postgres
+      context: .
+    container_name: dev_postgres_1
+    ports:
+      - "5433:5432"
+    shm_size: "1G"
+    volumes:
+      - ./:/db
+      - ./.var/lib/postgresql/data:/var/lib/postgresql/data
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+      - POSTGRES_INITDB_ARGS="-E utf-8"
+    networks:
+      default:
+        aliases:
+          - postgres
+
+networks:
+  default:

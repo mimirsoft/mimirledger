@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  test_mimirledger:
+    image: dev_mimirledger
+    environment:
+      - TEST_RUN
+      - TEST_MODULES
+      - LOG_LEVEL=DEBUG
+      - APP_ENV=test
+    volumes:
+      - ../api:/app:delegated
+      - ../tmp/go/pkg:/go/pkg:delegated
+      - ../tmp/go/cache:/root/.cache/go-build:delegated
+    working_dir: /app
+    command: make -e test-direct
+    networks:
+      - network1
+
+networks:
+  network1:
+    name: db_default
+    external: true

@@ -1,0 +1,34 @@
+version: "3"
+
+services:
+
+  mimirledger-base:
+    container_name: dev_mimirledger_1
+    hostname: mimirledger
+    image: dev_mimirledger
+    build:
+      context: ../
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ../api:/app:delegated
+      - ../tmp/go/pkg:/go/pkg:delegated
+      - ../tmp/go/cache:/root/.cache/go-build:delegated
+    environment:
+      - APP_ENV=dev
+      - GO_PORT=3010
+    working_dir: /app
+    networks:
+      - network1
+
+
+  mimirledger:
+    extends:
+      service: mimirledger-base
+    ports:
+      - "3010:3010"
+    command: make -e start-web
+
+networks:
+  network1:
+    name: db_default
+    external: true

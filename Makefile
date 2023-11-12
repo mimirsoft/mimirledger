@@ -4,6 +4,9 @@ DOCKER_COMPOSE_START := ${DOCKER_COMPOSE} up -d ${SERVICE_NAME}
 DB_SERVICE_NAME := postgres
 DB_DOCKER_COMPOSE := docker-compose -f db/db.yml
 DB_DOCKER_COMPOSE_START := ${DB_DOCKER_COMPOSE} up -d ${DB_SERVICE_NAME}
+WEB_SERVICE_NAME := web
+WEB_DOCKER_COMPOSE := docker-compose -f client/client.yml
+WEB_DOCKER_COMPOSE_START := ${WEB_DOCKER_COMPOSE} up -d ${WEB_SERVICE_NAME}
 DOCKER_COMPOSE_TEST := docker-compose -f dev/test.yml
 LOG_TAIL_LENGTH=50
 
@@ -18,13 +21,26 @@ start:
 start-db:
 	${DB_DOCKER_COMPOSE_START}
 
-stop:
+start-web:
+	${WEB_DOCKER_COMPOSE_START}
+
+build-web:
+	COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 ${WEB_DOCKER_COMPOSE} build ${WEB_SERVICE_NAME}
+
+stop: stop-api stop-db stop-web
+
+stop-api:
 	${DOCKER_COMPOSE} stop ${SERVICE_NAME}
-	${DB_DOCKER_COMPOSE} down
+	${DOCKER_COMPOSE} down
 
 stop-db:
 	${DB_DOCKER_COMPOSE} stop ${DB_SERVICE_NAME}
 	${DB_DOCKER_COMPOSE} down
+
+stop-web:
+	${WEB_DOCKER_COMPOSE} stop ${WEB_SERVICE_NAME}
+	${WEB_DOCKER_COMPOSE} down
+
 
 restart: stop start
 

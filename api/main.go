@@ -2,31 +2,32 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"github.com/mimirsoft/mimirledger/api/cfg"
 	"github.com/mimirsoft/mimirledger/api/datastore"
-	"go.uber.org/zap"
-	"log"
+	"github.com/rs/zerolog/log"
+	"net/http"
 )
 
 func main() {
-	logger, err := zap.NewProduction()
-	if err != nil {
-		log.Fatal(err)
-	}
-	sugar := logger.Sugar()
-
 	appConfig := LoadConfig()
 	fmt.Printf("appConfig:%v \n", appConfig)
 	fmt.Println("Hello, world.")
 	myClient, err := datastore.NewClient(&appConfig.Postgres)
 	if err != nil {
-		sugar.Errorf("godotenv.Load err: %v", err)
+		log.Error().Err(err).Msg("godotenv.Load")
 	}
 	err = myClient.Ping()
 	if err != nil {
-		sugar.Errorf("myClient.Ping() err: %v", err)
+		log.Error().Err(err).Msg("myClient.Ping()")
 	}
-
+	r := chi.NewRouter()
+	r.Use(middleware.Logger)
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("welcome asasdfdf"))
+	})
+	http.ListenAndServe(":3000", r)
 }
 
 type Config struct {
@@ -34,15 +35,9 @@ type Config struct {
 }
 
 func LoadConfig() Config {
-	logger, err := zap.NewProduction()
+	err := cfg.LoadEnv()
 	if err != nil {
-		log.Fatal(err)
-	}
-	sugar := logger.Sugar()
-
-	err = cfg.LoadEnv()
-	if err != nil {
-		sugar.Errorf("godotenv.Load err: %v", err)
+		log.Error().Err(err).Msg("cfg.LoadEnv()")
 	}
 	postgresCfg := datastore.LoadPostgresConfigFromEnv()
 

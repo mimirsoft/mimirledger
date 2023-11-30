@@ -63,6 +63,9 @@ stop-api: # stop api service
 logs:
 	${DOCKER_COMPOSE} logs --tail $(LOG_TAIL_LENGTH) -f ${SERVICE_NAME}
 
+logs-web:
+	${WEB_DOCKER_COMPOSE} logs --tail $(LOG_TAIL_LENGTH) -f ${WEB_SERVICE_NAME}
+
 
 docker-clean: # clean out all containers (does NOT require a full rebuild)
 	${DOCKER_COMPOSE} down || true

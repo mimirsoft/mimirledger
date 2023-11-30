@@ -25,9 +25,15 @@ func main() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("welcome asasdfdf"))
+		w.Write([]byte("ok2"))
 	})
-	http.ListenAndServe(":3000", r)
+	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("healthOK"))
+	})
+	r.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("hello"))
+	})
+	http.ListenAndServe(":3010", r)
 }
 
 type Config struct {

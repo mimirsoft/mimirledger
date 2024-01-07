@@ -15,7 +15,9 @@ ifdef TEST_RUN
  TESTRUN := -run ${TEST_RUN}
 endif
 
-start:
+start: start-db start-api start-web
+
+start-api:
 	${DOCKER_COMPOSE_START}
 
 start-db:
@@ -93,7 +95,7 @@ api-shell:
 	docker exec -it dev_mimirledger_1  /bin/ash
 
 postgres-shell:
-	docker exec -it dev_db-postgres_1  /bin/bash
+	docker exec -it dev_postgres_1  /bin/bash
 
 psql:
 	$(MAKE) -C db -e psql

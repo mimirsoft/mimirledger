@@ -1,21 +1,10 @@
 CREATE TYPE transaction_account_sign_type AS ENUM ('CREDIT','DEBIT');
+CREATE TYPE transaction_account_type AS ENUM ('ASSET','LIABILITY','EQUITY','INCOME','EXPENSE','GAIN','LOSS');
 
-CREATE TABLE transactions_accounttype (
-    accounttype_id integer NOT NULL PRIMARY KEY,
-    accounttype_name varchar(20) NOT NULL DEFAULT '',
-    accounttype_sign transaction_account_sign_type NOT NULL DEFAULT 'CREDIT'
-);
-
-INSERT INTO transactions_accounttype VALUES (1,'ASSET','DEBIT'),(2,'LIABILITY','CREDIT'),
-                                            (3,'EQUITY','CREDIT'),(4,'INCOME','CREDIT'),
-                                            (5,'EXPENSE','DEBIT'),(6,'GAIN','CREDIT'),(7,'LOSS','DEBIT');
-
-CREATE TABLE transactions_accounts (
+CREATE TABLE transaction_accounts (
     account_id integer NOT NULL PRIMARY KEY,
     account_name varchar(50) DEFAULT '',
-    accounttype_id integer NOT NULL DEFAULT '0',
     account_memo varchar(70) DEFAULT '',
-    account_starting decimal(12,2) DEFAULT '0.00',
     account_current bool NOT NULL DEFAULT true,
     account_left integer DEFAULT NULL,
     account_right integer DEFAULT NULL,
@@ -28,10 +17,21 @@ CREATE TABLE transactions_accounts (
     account_locked bool NOT NULL DEFAULT false,
     account_open_date timestamp without time zone DEFAULT now(),
     account_close_date timestamp without time zone DEFAULT NULL,
-    account_code varchar(50) DEFAULT ''
+    account_code varchar(50) DEFAULT '',
+    account_sign transaction_account_sign_type NOT NULL DEFAULT 'DEBIT',
+    account_type transaction_account_type NOT NULL DEFAULT 'ASSET'
 );
-ALTER TABLE transactions_accounts ADD CONSTRAINT transactions_accounts_accounttype_id_fkey
-    FOREIGN KEY (accounttype_id) REFERENCES transactions_accounttype(accounttype_id);
 
-CREATE INDEX transactions_accounts_accounttype_id_idx ON transactions_accounts (accounttype_id);
 
+INSERT INTO transaction_accounts(account_id,
+                                 account_name, account_memo,
+                                 account_current, account_left, account_right,
+                                 account_balance, account_subtotal,
+                                 account_fullname,
+                                 account_sign,
+                                 account_type)
+VALUES (1,
+        'ASSETS','TOP LEVEL ASSETS SAMPLE',
+        true, 1,2,
+        0,0,
+        'ASSETS', 'DEBIT', 'ASSET')

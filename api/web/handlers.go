@@ -1,17 +1,17 @@
-package main
+package web
 
 import (
 	"encoding/json"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"net/http"
 )
 
-type RequestError struct {
+type UnknownError struct {
 	StatusCode int    `json:"status_code,omitempty"`
 	Err        string `json:"error,omitempty"`
 }
-type UnknownError struct {
+
+type RequestError struct {
 	StatusCode int    `json:"status_code,omitempty"`
 	Err        string `json:"error,omitempty"`
 }
@@ -46,7 +46,7 @@ func (h RootHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(e.StatusCode)
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			if err = json.NewEncoder(w).Encode(e); err != nil {
-				log.Printf("failed json encode RequestError response %s", err)
+				l.Printf("failed json encode RequestError response %s", err)
 			}
 			return
 		default:
@@ -69,4 +69,38 @@ func (h RootHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // returns our universal custom root handler
 func NewRootHandler(handler func(w http.ResponseWriter, r *http.Request) error) *RootHandler {
 	return &RootHandler{H: handler}
+}
+
+// GET /api/health
+// HEAD /api/health
+func HealthCheck(healthController *HealthController) func(w http.ResponseWriter, r *http.Request) error {
+	return func(w http.ResponseWriter, r *http.Request) error {
+		err := healthController.HealthCheck(r.Context())
+		if err != nil {
+			return NewRequestError(http.StatusServiceUnavailable, err)
+		}
+		return RespondOK(w, "ok")
+	}
+}
+
+// GET /accounttypes
+func AccountTypes(acctController *AccountsController) func(w http.ResponseWriter, r *http.Request) error {
+	return func(w http.ResponseWriter, r *http.Request) error {
+		accountsTypes, err := acctController.AccountTypeList(r.Context())
+		if err != nil {
+			return NewRequestError(http.StatusServiceUnavailable, err)
+		}
+		return RespondOK(w, accountsTypes)
+	}
+}
+
+// GET /accounts
+func Accounts(acctController *AccountsController) func(w http.ResponseWriter, r *http.Request) error {
+	return func(w http.ResponseWriter, r *http.Request) error {
+		accountsTypes, err := acctController.AccountList(r.Context())
+		if err != nil {
+			return NewRequestError(http.StatusServiceUnavailable, err)
+		}
+		return RespondOK(w, accountsTypes)
+	}
 }

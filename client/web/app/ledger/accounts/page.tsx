@@ -35,8 +35,8 @@ export default function Page() {
     return (
         <div>
             <div>MY LIST OF Accounts</div>
-            {data.accountTypes &&
-                data.accountTypes.map((accountType, index) => <h1  key={index}>{accountType.name}</h1>)}
+            {data.accounts &&
+                data.accounts.map((account, index) => <h1  key={index}>{account.name}</h1>)}
         </div>
     );
 }

@@ -14,6 +14,15 @@ const (
 	defaultSSLMode = "disable"
 )
 
+type Datastores struct {
+	postgresClient *sqlx.DB
+}
+
+// NewDatastores creates a struct of MixStores
+func NewDatastores(conn *sqlx.DB) *Datastores {
+	return &Datastores{postgresClient: conn}
+}
+
 type PostgresConfig struct {
 	Host, Username, Password, DBName string
 	Port, MaxConnLifetime            int

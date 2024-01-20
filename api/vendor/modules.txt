@@ -8,7 +8,7 @@ github.com/go-chi/chi/v5/middleware
 # github.com/go-chi/cors v1.2.1
 ## explicit; go 1.14
 github.com/go-chi/cors
-# github.com/google/go-cmp v0.5.9
+# github.com/google/go-cmp v0.6.0
 ## explicit; go 1.13
 github.com/google/go-cmp/cmp
 github.com/google/go-cmp/cmp/internal/diff
@@ -91,6 +91,9 @@ github.com/onsi/gomega/matchers/support/goraph/edge
 github.com/onsi/gomega/matchers/support/goraph/node
 github.com/onsi/gomega/matchers/support/goraph/util
 github.com/onsi/gomega/types
+# github.com/pkg/errors v0.9.1
+## explicit
+github.com/pkg/errors
 # github.com/rogpeppe/go-internal v1.11.0
 ## explicit; go 1.19
 # github.com/rs/zerolog v1.31.0
@@ -99,6 +102,20 @@ github.com/rs/zerolog
 github.com/rs/zerolog/internal/cbor
 github.com/rs/zerolog/internal/json
 github.com/rs/zerolog/log
+github.com/rs/zerolog/pkgerrors
+# github.com/satori/go.uuid v1.2.0
+## explicit
+github.com/satori/go.uuid
+# go.opentelemetry.io/otel v1.21.0
+## explicit; go 1.20
+go.opentelemetry.io/otel/attribute
+go.opentelemetry.io/otel/codes
+go.opentelemetry.io/otel/internal
+go.opentelemetry.io/otel/internal/attribute
+# go.opentelemetry.io/otel/trace v1.21.0
+## explicit; go 1.20
+go.opentelemetry.io/otel/trace
+go.opentelemetry.io/otel/trace/embedded
 # golang.org/x/crypto v0.12.0
 ## explicit; go 1.17
 golang.org/x/crypto/pbkdf2

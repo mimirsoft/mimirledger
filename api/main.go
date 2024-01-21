@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/mimirsoft/mimirledger/api/cfg"
 	"github.com/mimirsoft/mimirledger/api/datastore"
 	"github.com/mimirsoft/mimirledger/api/web"
@@ -16,8 +15,7 @@ func main() {
 	logger := zerolog.New(loggerOutput)
 
 	appConfig := LoadConfig()
-	fmt.Printf("appConfig:%v \n", appConfig)
-	fmt.Println("Hello, world.")
+	logger.Info().Msg("####Starting MimirLedger API Server###")
 	myClient, err := datastore.NewClient(&appConfig.Postgres)
 	if err != nil {
 		log.Error().Err(err).Msg("godotenv.Load")

@@ -11,7 +11,7 @@ services:
     shm_size: "1G"
     volumes:
       - ./:/db
-      - ./.var/lib/postgresql/data:/var/lib/postgresql/data
+      - ./.postgres-data:/var/lib/postgresql/data
       - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     environment:
       - POSTGRES_USER=postgres

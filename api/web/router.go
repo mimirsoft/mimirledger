@@ -7,6 +7,8 @@ import (
 	"github.com/mimirsoft/mimirledger/api/datastore"
 	"github.com/mimirsoft/mimirledger/api/middlewares"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+
 	"net/http"
 )
 
@@ -32,11 +34,17 @@ func NewRouter(ds *datastore.Datastores, logger zerolog.Logger) *chi.Mux {
 	acctsController := NewAccountsController(ds)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("ok2"))
+		_, err := w.Write([]byte("ok2"))
+		if err != nil {
+			log.Error().Err(err).Msg("w.Write failed")
+		}
 	})
 	r.Get("/health", NewRootHandler(HealthCheck(healthController)).ServeHTTP)
 	r.Get("/hello", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("hello"))
+		_, err := w.Write([]byte("hello"))
+		if err != nil {
+			log.Error().Err(err).Msg("w.Write failed")
+		}
 	})
 	r.Get("/accounts", NewRootHandler(Accounts(acctsController)).ServeHTTP)
 	r.Get("/accounttypes", NewRootHandler(AccountTypes(acctsController)).ServeHTTP)

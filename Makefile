@@ -46,7 +46,7 @@ stop-web:
 
 restart: stop start
 
-test: # run unit tests
+test: create-testdb # run unit tests
 	${DOCKER_COMPOSE_TEST} rm --force || true
 	${DOCKER_COMPOSE_TEST} run test_mimirledger
 	${DOCKER_COMPOSE_TEST} down

@@ -3,21 +3,21 @@ CREATE TYPE transaction_account_type AS ENUM ('ASSET','LIABILITY','EQUITY','INCO
 
 CREATE TABLE transaction_accounts (
     account_id integer NOT NULL PRIMARY KEY,
+    account_parent integer NOT NULL DEFAULT '0',
     account_name varchar(50) DEFAULT '',
+    account_fullname varchar(200) DEFAULT '',
     account_memo varchar(70) DEFAULT '',
     account_current bool NOT NULL DEFAULT true,
     account_left integer DEFAULT NULL,
     account_right integer DEFAULT NULL,
     account_balance decimal(12,2) DEFAULT NULL,
     account_subtotal decimal(12,2) DEFAULT NULL,
-    account_fullname varchar(200) DEFAULT '',
-    account_parent integer NOT NULL DEFAULT '0',
-    account_reconcile_date date DEFAULT NULL,
+    account_reconcile_date timestamp without time zone DEFAULT NULL,
     account_flagged bool NOT NULL DEFAULT false,
     account_locked bool NOT NULL DEFAULT false,
     account_open_date timestamp without time zone DEFAULT now(),
     account_close_date timestamp without time zone DEFAULT NULL,
-    account_code varchar(50) DEFAULT '',
+    account_code varchar(50) DEFAULT NULL,
     account_sign transaction_account_sign_type NOT NULL DEFAULT 'DEBIT',
     account_type transaction_account_type NOT NULL DEFAULT 'ASSET'
 );

@@ -16,11 +16,21 @@ const (
 
 type Datastores struct {
 	postgresClient *sqlx.DB
+	accountStore   AccountStore
+}
+
+// AccountStore is the way to access the AccountStore
+func (ds *Datastores) AccountStore() AccountStore {
+	return ds.accountStore
 }
 
 // NewDatastores creates a struct of MixStores
 func NewDatastores(conn *sqlx.DB) *Datastores {
-	return &Datastores{postgresClient: conn}
+	return &Datastores{postgresClient: conn,
+		accountStore: AccountStore{
+			Client: conn,
+		},
+	}
 }
 
 type PostgresConfig struct {

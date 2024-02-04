@@ -27,7 +27,11 @@ func main() {
 	ds := datastore.NewDatastores(myClient)
 
 	r := web.NewRouter(ds, logger)
-	http.ListenAndServe(":3010", r)
+	err = http.ListenAndServe(":3010", r)
+	if err != nil {
+		log.Error().Err(err).Msg("http.ListenAndServe")
+	}
+
 }
 
 type Config struct {

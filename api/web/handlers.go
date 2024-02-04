@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"github.com/mimirsoft/mimirledger/api/web/response"
 	"github.com/rs/zerolog"
 	"net/http"
 )
@@ -97,10 +98,11 @@ func AccountTypes(acctController *AccountsController) func(w http.ResponseWriter
 // GET /accounts
 func Accounts(acctController *AccountsController) func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
-		accountsTypes, err := acctController.AccountList(r.Context())
+		accounts, err := acctController.AccountList(r.Context())
 		if err != nil {
 			return NewRequestError(http.StatusServiceUnavailable, err)
 		}
-		return RespondOK(w, accountsTypes)
+		jsonResponse := response.ConvertAccountsToRespAccountSet(accounts)
+		return RespondOK(w, jsonResponse)
 	}
 }

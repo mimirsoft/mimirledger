@@ -2,7 +2,9 @@ package web
 
 import (
 	"context"
+	"fmt"
 	"github.com/mimirsoft/mimirledger/api/datastore"
+	"github.com/mimirsoft/mimirledger/api/models"
 )
 
 // HealthController is the controller struct for the health check endpoint
@@ -23,20 +25,9 @@ func NewHealthController(ds *datastore.Datastores) *HealthController {
 	}
 }
 
-// Auth is for use in accounts controller responses
-type Account struct {
-	ID   uint64 `json:"id"`
-	Name string `json:"name"`
-}
-
 // AccountTypes is for use in accounts controller responses
 type AccountType struct {
 	Name string `json:"name"`
-}
-
-// AccountSet is for use in accounts controller responses
-type AccountSet struct {
-	Accounts []Account `json:"accounts"`
 }
 
 // AccountTypeSet is for use in accounts controller responses
@@ -47,6 +38,13 @@ type AccountTypeSet struct {
 // AccountsController is the controller struct for accounts
 type AccountsController struct {
 	DataStores *datastore.Datastores
+}
+
+// NewAccountsController instantiates a new AccountsController struct
+func NewAccountsController(ds *datastore.Datastores) *AccountsController {
+	return &AccountsController{
+		DataStores: ds,
+	}
 }
 
 // GET /accounttypes
@@ -66,24 +64,10 @@ func (ac *AccountsController) AccountTypeList(ctx context.Context) (*AccountType
 }
 
 // GET /accounts
-func (ac *AccountsController) AccountList(ctx context.Context) (*AccountSet, error) {
-	at := []Account{
-		{
-			Name: "checking",
-		},
-		{
-			Name: "bank",
-		},
-		{
-			Name: "income",
-		},
+func (ac *AccountsController) AccountList(ctx context.Context) ([]models.Account, error) {
+	accounts, err := models.RetrieveAccounts(ac.DataStores)
+	if err != nil {
+		return nil, fmt.Errorf("models.RetrieveAccounts:%w", err)
 	}
-	return &AccountSet{Accounts: at}, nil
-}
-
-// NewAccountsController instantiates a new AccountsController struct
-func NewAccountsController(ds *datastore.Datastores) *AccountsController {
-	return &AccountsController{
-		DataStores: ds,
-	}
+	return accounts, nil
 }

@@ -27,6 +27,7 @@ create-testdb: create-users
 else true; fi
 
 drop-devdb:
+	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=postgres psql -h ${PG_DB_HOST} -p ${PG_DB_PORT} -U postgres -d ${DEVDBNAME} -c \"SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE datname = current_database() AND pid <> pg_backend_pid() \""
 	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=postgres dropdb -h ${PG_DB_HOST} -p ${PG_DB_PORT} -U postgres ${DEVDBNAME} || true"
 
 drop-testdb:
@@ -34,3 +35,4 @@ drop-testdb:
 
 psql:
 	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=mimirledger psql -h ${PG_DB_HOST} -p ${PG_DB_PORT} -U mimirledger -d mimirledger"
+

@@ -32,10 +32,10 @@ type AccountSign string
 type AccountType string
 
 type Account struct {
-	AccountID            uint64          `db:"account_id,insertomitempty"`
+	AccountID            uint64          `db:"account_id,omitempty"`
 	AccountParent        uint64          `db:"account_parent"`
 	AccountName          string          `db:"account_name"`
-	AccountFullName      string          `db:"account_fullname"`
+	AccountFullName      string          `db:"account_full_name"`
 	AccountMemo          string          `db:"account_memo"`
 	AccountCurrent       bool            `db:"account_current"`
 	AccountLeft          uint64          `db:"account_left"`
@@ -72,4 +72,52 @@ func (store *AccountStore) GetAccounts() (as []Account, err error) {
 		return nil, sql.ErrNoRows
 	}
 	return
+}
+
+// Store inserts a UserNotification into postgres
+func (store *AccountStore) Store(acct *Account) (err error) {
+	query := `    INSERT INTO transaction_accounts 
+		           (account_id,
+	account_parent,
+	account_name,
+	account_full_name,
+	account_memo,
+	account_current,
+	account_left,
+	account_right,
+	account_balance,
+	account_subtotal,
+	account_reconcile_date,
+	account_flagged,
+	account_locked,
+	account_open_date,
+	account_close_date,
+	account_code,
+	account_sign,
+	account_type)
+		    VALUES (:account_id,
+	:account_parent,
+	:account_name,
+	:account_full_name,
+	:account_memo,
+	:account_current,
+	:account_left,
+	:account_right,
+	:account_balance,
+	:account_subtotal,
+	:account_reconcile_date,
+	:account_flagged,
+	:account_locked,
+	:account_open_date,
+	:account_close_date,
+	:account_code,
+	:account_sign,
+	:account_type)
+		 RETURNING *`
+	stmt, err := store.Client.PrepareNamed(query)
+	if err != nil {
+		return
+	}
+	defer stmt.Close()
+	return stmt.QueryRow(acct).StructScan(acct)
 }

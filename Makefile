@@ -32,7 +32,7 @@ build-web:
 stop: stop-api stop-db stop-web
 
 stop-api:
-	${DOCKER_COMPOSE} stop ${SERVICE_NAME}
+	${DOCKER_COMPOSE} stop --force ${SERVICE_NAME} || true
 	${DOCKER_COMPOSE} down
 
 stop-db:
@@ -58,9 +58,6 @@ update: stop-api docker-clean # rebuild image and restart service
 	${DOCKER_COMPOSE} rm --force ${SERVICE_NAME}
 	${DOCKER_COMPOSE} build ${SERVICE_NAME}
 	$(MAKE) start
-
-stop-api: # stop api service
-	${DOCKER_COMPOSE} stop --force ${SERVICE_NAME} || true
 
 logs:
 	${DOCKER_COMPOSE} logs --tail $(LOG_TAIL_LENGTH) -f ${SERVICE_NAME}

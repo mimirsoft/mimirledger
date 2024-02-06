@@ -2,10 +2,10 @@ CREATE TYPE transaction_account_sign_type AS ENUM ('CREDIT','DEBIT');
 CREATE TYPE transaction_account_type AS ENUM ('ASSET','LIABILITY','EQUITY','INCOME','EXPENSE','GAIN','LOSS');
 
 CREATE TABLE transaction_accounts (
-    account_id integer NOT NULL PRIMARY KEY,
+    account_id SERIAL PRIMARY KEY,
     account_parent integer NOT NULL DEFAULT '0',
     account_name varchar(50) DEFAULT '',
-    account_fullname varchar(200) DEFAULT '',
+    account_full_name varchar(200) DEFAULT '',
     account_memo varchar(70) DEFAULT '',
     account_current bool NOT NULL DEFAULT true,
     account_left integer DEFAULT NULL,
@@ -23,25 +23,26 @@ CREATE TABLE transaction_accounts (
 );
 
 
-INSERT INTO transaction_accounts(account_id,
-                                 account_name, account_memo,
-                                 account_current, account_left, account_right,
-                                 account_balance, account_subtotal,
-                                 account_fullname,
-                                 account_sign,
-                                 account_type)
-VALUES (1,
-        'ASSETS','TOP LEVEL ASSETS SAMPLE',
-        true, 1,2,
-        0,0,
-        'ASSETS', 'DEBIT', 'ASSET'),
-       (2,
-        'LIABILITIES','TOP LEVEL LIABILITY SAMPLE',
-        true, 3,4,
-        0,0,
-        'ASSETS', 'CREDIT', 'LIABILITY'),
-(3,
-    'EQUITY','TOP LEVEL EQUITY SAMPLE',
-    true, 5,6,
-    0,0,
-    'EQUITY', 'CREDIT', 'EQUITY')
+CREATE TABLE transactions_main (
+    transaction_id integer NOT NULL PRIMARY KEY,
+    transaction_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    transaction_comment varchar(250) DEFAULT NULL,
+    transaction_amount decimal(11,2) DEFAULT '0.00',
+    transaction_check_num varchar(32) DEFAULT NULL,
+    transaction_reconcile bool NOT NULL default FALSE,
+    transaction_reconcile_date date DEFAULT NULL,
+    is_split bool NOT NULL default FALSE) ;
+
+CREATE TABLE transactions_debit_credit (
+    transaction_dc_id integer NOT NULL PRIMARY KEY,
+    account_id integer NOT NULL,
+    transaction_id integer NOT NULL,
+    transaction_dc_amount decimal(11,2) DEFAULT '0.00',
+    transaction_dc transaction_account_sign_type NOT NULL DEFAULT 'DEBIT') ;
+
+ALTER TABLE transactions_debit_credit
+    ADD CONSTRAINT transactions_debit_credit_transaction_id_fkey FOREIGN KEY (transaction_id) REFERENCES transactions_main(transaction_id) ON DELETE CASCADE;
+CREATE INDEX transactions_debit_credit_transaction_id_idx ON transactions_debit_credit (transaction_id);
+ALTER TABLE transactions_debit_credit
+    ADD CONSTRAINT transactions_debit_credit_transaction_account_id_fkey FOREIGN KEY (account_id) REFERENCES transaction_accounts(account_id) ON DELETE CASCADE;
+CREATE INDEX transactions_debit_credit_transaction_account_idx ON transactions_debit_credit (account_id);

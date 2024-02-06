@@ -1,6 +1,7 @@
 package datastore
 
 import (
+	"github.com/jmoiron/sqlx"
 	"github.com/mimirsoft/mimirledger/api/cfg"
 	"os"
 	"testing"
@@ -11,15 +12,22 @@ import (
 
 var TestPostgresConfig PostgresConfig
 
+var TestPostgresClient *sqlx.DB
+
 func TestMain(m *testing.M) {
 	cfg.LoadEnv()
 	myConfig := LoadPostgresConfigFromEnv()
 	TestPostgresConfig = myConfig
+	myClient, err := NewClient(&TestPostgresConfig)
+	if err != nil {
+		panic(err)
+	}
+	TestPostgresClient = myClient
 	result := m.Run()
 	os.Exit(result)
 }
 
-func TestCommentCreateReply(t *testing.T) {
+func TestPostgresClientTestAndPing(t *testing.T) {
 	g := gomega.NewWithT(t)
 	gomega.RegisterFailHandler(ginkgo.Fail)
 	myClient, err := NewClient(&TestPostgresConfig)

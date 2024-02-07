@@ -24,7 +24,7 @@ CREATE TABLE transaction_accounts (
 
 
 CREATE TABLE transactions_main (
-    transaction_id integer NOT NULL PRIMARY KEY,
+    transaction_id SERIAL PRIMARY KEY,
     transaction_date DATE NOT NULL DEFAULT CURRENT_DATE,
     transaction_comment varchar(250) DEFAULT NULL,
     transaction_amount decimal(11,2) DEFAULT '0.00',
@@ -34,7 +34,7 @@ CREATE TABLE transactions_main (
     is_split bool NOT NULL default FALSE) ;
 
 CREATE TABLE transactions_debit_credit (
-    transaction_dc_id integer NOT NULL PRIMARY KEY,
+    transaction_dc_id SERIAL PRIMARY KEY,
     account_id integer NOT NULL,
     transaction_id integer NOT NULL,
     transaction_dc_amount decimal(11,2) DEFAULT '0.00',

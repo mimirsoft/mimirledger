@@ -26,7 +26,7 @@ func main() {
 	}
 	ds := datastore.NewDatastores(myClient)
 
-	r := web.NewRouter(ds, logger)
+	r := web.NewRouter(ds, &logger)
 	err = http.ListenAndServe(":3010", r)
 	if err != nil {
 		log.Error().Err(err).Msg("http.ListenAndServe")

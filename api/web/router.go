@@ -12,10 +12,12 @@ import (
 	"net/http"
 )
 
-func NewRouter(ds *datastore.Datastores, logger zerolog.Logger) *chi.Mux {
+func NewRouter(ds *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middlewares.RequestId)
-	r.Use(middlewares.Logger(logger))
+	if logger != nil {
+		r.Use(middlewares.Logger(*logger))
+	}
 	r.Use(middleware.Recoverer)
 	// Basic CORS
 	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing
@@ -46,7 +48,8 @@ func NewRouter(ds *datastore.Datastores, logger zerolog.Logger) *chi.Mux {
 			log.Error().Err(err).Msg("w.Write failed")
 		}
 	})
-	r.Get("/accounts", NewRootHandler(Accounts(acctsController)).ServeHTTP)
-	r.Get("/accounttypes", NewRootHandler(AccountTypes(acctsController)).ServeHTTP)
+	r.Get("/accounts", NewRootHandler(GetAccounts(acctsController)).ServeHTTP)
+	r.Post("/accounts", NewRootHandler(GetAccounts(acctsController)).ServeHTTP)
+	r.Get("/accounttypes", NewRootHandler(GetAccountTypes(acctsController)).ServeHTTP)
 	return r
 }

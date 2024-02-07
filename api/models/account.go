@@ -28,6 +28,18 @@ type Account struct {
 	AccountType          datastore.AccountType
 }
 
+// CreateAccount creates a new account
+func CreateAccount(ds *datastore.Datastores, acct Account) (*Account, error) {
+	as := ds.AccountStore()
+	eAcct := datastore.Account(acct)
+	err := as.Store(&eAcct)
+	if err != nil {
+		return nil, fmt.Errorf("AccountStore().Store:%w", err)
+	}
+	acct = Account(eAcct)
+	return &acct, nil
+}
+
 // RetrieveAccounts retrieves accounts
 func RetrieveAccounts(ds *datastore.Datastores) ([]Account, error) {
 	as := ds.AccountStore()

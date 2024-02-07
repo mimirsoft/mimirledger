@@ -36,3 +36,8 @@ drop-testdb:
 psql:
 	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=mimirledger psql -h ${PG_DB_HOST} -p ${PG_DB_PORT} -U mimirledger -d mimirledger"
 
+
+
+PGPASSWORD=postgres dropdb -h localhost -p 5432 -U postgres mimirledgertest || true
+PGPASSWORD=postgres createdb -h localhost -p 5432 -U postgres mimirledgertest
+PGPASSWORD=postgres psql -h localhost -p 5432 -d mimirledgertest -U postgres --echo-errors < ./db/schema.sql

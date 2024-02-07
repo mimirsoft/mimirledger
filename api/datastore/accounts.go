@@ -52,33 +52,10 @@ type Account struct {
 	AccountType          AccountType     `db:"account_type"`
 }
 
-// Gets All Accounts
-func (store *AccountStore) GetAccounts() (as []Account, err error) {
-	query := `select * from transaction_accounts order by account_left`
-	rows, err := store.Client.Queryx(query)
-	if err != nil {
-		return
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var acct Account
-		if err = rows.StructScan(&acct); err != nil {
-			return
-		}
-		as = append(as, acct)
-	}
-	if len(as) == 0 {
-		return nil, sql.ErrNoRows
-	}
-	return
-}
-
 // Store inserts a UserNotification into postgres
 func (store *AccountStore) Store(acct *Account) (err error) {
 	query := `    INSERT INTO transaction_accounts 
-		           (account_id,
-	account_parent,
+		           (account_parent,
 	account_name,
 	account_full_name,
 	account_memo,
@@ -95,8 +72,7 @@ func (store *AccountStore) Store(acct *Account) (err error) {
 	account_code,
 	account_sign,
 	account_type)
-		    VALUES (:account_id,
-	:account_parent,
+		    VALUES (:account_parent,
 	:account_name,
 	:account_full_name,
 	:account_memo,
@@ -120,4 +96,26 @@ func (store *AccountStore) Store(acct *Account) (err error) {
 	}
 	defer stmt.Close()
 	return stmt.QueryRow(acct).StructScan(acct)
+}
+
+// Gets All Accounts
+func (store *AccountStore) GetAccounts() (as []Account, err error) {
+	query := `select * from transaction_accounts order by account_left`
+	rows, err := store.Client.Queryx(query)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var acct Account
+		if err = rows.StructScan(&acct); err != nil {
+			return
+		}
+		as = append(as, acct)
+	}
+	if len(as) == 0 {
+		return nil, sql.ErrNoRows
+	}
+	return
 }

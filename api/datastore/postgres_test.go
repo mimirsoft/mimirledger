@@ -31,6 +31,7 @@ func TestPostgresClientTestAndPing(t *testing.T) {
 	g := gomega.NewWithT(t)
 	gomega.RegisterFailHandler(ginkgo.Fail)
 	myClient, err := NewClient(&TestPostgresConfig)
+	g.Expect(TestPostgresConfig.DBName).To(gomega.Equal("mimirledgertest"))
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	err = myClient.Ping()
 	g.Expect(err).NotTo(gomega.HaveOccurred())

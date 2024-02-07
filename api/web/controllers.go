@@ -71,3 +71,12 @@ func (ac *AccountsController) AccountList(ctx context.Context) ([]models.Account
 	}
 	return accounts, nil
 }
+
+// POST /accounts
+func (ac *AccountsController) CreateAccount(ctx context.Context, account models.Account) (*models.Account, error) {
+	myAcct, err := models.CreateAccount(ac.DataStores, account)
+	if err != nil {
+		return nil, fmt.Errorf("models.RetrieveAccounts:%w", err)
+	}
+	return myAcct, nil
+}

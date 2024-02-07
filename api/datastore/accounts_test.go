@@ -38,9 +38,11 @@ func TestAccountStoreValid(t *testing.T) {
 	a3 := Account{AccountName: "my bank", AccountSign: AccountSignDebit, AccountType: AccountTypeAsset}
 	err := aStore.Store(&a3)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(a3.AccountID).To(gomega.Equal(uint64(1)))
 
 	acctSet, err := aStore.GetAccounts()
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(acctSet).To(gomega.HaveLen(1))
 	g.Expect(acctSet[0].AccountName).To(gomega.Equal(a3.AccountName))
+	g.Expect(acctSet[0].AccountID).To(gomega.Equal(uint64(1)))
 }

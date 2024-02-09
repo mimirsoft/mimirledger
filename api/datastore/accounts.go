@@ -53,7 +53,7 @@ type Account struct {
 }
 
 // Store inserts a UserNotification into postgres
-func (store *AccountStore) Store(acct *Account) (err error) {
+func (store AccountStore) Store(acct *Account) (err error) {
 	query := `    INSERT INTO transaction_accounts 
 		           (account_parent,
 	account_name,
@@ -99,7 +99,7 @@ func (store *AccountStore) Store(acct *Account) (err error) {
 }
 
 // Gets All Accounts
-func (store *AccountStore) GetAccounts() (as []Account, err error) {
+func (store AccountStore) GetAccounts() (as []Account, err error) {
 	query := `select * from transaction_accounts order by account_left`
 	rows, err := store.Client.Queryx(query)
 	if err != nil {

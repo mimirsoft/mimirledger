@@ -28,20 +28,19 @@ type Account struct {
 	AccountType          datastore.AccountType
 }
 
-// CreateAccount creates a new account
-func CreateAccount(ds *datastore.Datastores, acct Account) (*Account, error) {
-	as := ds.AccountStore()
-	eAcct := datastore.Account(acct)
-	err := as.Store(&eAcct)
+// Store inserts a URLComment
+func (c *Account) Store(ds *datastore.Datastores) (err error) { //nolint:gocyclo
+	eAcct := datastore.Account(*c)
+	err = ds.AccountStore().Store(&eAcct)
 	if err != nil {
-		return nil, fmt.Errorf("AccountStore().Store:%w", err)
+		return fmt.Errorf("ds.AccountStore().Store:%w", err)
 	}
-	acct = Account(eAcct)
-	return &acct, nil
+	*c = Account(eAcct)
+	return nil
 }
 
 // RetrieveAccounts retrieves accounts
-func RetrieveAccounts(ds *datastore.Datastores) ([]Account, error) {
+func RetrieveAccounts(ds *datastore.Datastores) ([]*Account, error) {
 	as := ds.AccountStore()
 	actSet, err := as.GetAccounts()
 	if err != nil {
@@ -51,10 +50,11 @@ func RetrieveAccounts(ds *datastore.Datastores) ([]Account, error) {
 	return accts, nil
 }
 
-func entAccountToAccounts(eAccts []datastore.Account) (ua []Account) {
-	ua = make([]Account, len(eAccts))
+func entAccountToAccounts(eAccts []datastore.Account) (ua []*Account) {
+	ua = make([]*Account, len(eAccts))
 	for idx := range eAccts {
-		ua[idx] = Account(eAccts[idx])
+		act := Account(eAccts[idx])
+		ua[idx] = &act
 	}
 	return
 }

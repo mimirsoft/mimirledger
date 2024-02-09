@@ -2,10 +2,6 @@ package web
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/mimirsoft/mimirledger/api/models"
-	"github.com/mimirsoft/mimirledger/api/web/request"
-	"github.com/mimirsoft/mimirledger/api/web/response"
 	"github.com/rs/zerolog"
 	"net/http"
 )
@@ -84,46 +80,5 @@ func HealthCheck(healthController *HealthController) func(w http.ResponseWriter,
 			return NewRequestError(http.StatusServiceUnavailable, err)
 		}
 		return RespondOK(w, "ok")
-	}
-}
-
-// GET /accounttypes
-func GetAccountTypes(acctController *AccountsController) func(w http.ResponseWriter, r *http.Request) error {
-	return func(w http.ResponseWriter, r *http.Request) error {
-		accountsTypes, err := acctController.AccountTypeList(r.Context())
-		if err != nil {
-			return NewRequestError(http.StatusServiceUnavailable, err)
-		}
-		return RespondOK(w, accountsTypes)
-	}
-}
-
-// GET /accounts
-func GetAccounts(acctController *AccountsController) func(w http.ResponseWriter, r *http.Request) error {
-	return func(w http.ResponseWriter, r *http.Request) error {
-		accounts, err := acctController.AccountList(r.Context())
-		if err != nil {
-			return NewRequestError(http.StatusServiceUnavailable, err)
-		}
-		jsonResponse := response.ConvertAccountsToRespAccountSet(accounts)
-		return RespondOK(w, jsonResponse)
-	}
-}
-
-// POST /accounts
-func PostAccounts(acctController *AccountsController) func(w http.ResponseWriter, r *http.Request) error {
-	return func(w http.ResponseWriter, r *http.Request) error {
-		var acct request.Account
-		err := json.NewDecoder(r.Body).Decode(&acct)
-		if err != nil {
-			return fmt.Errorf("son.NewDecoder(r.Body).Decode:%w", err)
-		}
-		mdlAccount := models.Account(acct)
-		account, err := acctController.CreateAccount(r.Context(), mdlAccount)
-		if err != nil {
-			return NewRequestError(http.StatusServiceUnavailable, err)
-		}
-		jsonResponse := response.Account(*account)
-		return RespondOK(w, jsonResponse)
 	}
 }

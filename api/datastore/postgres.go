@@ -24,6 +24,11 @@ func (ds *Datastores) AccountStore() AccountStore {
 	return ds.accountStore
 }
 
+// PGClient is the way to access the Postgres Client
+func (ds *Datastores) PGClient() *sqlx.DB {
+	return ds.postgresClient
+}
+
 // NewDatastores creates a struct of MixStores
 func NewDatastores(conn *sqlx.DB) *Datastores {
 	return &Datastores{postgresClient: conn,

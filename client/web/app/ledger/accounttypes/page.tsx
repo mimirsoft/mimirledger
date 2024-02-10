@@ -1,6 +1,8 @@
 'use client'
 import styles from '@/app/ui//Home.module.css';
 import useSWR from 'swr'
+import TransactionAccounts from "@/app/ui/dashboard/transaction-account";
+import AccountTypes from "@/app/ui/dashboard/account-types";
 const fetcher = (...args) => fetch(...args).then((res) => res.json())
 
 console.log(process.env.NEXT_PUBLIC_MIMIRLEDGER_API_URL);
@@ -34,8 +36,6 @@ export default function Page() {
 
   return (
       <div>
-         {data.accountTypes &&
-             data.accountTypes.map((accountType, index) => <h1  key={index}>{accountType.name}</h1>)}
-      </div>
+        <AccountTypes /></div>
   );
 }

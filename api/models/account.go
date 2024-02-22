@@ -2,6 +2,7 @@ package models
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/mimirsoft/mimirledger/api/datastore"
 	"time"
@@ -44,6 +45,9 @@ func RetrieveAccounts(ds *datastore.Datastores) ([]*Account, error) {
 	as := ds.AccountStore()
 	actSet, err := as.GetAccounts()
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
 		return nil, fmt.Errorf("AccountStore().GetAccounts:%w", err)
 	}
 	accts := entAccountToAccounts(actSet)

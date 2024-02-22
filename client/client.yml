@@ -6,13 +6,13 @@ services:
       context: ./
       dockerfile: Dockerfile.dev
     volumes:
-      - ./web:/app:delegated
+      - ./webledge:/app:delegated
     working_dir: /app
     networks:
       - network1
     ports:
       - "3000:3000"
-    command: npm run dev
+    command: npm start
     environment:
       NODE_ENV: development
 

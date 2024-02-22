@@ -6,6 +6,6 @@ COPY web/package.json ./
 
 RUN npm install
 
-COPY web .
+COPY webledge .
 
-CMD ["npm", "run", "dev"]
+CMD ["npm", "start"]

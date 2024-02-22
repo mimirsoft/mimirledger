@@ -21,7 +21,7 @@ type Account struct {
 	AccountCurrent       bool            `json:"account_current"`
 	AccountLeft          uint64          `json:"account_left"`
 	AccountRight         uint64          `json:"account_right"`
-	AccountBalance       sql.NullFloat64 `json:"account_balance"`
+	AccountBalance       float64         `json:"account_balance"`
 	AccountSubtotal      sql.NullFloat64 `json:"account_subtotal"`
 	AccountReconcileDate sql.NullTime    `json:"account_reconcile_date"`
 	AccountFlagged       bool            `json:"account_flagged"`
@@ -52,7 +52,7 @@ func AccountToRespAccount(act *models.Account) *Account {
 		AccountCurrent:       act.AccountCurrent,
 		AccountLeft:          act.AccountLeft,
 		AccountRight:         act.AccountRight,
-		AccountBalance:       act.AccountBalance,
+		AccountBalance:       act.AccountBalance.Float64,
 		AccountSubtotal:      act.AccountSubtotal,
 		AccountReconcileDate: act.AccountReconcileDate,
 		AccountFlagged:       act.AccountFlagged,

@@ -15,6 +15,16 @@ func TestAccountGetAll(t *testing.T) {
 	gomega.RegisterFailHandler(ginkgo.Fail)
 	setupDatastores(TestDataStore)
 
+	var test = RouterTest{Request: Request{
+		Method:     http.MethodGet,
+		Router:     TestRouter,
+		RequestURL: "/accounts",
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	var accountSetRes response.AccountSet
+	test.ExecWithUnmarshal(&accountSetRes)
+	g.Expect(accountSetRes.Accounts).To(gomega.HaveLen(0))
+
 	// store 2 accounts manually
 	a1 := models.Account{AccountName: "MY BANK", AccountSign: datastore.AccountSignDebit,
 		AccountType: datastore.AccountTypeAsset}
@@ -25,13 +35,12 @@ func TestAccountGetAll(t *testing.T) {
 	err = a2.Store(TestDataStore)
 	g.Expect(err).NotTo(gomega.HaveOccurred()) // reset datastore
 
-	var test = RouterTest{Request: Request{
+	test = RouterTest{Request: Request{
 		Method:     http.MethodGet,
 		Router:     TestRouter,
 		RequestURL: "/accounts",
 	}, GomegaWithT: g, Code: http.StatusOK}
 
-	var accountSetRes response.AccountSet
 	test.ExecWithUnmarshal(&accountSetRes)
 	g.Expect(accountSetRes.Accounts).To(gomega.HaveLen(2))
 	g.Expect(accountSetRes.Accounts[0].AccountName).To(gomega.Equal("MY BANK"))

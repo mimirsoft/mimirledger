@@ -18,13 +18,17 @@ create-users:
 
 create-devdb: create-users
 	if docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=${PG_DB_PASSWORD} createdb -h ${PG_DB_HOST} -p ${PG_DB_PORT} -U ${PG_DB_USER} ${DEVDBNAME}"; then \
-	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=${PG_DB_PASSWORD} psql ${DEV_PSQL_OPTS} --echo-errors < ./db/schema.sql;" \
-else true; fi
+	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=${PG_DB_PASSWORD} psql ${DEV_PSQL_OPTS} --echo-errors < ./db/schema.sql;"; \
+	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=${PG_DB_PASSWORD} psql ${DEV_PSQL_OPTS} --echo-errors < ./db/initial_rows.sql;"; \
+	else true; \
+	fi
 
 create-testdb: create-users
 	if docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=${PG_DB_PASSWORD} createdb -h ${PG_DB_HOST} -p ${PG_DB_PORT} -U ${PG_DB_USER} ${TESTDBNAME}"; then \
 	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=${PG_DB_PASSWORD} psql ${TEST_PSQL_OPTS} --echo-errors < ./db/schema.sql;" \
-else true; fi
+	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=${PG_DB_PASSWORD} psql ${TEST_PSQL_OPTS} --echo-errors < ./db/initial_rows.sql;" \
+	else true; \
+	fi
 
 drop-devdb:
 	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=postgres psql -h ${PG_DB_HOST} -p ${PG_DB_PORT} -U postgres -d ${DEVDBNAME} -c \"SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE datname = current_database() AND pid <> pg_backend_pid() \""

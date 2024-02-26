@@ -32,24 +32,25 @@ type AccountSign string
 type AccountType string
 
 type Account struct {
-	AccountID            uint64          `db:"account_id,omitempty"`
-	AccountParent        uint64          `db:"account_parent"`
-	AccountName          string          `db:"account_name"`
-	AccountFullName      string          `db:"account_full_name"`
-	AccountMemo          string          `db:"account_memo"`
-	AccountCurrent       bool            `db:"account_current"`
-	AccountLeft          uint64          `db:"account_left"`
-	AccountRight         uint64          `db:"account_right"`
-	AccountBalance       sql.NullFloat64 `db:"account_balance"`
-	AccountSubtotal      sql.NullFloat64 `db:"account_subtotal"`
-	AccountReconcileDate sql.NullTime    `db:"account_reconcile_date"`
-	AccountFlagged       bool            `db:"account_flagged"`
-	AccountLocked        bool            `db:"account_locked"`
-	AccountOpenDate      time.Time       `db:"account_open_date"`
-	AccountCloseDate     sql.NullTime    `db:"account_close_date"`
-	AccountCode          sql.NullString  `db:"account_code"`
-	AccountSign          AccountSign     `db:"account_sign"`
-	AccountType          AccountType     `db:"account_type"`
+	AccountID            uint64         `db:"account_id,omitempty"`
+	AccountParent        uint64         `db:"account_parent"`
+	AccountName          string         `db:"account_name"`
+	AccountFullName      string         `db:"account_full_name"`
+	AccountMemo          string         `db:"account_memo"`
+	AccountCurrent       bool           `db:"account_current"`
+	AccountLeft          uint64         `db:"account_left"`
+	AccountRight         uint64         `db:"account_right"`
+	AccountBalance       uint64         `db:"account_balance"`
+	AccountSubtotal      uint64         `db:"account_subtotal"`
+	AccountDecimals      uint64         `db:"account_decimals"`
+	AccountReconcileDate sql.NullTime   `db:"account_reconcile_date"`
+	AccountFlagged       bool           `db:"account_flagged"`
+	AccountLocked        bool           `db:"account_locked"`
+	AccountOpenDate      time.Time      `db:"account_open_date"`
+	AccountCloseDate     sql.NullTime   `db:"account_close_date"`
+	AccountCode          sql.NullString `db:"account_code"`
+	AccountSign          AccountSign    `db:"account_sign"`
+	AccountType          AccountType    `db:"account_type"`
 }
 
 // Store inserts a UserNotification into postgres

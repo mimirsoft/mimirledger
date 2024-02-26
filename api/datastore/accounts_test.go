@@ -35,7 +35,10 @@ func TestAccountStoreValid(t *testing.T) {
 	gomega.RegisterFailHandler(ginkgo.Fail)
 
 	aStore := createAccountStore()
-	a3 := Account{AccountName: "my bank", AccountSign: AccountSignDebit, AccountType: AccountTypeAsset}
+	a3 := Account{AccountName: "my bank", AccountFullName: "BankAccounts:MyBank",
+		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
+		AccountBalance: 3000, AccountDecimals: 2, AccountSubtotal: 2000,
+		AccountLeft: 1, AccountRight: 2}
 	err := aStore.Store(&a3)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(a3.AccountID).To(gomega.Equal(uint64(1)))
@@ -44,5 +47,11 @@ func TestAccountStoreValid(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(acctSet).To(gomega.HaveLen(1))
 	g.Expect(acctSet[0].AccountName).To(gomega.Equal(a3.AccountName))
+	g.Expect(acctSet[0].AccountFullName).To(gomega.Equal("BankAccounts:MyBank"))
 	g.Expect(acctSet[0].AccountID).To(gomega.Equal(uint64(1)))
+	g.Expect(acctSet[0].AccountLeft).To(gomega.Equal(uint64(1)))
+	g.Expect(acctSet[0].AccountRight).To(gomega.Equal(uint64(2)))
+	g.Expect(acctSet[0].AccountBalance).To(gomega.Equal(uint64(3000)))
+	g.Expect(acctSet[0].AccountSubtotal).To(gomega.Equal(uint64(2000)))
+	g.Expect(acctSet[0].AccountDecimals).To(gomega.Equal(uint64(2)))
 }

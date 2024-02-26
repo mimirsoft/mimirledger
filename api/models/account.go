@@ -17,8 +17,9 @@ type Account struct {
 	AccountCurrent       bool
 	AccountLeft          uint64
 	AccountRight         uint64
-	AccountBalance       sql.NullFloat64
-	AccountSubtotal      sql.NullFloat64
+	AccountBalance       uint64
+	AccountSubtotal      uint64
+	AccountDecimals      uint64
 	AccountReconcileDate sql.NullTime
 	AccountFlagged       bool
 	AccountLocked        bool

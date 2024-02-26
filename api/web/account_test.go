@@ -27,10 +27,12 @@ func TestAccountGetAll(t *testing.T) {
 
 	// store 2 accounts manually
 	a1 := models.Account{AccountName: "MY BANK", AccountSign: datastore.AccountSignDebit,
+		AccountLeft: 1, AccountRight: 2,
 		AccountType: datastore.AccountTypeAsset}
 	err := a1.Store(TestDataStore)
 	g.Expect(err).NotTo(gomega.HaveOccurred()) // reset datastore
 	a2 := models.Account{AccountName: "MY OTHER BANK", AccountSign: datastore.AccountSignDebit,
+		AccountLeft: 3, AccountRight: 4,
 		AccountType: datastore.AccountTypeAsset}
 	err = a2.Store(TestDataStore)
 	g.Expect(err).NotTo(gomega.HaveOccurred()) // reset datastore

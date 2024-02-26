@@ -16,8 +16,9 @@ type Account struct {
 	AccountCurrent       bool                  `json:"account_current"`
 	AccountLeft          uint64                `json:"account_left"`
 	AccountRight         uint64                `json:"account_right"`
-	AccountBalance       sql.NullFloat64       `json:"account_balance"`
-	AccountSubtotal      sql.NullFloat64       `json:"account_subtotal"`
+	AccountBalance       uint64                `json:"account_balance"`
+	AccountSubtotal      uint64                `json:"account_subtotal"`
+	AccountDecimals      uint64                `json:"account_decimals"`
 	AccountReconcileDate sql.NullTime          `json:"account_reconcile_date"`
 	AccountFlagged       bool                  `json:"account_flagged"`
 	AccountLocked        bool                  `json:"account_locked"`

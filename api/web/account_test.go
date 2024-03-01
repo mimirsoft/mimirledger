@@ -27,12 +27,10 @@ func TestAccountGetAll(t *testing.T) {
 
 	// store 2 accounts manually
 	a1 := models.Account{AccountName: "MY BANK", AccountSign: datastore.AccountSignDebit,
-		AccountLeft: 1, AccountRight: 2,
 		AccountType: datastore.AccountTypeAsset}
 	err := a1.Store(TestDataStore)
 	g.Expect(err).NotTo(gomega.HaveOccurred()) // reset datastore
-	a2 := models.Account{AccountName: "MY OTHER BANK", AccountSign: datastore.AccountSignDebit,
-		AccountLeft: 3, AccountRight: 4,
+	a2 := models.Account{AccountName: "ZZZ BANK", AccountSign: datastore.AccountSignDebit,
 		AccountType: datastore.AccountTypeAsset}
 	err = a2.Store(TestDataStore)
 	g.Expect(err).NotTo(gomega.HaveOccurred()) // reset datastore
@@ -45,14 +43,49 @@ func TestAccountGetAll(t *testing.T) {
 
 	test.ExecWithUnmarshal(&accountSetRes)
 	g.Expect(accountSetRes.Accounts).To(gomega.HaveLen(2))
+	g.Expect(accountSetRes.Accounts[0].AccountLeft).To(gomega.Equal(uint64(1)))
+	g.Expect(accountSetRes.Accounts[0].AccountRight).To(gomega.Equal(uint64(2)))
 	g.Expect(accountSetRes.Accounts[0].AccountName).To(gomega.Equal("MY BANK"))
 	g.Expect(accountSetRes.Accounts[0].AccountType).To(gomega.Equal("ASSET"))
 	g.Expect(accountSetRes.Accounts[0].AccountSign).To(gomega.Equal("DEBIT"))
 
-	g.Expect(accountSetRes.Accounts[1].AccountName).To(gomega.Equal("MY OTHER BANK"))
+	g.Expect(accountSetRes.Accounts[1].AccountLeft).To(gomega.Equal(uint64(3)))
+	g.Expect(accountSetRes.Accounts[1].AccountRight).To(gomega.Equal(uint64(4)))
+	g.Expect(accountSetRes.Accounts[1].AccountName).To(gomega.Equal("ZZZ BANK"))
 	g.Expect(accountSetRes.Accounts[1].AccountType).To(gomega.Equal("ASSET"))
 	g.Expect(accountSetRes.Accounts[1].AccountSign).To(gomega.Equal("DEBIT"))
 
+	// add a third account
+	a3 := models.Account{AccountName: "AAA BANK", AccountSign: datastore.AccountSignDebit,
+		AccountType: datastore.AccountTypeAsset}
+	err = a3.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred()) // reset datastore
+
+	test = RouterTest{Request: Request{
+		Method:     http.MethodGet,
+		Router:     TestRouter,
+		RequestURL: "/accounts",
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	test.ExecWithUnmarshal(&accountSetRes)
+	g.Expect(accountSetRes.Accounts).To(gomega.HaveLen(3))
+	g.Expect(accountSetRes.Accounts[0].AccountLeft).To(gomega.Equal(uint64(1)))
+	g.Expect(accountSetRes.Accounts[0].AccountRight).To(gomega.Equal(uint64(2)))
+	g.Expect(accountSetRes.Accounts[0].AccountName).To(gomega.Equal("AAA BANK"))
+	g.Expect(accountSetRes.Accounts[0].AccountType).To(gomega.Equal("ASSET"))
+	g.Expect(accountSetRes.Accounts[0].AccountSign).To(gomega.Equal("DEBIT"))
+
+	g.Expect(accountSetRes.Accounts[1].AccountName).To(gomega.Equal("MY BANK"))
+	g.Expect(accountSetRes.Accounts[1].AccountType).To(gomega.Equal("ASSET"))
+	g.Expect(accountSetRes.Accounts[1].AccountSign).To(gomega.Equal("DEBIT"))
+	g.Expect(accountSetRes.Accounts[1].AccountLeft).To(gomega.Equal(uint64(3)))
+	g.Expect(accountSetRes.Accounts[1].AccountRight).To(gomega.Equal(uint64(4)))
+
+	g.Expect(accountSetRes.Accounts[2].AccountName).To(gomega.Equal("ZZZ BANK"))
+	g.Expect(accountSetRes.Accounts[2].AccountType).To(gomega.Equal("ASSET"))
+	g.Expect(accountSetRes.Accounts[2].AccountSign).To(gomega.Equal("DEBIT"))
+	g.Expect(accountSetRes.Accounts[2].AccountLeft).To(gomega.Equal(uint64(5)))
+	g.Expect(accountSetRes.Accounts[2].AccountRight).To(gomega.Equal(uint64(6)))
 }
 
 func TestAccountPostAccountsInvalid(t *testing.T) {

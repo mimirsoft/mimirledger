@@ -8,8 +8,8 @@ CREATE TABLE transaction_accounts (
     account_full_name varchar(200) DEFAULT '',
     account_memo varchar(70) DEFAULT '',
     account_current bool NOT NULL DEFAULT true,
-    account_left integer NOT NULL UNIQUE,
-    account_right integer NOT NULL UNIQUE,
+    account_left integer NOT NULL,
+    account_right integer NOT NULL,
     account_balance integer NOT NULL DEFAULT 0,
     account_subtotal integer NOT NULL  DEFAULT 0,
     account_decimals smallint NOT NULL  DEFAULT 2,
@@ -22,6 +22,8 @@ CREATE TABLE transaction_accounts (
     account_sign transaction_account_sign_type NOT NULL DEFAULT 'DEBIT',
     account_type transaction_account_type NOT NULL DEFAULT 'ASSET'
 );
+CREATE INDEX transaction_accounts_account_left_idx ON transaction_accounts (account_left);
+CREATE INDEX transaction_accounts_account_right_idx ON transaction_accounts (account_right);
 
 
 CREATE TABLE transactions_main (

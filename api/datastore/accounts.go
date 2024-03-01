@@ -120,3 +120,56 @@ func (store AccountStore) GetAccounts() (as []Account, err error) {
 	}
 	return
 }
+
+// Gets one account by account ID
+func (store AccountStore) GetAccountByID(id uint64) (*Account, error) {
+	query := `select * from transaction_accounts where account_id = $1`
+	row := store.Client.QueryRowx(query, id)
+	var as Account
+	if err := row.StructScan(&as); err != nil {
+		return nil, err
+	}
+	return &as, nil
+}
+
+// Gets All Accounts
+func (store AccountStore) GetDirectChildren(id uint64) (as []Account, err error) {
+	query := `select * from transaction_accounts WHERE account_parent = $1
+	   ORDER BY account_name `
+	rows, err := store.Client.Queryx(query, id)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var acct Account
+		if err = rows.StructScan(&acct); err != nil {
+			return
+		}
+		as = append(as, acct)
+	}
+	if len(as) == 0 {
+		return nil, sql.ErrNoRows
+	}
+	return
+}
+
+// OpenSpotInTree opens a spot in our nested set
+func (store AccountStore) OpenSpotInTree(left uint64, right uint64) error {
+	query := `UPDATE transaction_accounts
+	SET account_right=account_right+2
+	WHERE account_right > $1`
+	_, err := store.Client.Exec(query, right)
+	if err != nil {
+		return err
+	}
+	query = `UPDATE transaction_accounts
+	SET account_left=account_left+2
+	WHERE account_left > $1`
+	_, err = store.Client.Exec(query, left)
+	if err != nil {
+		return nil
+	}
+	return nil
+}

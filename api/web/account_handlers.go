@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mimirsoft/mimirledger/api/models"
 	"github.com/mimirsoft/mimirledger/api/web/request"
 	"github.com/mimirsoft/mimirledger/api/web/response"
 	"net/http"
@@ -46,7 +45,7 @@ func PostAccounts(acctController *AccountsController) func(w http.ResponseWriter
 		if err != nil {
 			return fmt.Errorf("son.NewDecoder(r.Body).Decode:%w", err)
 		}
-		mdlAccount := models.Account(acct)
+		mdlAccount := request.ReqAccountToAccount(&acct)
 		account, err := acctController.CreateAccount(r.Context(), mdlAccount)
 		if err != nil {
 			return NewRequestError(http.StatusBadRequest, err)

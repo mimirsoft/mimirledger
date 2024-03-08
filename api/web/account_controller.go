@@ -67,10 +67,10 @@ func (ac *AccountsController) AccountList(ctx context.Context) ([]*models.Accoun
 }
 
 // POST /accounts
-func (ac *AccountsController) CreateAccount(ctx context.Context, account models.Account) (*models.Account, error) {
+func (ac *AccountsController) CreateAccount(ctx context.Context, account *models.Account) (*models.Account, error) {
 	err := account.Store(ac.DataStores)
 	if err != nil {
 		return nil, fmt.Errorf("account.Store:%w", err)
 	}
-	return &account, nil
+	return account, nil
 }

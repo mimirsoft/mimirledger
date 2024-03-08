@@ -99,6 +99,52 @@ func (store AccountStore) Store(acct *Account) (err error) {
 	return stmt.QueryRow(acct).StructScan(acct)
 }
 
+// Store inserts a UserNotification into postgres
+func (store AccountStore) Update(acct *Account) (err error) {
+	query := `    UPDATE  transaction_accounts 
+		    SET       (account_parent,
+	account_name,
+	account_full_name,
+	account_memo,
+	account_current,
+	account_left,
+	account_right,
+	account_balance,
+	account_subtotal,
+	account_reconcile_date,
+	account_flagged,
+	account_locked,
+	account_open_date,
+	account_close_date,
+	account_code,
+	account_sign,
+	account_type) = (:account_parent,
+	:account_name,
+	:account_full_name,
+	:account_memo,
+	:account_current,
+	:account_left,
+	:account_right,
+	:account_balance,
+	:account_subtotal,
+	:account_reconcile_date,
+	:account_flagged,
+	:account_locked,
+	:account_open_date,
+	:account_close_date,
+	:account_code,
+	:account_sign,
+	:account_type)
+		    WHERE account_id = :account_id
+		 RETURNING *`
+	stmt, err := store.Client.PrepareNamed(query)
+	if err != nil {
+		return
+	}
+	defer stmt.Close()
+	return stmt.QueryRow(acct).StructScan(acct)
+}
+
 // Gets All Accounts
 func (store AccountStore) GetAccounts() (as []Account, err error) {
 	query := `select * from transaction_accounts order by account_left`
@@ -132,7 +178,7 @@ func (store AccountStore) GetAccountByID(id uint64) (*Account, error) {
 	return &as, nil
 }
 
-// Gets All Accounts
+// GetDirectChildren gets first level children of an account
 func (store AccountStore) GetDirectChildren(id uint64) (as []Account, err error) {
 	query := `select * from transaction_accounts WHERE account_parent = $1
 	   ORDER BY account_name `
@@ -155,19 +201,67 @@ func (store AccountStore) GetDirectChildren(id uint64) (as []Account, err error)
 	return
 }
 
+// Gets All Children of a given account, regardless of dept
+func (store AccountStore) GetAllChildren(id uint64) (as []Account, err error) {
+	query := `SELECT 
+children.*
+FROM transaction_accounts AS parents,
+transaction_accounts AS children
+WHERE children.account_left BETWEEN parents.account_left AND parents.account_right
+AND children.account_left <> parents.account_left
+AND parents.account_id=$1
+ORDER BY account_left`
+	rows, err := store.Client.Queryx(query, id)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var acct Account
+		if err = rows.StructScan(&acct); err != nil {
+			return
+		}
+		as = append(as, acct)
+	}
+	if len(as) == 0 {
+		return nil, sql.ErrNoRows
+	}
+	return
+}
+
 // OpenSpotInTree opens a spot in our nested set
-func (store AccountStore) OpenSpotInTree(left uint64, right uint64) error {
+func (store AccountStore) OpenSpotInTree(afterValue, spread uint64) error {
 	query := `UPDATE transaction_accounts
-	SET account_right=account_right+2
+	SET account_right=account_right+$2
 	WHERE account_right > $1`
-	_, err := store.Client.Exec(query, right)
+	_, err := store.Client.Exec(query, afterValue, spread)
 	if err != nil {
 		return err
 	}
 	query = `UPDATE transaction_accounts
-	SET account_left=account_left+2
+	SET account_left=account_left+$2
 	WHERE account_left > $1`
-	_, err = store.Client.Exec(query, left)
+	_, err = store.Client.Exec(query, afterValue, spread)
+	if err != nil {
+		return nil
+	}
+	return nil
+}
+
+// CloseSpotInTree closes a gap in our account tree
+func (store AccountStore) CloseSpotInTree(afterValue, spread uint64) error {
+	query := `UPDATE transaction_accounts
+	SET account_right=account_right-$2
+	WHERE account_right > $1`
+	_, err := store.Client.Exec(query, afterValue, spread)
+	if err != nil {
+		return err
+	}
+	query = `UPDATE transaction_accounts
+	SET account_left=account_left-$2
+	WHERE account_left > $1`
+	_, err = store.Client.Exec(query, afterValue, spread)
 	if err != nil {
 		return nil
 	}

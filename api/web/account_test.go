@@ -108,7 +108,7 @@ func TestAccountPostAccountsInvalid(t *testing.T) {
 				Router:     TestRouter,
 				RequestURL: "/accounts",
 				Payload: map[string]interface{}{
-					"account_name": "my bank acct",
+					"accountName": "my bank acct",
 				},
 			},
 			GomegaWithT: g,
@@ -120,8 +120,8 @@ func TestAccountPostAccountsInvalid(t *testing.T) {
 				Router:     TestRouter,
 				RequestURL: "/accounts",
 				Payload: map[string]interface{}{
-					"account_name": "my bank acct",
-					"account_sign": "DEBIT",
+					"accountName": "my bank acct",
+					"accountSign": "DEBIT",
 				},
 			},
 			GomegaWithT: g,
@@ -136,9 +136,9 @@ func TestAccountPostAccounts(t *testing.T) {
 	setupDatastores(TestDataStore)
 
 	acctReq := map[string]interface{}{
-		"account_name": "my bank",
-		"account_type": "ASSET",
-		"account_sign": "DEBIT",
+		"accountName": "my bank",
+		"accountType": "ASSET",
+		"accountSign": "DEBIT",
 	}
 	var test = RouterTest{Request: Request{
 		Method:     http.MethodPost,

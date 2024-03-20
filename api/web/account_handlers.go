@@ -43,7 +43,7 @@ func PostAccounts(acctController *AccountsController) func(w http.ResponseWriter
 		}
 		err := json.NewDecoder(r.Body).Decode(&acct)
 		if err != nil {
-			return fmt.Errorf("son.NewDecoder(r.Body).Decode:%w", err)
+			return fmt.Errorf("json.NewDecoder(r.Body).Decode:%w", err)
 		}
 		mdlAccount := request.ReqAccountToAccount(&acct)
 		account, err := acctController.CreateAccount(r.Context(), mdlAccount)

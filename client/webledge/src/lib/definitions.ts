@@ -1,10 +1,10 @@
 export type TransactionAccount = {
-    account_id: number;
-    account_parent: number;
-    account_name: string;
-    account_fullname: string;
-    account_memo: string;
-    account_balance: number;
+    accountID: number;
+    accountParent: number;
+    accountName: string;
+    accountFullName: string;
+    accountMemo: string;
+    accountBalance: number;
 };
 
 export type TransactionAccountType = {

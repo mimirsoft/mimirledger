@@ -112,7 +112,6 @@ func (c *Account) Update(ds *datastore.Datastores) (err error) { //nolint:gocycl
 		if err != nil {
 			return fmt.Errorf("findSpotInTree:%w", err)
 		}
-	
 		err = openSpotInTree(ds, afterValue, spread)
 		if err != nil {
 			return fmt.Errorf("openSpotInTree:%w", err)

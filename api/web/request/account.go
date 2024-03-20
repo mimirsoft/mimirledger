@@ -9,23 +9,23 @@ import (
 
 // Account is for use in accounts controller responses
 type Account struct {
-	AccountID            uint64                `json:"account_id"`
-	AccountParent        uint64                `json:"account_parent"`
-	AccountName          string                `json:"account_name"`
-	AccountFullName      string                `json:"account_fullname"`
-	AccountMemo          string                `json:"account_memo"`
-	AccountCurrent       bool                  `json:"account_current"`
-	AccountBalance       uint64                `json:"account_balance"`
-	AccountSubtotal      uint64                `json:"account_subtotal"`
-	AccountDecimals      uint64                `json:"account_decimals"`
-	AccountReconcileDate sql.NullTime          `json:"account_reconcile_date"`
-	AccountFlagged       bool                  `json:"account_flagged"`
-	AccountLocked        bool                  `json:"account_locked"`
-	AccountOpenDate      time.Time             `json:"account_open_date"`
-	AccountCloseDate     sql.NullTime          `json:"account_close_date"`
-	AccountCode          sql.NullString        `json:"account_code"`
-	AccountSign          datastore.AccountSign `json:"account_sign"`
-	AccountType          datastore.AccountType `json:"account_type"`
+	AccountID            uint64                `json:"accountID"`
+	AccountParent        uint64                `json:"accountParent"`
+	AccountName          string                `json:"accountName"`
+	AccountFullName      string                `json:"accountFullname"`
+	AccountMemo          string                `json:"accountMemo"`
+	AccountCurrent       bool                  `json:"accountCurrent"`
+	AccountBalance       uint64                `json:"accountBalance"`
+	AccountSubtotal      uint64                `json:"accountSubtotal"`
+	AccountDecimals      uint64                `json:"accountDecimals"`
+	AccountReconcileDate sql.NullTime          `json:"accountReconcileDate"`
+	AccountFlagged       bool                  `json:"accountFlagged"`
+	AccountLocked        bool                  `json:"accountLocked"`
+	AccountOpenDate      time.Time             `json:"accountOpenDate"`
+	AccountCloseDate     sql.NullTime          `json:"accountCloseDate"`
+	AccountCode          sql.NullString        `json:"accountCode"`
+	AccountSign          datastore.AccountSign `json:"accountSign"`
+	AccountType          datastore.AccountType `json:"accountType"`
 }
 
 func ReqAccountToAccount(act *Account) *models.Account {

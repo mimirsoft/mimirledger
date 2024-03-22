@@ -42,13 +42,7 @@ func TestAccount_StoreInvalid(t *testing.T) {
 	a2 := Account{AccountName: "MyBank"}
 	err = a2.Store(testDS)
 	g.Expect(err).To(gomega.HaveOccurred())
-	g.Expect(err.Error()).To(gomega.ContainSubstring("invalid input value for enum transaction_account_sign_type"))
-
-	// failed due to no transaction_account_sign_type
-	a3 := Account{AccountName: "MyBank", AccountSign: datastore.AccountSignCredit}
-	err = a3.Store(testDS)
-	g.Expect(err).To(gomega.HaveOccurred())
-	g.Expect(err.Error()).To(gomega.ContainSubstring("invalid input value for enum transaction_account_type"))
+	g.Expect(err.Error()).To(gomega.ContainSubstring("accountType is not valid, cannot determine AccountSign"))
 
 }
 func TestAccount_Store(t *testing.T) {

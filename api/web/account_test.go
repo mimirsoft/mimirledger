@@ -112,20 +112,7 @@ func TestAccountPostAccountsInvalid(t *testing.T) {
 				},
 			},
 			GomegaWithT: g,
-			Code:        http.StatusBadRequest, RespBody: "invalid input value for enum transaction_account_sign_type",
-		},
-		{
-			Request: Request{
-				Method:     http.MethodPost,
-				Router:     TestRouter,
-				RequestURL: "/accounts",
-				Payload: map[string]interface{}{
-					"accountName": "my bank acct",
-					"accountSign": "DEBIT",
-				},
-			},
-			GomegaWithT: g,
-			Code:        http.StatusBadRequest, RespBody: "invalid input value for enum transaction_account_type",
+			Code:        http.StatusBadRequest, RespBody: "accountType is not valid, cannot determine AccountSign",
 		},
 	}).Exec()
 }
@@ -138,7 +125,6 @@ func TestAccountPostAccounts(t *testing.T) {
 	acctReq := map[string]interface{}{
 		"accountName": "my bank",
 		"accountType": "ASSET",
-		"accountSign": "DEBIT",
 	}
 	var test = RouterTest{Request: Request{
 		Method:     http.MethodPost,

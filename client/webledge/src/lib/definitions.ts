@@ -1,3 +1,11 @@
+export type TransactionAccountRequest = {
+    accountParent: number;
+    accountName: string;
+    accountMemo: string;
+    accountType: string;
+};
+
+
 export type TransactionAccount = {
     accountID: number;
     accountParent: number;

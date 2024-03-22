@@ -32,6 +32,7 @@ type Account struct {
 
 var errParentAccountNotFound = errors.New("cannot find parent account with ID")
 var errAccountNameEmptyString = errors.New("account name cannot be empty")
+var errAccountTypeInvalid = errors.New("accountType is not valid, cannot determine AccountSign")
 
 // Store inserts a URLComment
 func (c *Account) Store(ds *datastore.Datastores) error { //nolint:gocyclo
@@ -52,6 +53,13 @@ func (c *Account) Store(ds *datastore.Datastores) error { //nolint:gocyclo
 		c.AccountType = parentAccount.AccountType
 		c.AccountSign = parentAccount.AccountSign
 	}
+	var ok bool
+	var accountSign datastore.AccountSign
+	if accountSign, ok = datastore.AccountTypeToSign[c.AccountType]; !ok {
+		return fmt.Errorf("%w c.AccountType:%s:", errAccountTypeInvalid, c.AccountType)
+	}
+	c.AccountSign = accountSign
+
 	//Find the new spot in the tree.
 	afterValue, err := findSpotInTree(ds, c.AccountParent, c.AccountName)
 	if err != nil {
@@ -66,7 +74,7 @@ func (c *Account) Store(ds *datastore.Datastores) error { //nolint:gocyclo
 	eAcct := datastore.Account(*c)
 	err = ds.AccountStore().Store(&eAcct)
 	if err != nil {
-		return fmt.Errorf("ds.AccountStore().Store:%w", err)
+		return fmt.Errorf("ds.AccountStore().Store:%w [account:%+v]", err, eAcct)
 	}
 	*c = Account(eAcct)
 	return nil

@@ -9,7 +9,7 @@ import (
 
 // Account is for use in accounts controller responses
 type Account struct {
-	AccountID            uint64                `json:"accountID"`
+	AccountID            uint64                `json:"accountID,omitempty"`
 	AccountParent        uint64                `json:"accountParent"`
 	AccountName          string                `json:"accountName"`
 	AccountFullName      string                `json:"accountFullname"`
@@ -24,7 +24,6 @@ type Account struct {
 	AccountOpenDate      time.Time             `json:"accountOpenDate"`
 	AccountCloseDate     sql.NullTime          `json:"accountCloseDate"`
 	AccountCode          sql.NullString        `json:"accountCode"`
-	AccountSign          datastore.AccountSign `json:"accountSign"`
 	AccountType          datastore.AccountType `json:"accountType"`
 }
 
@@ -45,7 +44,6 @@ func ReqAccountToAccount(act *Account) *models.Account {
 		AccountOpenDate:      act.AccountOpenDate,
 		AccountCloseDate:     act.AccountCloseDate,
 		AccountCode:          act.AccountCode,
-		AccountSign:          act.AccountSign,
 		AccountType:          act.AccountType,
 	}
 }

@@ -1,6 +1,6 @@
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
-import { TransactionAccount } from '../../lib/definitions';
+import { TransactionAccount, TransactionAccountRequest } from '../../lib/definitions';
 
 import { useTransactionAccounts } from '../../lib/data';
 import useSWR from "swr";
@@ -12,7 +12,18 @@ const postFormData = async (formData: FormData) => {
     try {
         const myURL = new URL('/accounts', process.env.REACT_APP_MIMIRLEDGER_API_URL);
         console.log(myURL)
-        var json =JSON.stringify(Object.fromEntries(formData));
+        // Do a bit of work to convert the entries to a plain JS object
+        const formEntries = Object.fromEntries(formData);
+
+        const newAccount : TransactionAccountRequest = {
+            accountParent : Number(formEntries.accountParent),
+            accountName : String(formEntries.accountName),
+            accountType : String(formEntries.accountType),
+            accountMemo : String(formEntries.accountMemo),
+        };
+
+        var json = JSON.stringify(newAccount);
+
         console.log(json)
         const settings :RequestInit = {
             method: 'POST',
@@ -60,8 +71,20 @@ My Accounts
                 </select>
             </label>
             <label>AccountType:
-                <input type="text" name="accountType"/>
+                <select name="accountType">
+                    <option value="ASSET">ASSET</option>
+                    <option value="LIABILITY">LIABILITY</option>
+                    <option value="EQUITY">EQUITY</option>
+                    <option value="INCOME">INCOME</option>
+                    <option value="ASSET">EXPENSE</option>
+                    <option value="ASSET">GAIN</option>
+                    <option value="ASSET">LOSS</option>
+                </select>
             </label>
+            <label>Memo:
+                <input type="text" name="accountMemo"/>
+            </label>
+
             <button type="submit">Create Account</button>
         </form>
         {data.accounts && data.accounts.map((account: TransactionAccount, index: number) => {
@@ -70,22 +93,29 @@ My Accounts
                     <div className="flex items-center">
                         <div className="min-w-0">
 
-                                <p className="hidden text-sm text-gray-500 sm:block">
-                                    {account.accountFullName}
-                                </p>
-                            </div>
-                        </div>
-                        <p
-                            className={` truncate text-sm font-medium md:text-base`}
-                        >
+                            <p className="hidden text-sm text-gray-500 sm:block">
+                                {account.accountFullName}
+                            </p>
+                            <p className="hidden text-sm text-gray-500 sm:block">
+                                {account.accountName}
+                            </p>
+                            <p className="hidden text-sm text-gray-500 sm:block">
+                                {account.accountID}
+                            </p>
+                            <p
+                                className={` truncate text-sm font-medium md:text-base`}
+                            >
                             {account.accountBalance}
-                        </p>
+                            </p>
+                        </div>
                     </div>
-                );
-            })}
+
+                </div>
+            );
+        })}
     </div>
 </div>
 
         </div>
-);
+    );
 }

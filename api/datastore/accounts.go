@@ -25,6 +25,15 @@ const (
 	AccountTypeLoss      = AccountType("LOSS")
 )
 
+var AccountTypeToSign = map[AccountType]AccountSign{
+	AccountTypeAsset:     AccountSignDebit,
+	AccountTypeLiability: AccountSignCredit,
+	AccountTypeEquity:    AccountSignCredit,
+	AccountTypeIncome:    AccountSignDebit,
+	AccountTypeExpense:   AccountSignCredit,
+	AccountTypeGain:      AccountSignCredit,
+	AccountTypeLoss:      AccountSignDebit}
+
 // UserNotificationStatus is an enum for UserNotification statuses
 type AccountSign string
 

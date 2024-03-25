@@ -17,18 +17,9 @@ const NavBar = () => {
         <div>
             <NavTitle navLogo={siteName}/>
             <nav className={`nav`}>
-                <div></div>
-                <div
-                    onClick={() => setNavActive(!navActive)}
-                    className={`nav__menu-bar`}
-                >
-                    <div></div>
-                    <div></div>
-                    <div></div>
-                </div>
-                <div className={`${navActive ? "active" : ""} nav__menu-list`}>
+                <div className={`${navActive ? "active" : ""} flex bg-slate-200`}>
                     {MENU_LIST.map((menu, idx) => (
-                        <div className={`nav__menu-listbox-item`}
+                        <div className={`w-64 bg-blue-500 p-4 text-white`}
                              onClick={() => {
                                  setActiveIdx(idx);
                                  setNavActive(false);

@@ -87,29 +87,37 @@ My Accounts
 
             <button type="submit">Create Account</button>
         </form>
+    </div>
+    <div>
+        <div className="flex">
+            <div className="w-80">
+                AccountID
+            </div>
+            <div className="w-80">
+                FullName
+            </div>
+            <div className="w-80">
+                Name
+            </div>
+            <div className="w-80">
+                Balance
+            </div>
+        </div>
         {data.accounts && data.accounts.map((account: TransactionAccount, index: number) => {
             return (
-                <div>
-                    <div className="flex items-center">
-                        <div className="min-w-0">
-
-                            <p className="hidden text-sm text-gray-500 sm:block">
-                                {account.accountFullName}
-                            </p>
-                            <p className="hidden text-sm text-gray-500 sm:block">
-                                {account.accountName}
-                            </p>
-                            <p className="hidden text-sm text-gray-500 sm:block">
-                                {account.accountID}
-                            </p>
-                            <p
-                                className={` truncate text-sm font-medium md:text-base`}
-                            >
-                            {account.accountBalance}
-                            </p>
-                        </div>
+                <div className="flex">
+                    <div className="w-80">
+                        {account.accountID}
                     </div>
-
+                    <div className="w-80">
+                        {account.accountFullName}
+                    </div>
+                    <div className="w-80">
+                        {account.accountName}
+                    </div>
+                    <div className="w-80">
+                        {account.accountBalance}
+                    </div>
                 </div>
             );
         })}

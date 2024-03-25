@@ -6,11 +6,11 @@ import { Outlet } from "react-router-dom";
 
 export default function OuterContainer() {
     return (
-        <><div className="outer-container">
+        <><div className="w-full">
             <NavBar />
             <MainContainer><Outlet /></MainContainer>
-        </div>
             <Footer/>
+        </div>
         </>
     )
 }

@@ -6,6 +6,7 @@ import './App.css';
 import Home from "./pages/Home";
 import Accounts from "./pages/Accounts";
 import AccountTypes from "./pages/AccountTypes";
+import Transactions from "./pages/Transactions";
 import NoPage from "./pages/NoPage";
 import OuterContainer from './components/templates/OuterContainer';
 
@@ -17,7 +18,8 @@ function App() {
             <Route index element={<Home />} />
             <Route path="accounts" element={<Accounts />} />
             <Route path="accounttypes" element={<AccountTypes />} />
-            <Route path="*" element={<NoPage />} />df
+              <Route path="transactions" element={<Transactions />} />
+              <Route path="*" element={<NoPage />} />df
           </Route>
         </Routes>
       </BrowserRouter>

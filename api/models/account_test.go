@@ -103,11 +103,15 @@ func TestAccount_StoreParentAndChildren(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(a1.AccountLeft).To(gomega.Equal(uint64(1)))
 	g.Expect(a1.AccountRight).To(gomega.Equal(uint64(2)))
+	g.Expect(a1.AccountName).To(gomega.Equal("MyBank"))
+	g.Expect(a1.AccountFullName).To(gomega.Equal("MyBank"))
 
 	a2 := Account{AccountName: "MyBank_subacct", AccountParent: a1.AccountID,
 		AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
 	err = a2.Store(testDS)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(a2.AccountName).To(gomega.Equal("MyBank_subacct"))
+	g.Expect(a2.AccountFullName).To(gomega.Equal("MyBank:MyBank_subacct"))
 
 	myAcct, err := getAccountByID(testDS, a1.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
@@ -125,6 +129,8 @@ func TestAccount_StoreParentAndChildren(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(a3.AccountLeft).To(gomega.Equal(uint64(3)))
 	g.Expect(a3.AccountRight).To(gomega.Equal(uint64(4)))
+	g.Expect(a3.AccountName).To(gomega.Equal("MyBank_sub_subacct"))
+	g.Expect(a3.AccountFullName).To(gomega.Equal("MyBank:MyBank_subacct:MyBank_sub_subacct"))
 
 	children, err := findDirectChildren(testDS, a1.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
@@ -208,6 +214,47 @@ func TestAccount_StoreParentAndChildrenMoved(t *testing.T) {
 	g.Expect(myAcct.AccountLeft).To(gomega.Equal(uint64(5)))
 	g.Expect(myAcct.AccountRight).To(gomega.Equal(uint64(6)))
 
+}
+
+// test make account and children and grand children
+func TestAccount_RetrieveAccountFullName(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDB(g)
+	acctSet, err := RetrieveAccounts(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(acctSet).To(gomega.HaveLen(0))
+
+	a1 := Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err = a1.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a2 := Account{AccountName: "MyBank_subacct", AccountParent: a1.AccountID,
+		AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err = a2.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a3 := Account{AccountName: "MyBank_sub_subacct", AccountParent: a2.AccountID,
+		AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err = a3.Store(testDS)
+	g.Expect(a3.AccountLeft).To(gomega.Equal(uint64(3)))
+	g.Expect(a3.AccountRight).To(gomega.Equal(uint64(4)))
+
+	a4 := Account{AccountName: "OtherBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err = a4.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	fullName, err := retrieveAccountFullName(testDS, a3.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(fullName).To(gomega.Equal("MyBank:MyBank_subacct:MyBank_sub_subacct"))
+
+	fullName, err = retrieveAccountFullName(testDS, a2.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(fullName).To(gomega.Equal("MyBank:MyBank_subacct"))
+
+	fullName, err = retrieveAccountFullName(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(fullName).To(gomega.Equal("MyBank"))
 }
 
 // test make account and children and grand children and move them around

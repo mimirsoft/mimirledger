@@ -20,8 +20,18 @@ export default function TransactionAccountTypes() {
 
     return (
         <div>
-            {data.accountTypes &&
-                data.accountTypes.map((accountType:TransactionAccountType, index:number) => <h1  key={index}>{accountType.name}</h1>)}
+            {data.accountTypes &&  data.accountTypes.map((accountType:TransactionAccountType, index:number) => {
+                    return (
+                        <div className="flex">
+                            <div className="w-64">
+                            <h1 key={index}>{accountType.name}</h1>
+                            </div>
+                            <div className="w-64">
+                            <h1 key={index}>{accountType.sign}</h1>
+                            </div>
+                        </div>
+                    );
+            })}
         </div>
     );
 }

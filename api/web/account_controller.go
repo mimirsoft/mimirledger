@@ -22,6 +22,7 @@ func NewAccountsController(ds *datastore.Datastores) *AccountsController {
 // AccountTypes is for use in accounts controller responses
 type AccountType struct {
 	Name string `json:"name"`
+	Sign string `json:"sign"`
 }
 
 // AccountTypeSet is for use in accounts controller responses
@@ -34,24 +35,31 @@ func (ac *AccountsController) AccountTypeList(ctx context.Context) (*AccountType
 	at := []AccountType{
 		{
 			Name: "ASSET",
+			Sign: "DEBIT",
 		},
 		{
 			Name: "LIABILITY",
+			Sign: "CREDIT",
 		},
 		{
 			Name: "EQUITY",
+			Sign: "CREDIT",
 		},
 		{
 			Name: "INCOME",
+			Sign: "DEBIT",
 		},
 		{
 			Name: "EXPENSE",
+			Sign: "CREDIT",
 		},
 		{
 			Name: "GAIN",
+			Sign: "CREDIT",
 		},
 		{
 			Name: "LOSS",
+			Sign: "DEBIT",
 		},
 	}
 	return &AccountTypeSet{AccountTypes: at}, nil

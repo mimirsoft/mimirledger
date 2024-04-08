@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mimirsoft/mimirledger/api/datastore"
+	"strings"
 	"time"
 )
 
@@ -76,6 +77,15 @@ func (c *Account) Store(ds *datastore.Datastores) error { //nolint:gocyclo
 	if err != nil {
 		return fmt.Errorf("ds.AccountStore().Store:%w [account:%+v]", err, eAcct)
 	}
+	fullName, err := retrieveAccountFullName(ds, eAcct.AccountID)
+	if err != nil {
+		return fmt.Errorf("retrieveAccountFullName:%w [account:%+v]", err, eAcct)
+	}
+	eAcct.AccountFullName = fullName
+	err = ds.AccountStore().Update(&eAcct)
+	if err != nil {
+		return fmt.Errorf("ds.AccountStore().Update:%w", err)
+	}
 	*c = Account(eAcct)
 	return nil
 }
@@ -104,45 +114,60 @@ func (c *Account) Update(ds *datastore.Datastores) (err error) { //nolint:gocycl
 			c.AccountType = parentAccount.AccountType
 			c.AccountSign = parentAccount.AccountSign
 		}
-		//Find all children
-		children, err := findAllChildren(ds, c.AccountID)
-		if err != nil {
-			return fmt.Errorf("findAllChildren: %w [ AccountID:%d]", err, c.AccountID)
-		}
-		// close old spot in tree
-		spread := acctB4Update.AccountRight - acctB4Update.AccountLeft + 1
-		err = closeSpotInTree(ds, acctB4Update.AccountRight, spread)
-		if err != nil {
-			return fmt.Errorf("closeSpotInTree:%w", err)
-		}
-		//Find the new spot in the tree.
-		afterValue, err := findSpotInTree(ds, c.AccountParent, c.AccountName)
-		if err != nil {
-			return fmt.Errorf("findSpotInTree:%w", err)
-		}
-		err = openSpotInTree(ds, afterValue, spread)
-		if err != nil {
-			return fmt.Errorf("openSpotInTree:%w", err)
-		}
-		c.AccountLeft = afterValue + 1
-		c.AccountRight = afterValue + spread
-		//Update all the children
-		shift := c.AccountLeft - acctB4Update.AccountLeft
-		for idx := range children {
-			child := children[idx]
-			child.AccountLeft += shift
-			child.AccountRight += shift
-			eAcct := datastore.Account(*child)
-			err := ds.AccountStore().Update(&eAcct)
-			if err != nil {
-				return fmt.Errorf("accountStore().Update:%w", err)
-			}
-		}
 	}
+	//Find all children
+	children, err := findAllChildren(ds, c.AccountID)
+	if err != nil {
+		return fmt.Errorf("findAllChildren: %w [ AccountID:%d]", err, c.AccountID)
+	}
+	// close old spot in tree
+	spread := acctB4Update.AccountRight - acctB4Update.AccountLeft + 1
+	err = closeSpotInTree(ds, acctB4Update.AccountRight, spread)
+	if err != nil {
+		return fmt.Errorf("closeSpotInTree:%w", err)
+	}
+	//Find the new spot in the tree.
+	afterValue, err := findSpotInTree(ds, c.AccountParent, c.AccountName)
+	if err != nil {
+		return fmt.Errorf("findSpotInTree:%w", err)
+	}
+	err = openSpotInTree(ds, afterValue, spread)
+	if err != nil {
+		return fmt.Errorf("openSpotInTree:%w", err)
+	}
+	c.AccountLeft = afterValue + 1
+	c.AccountRight = afterValue + spread
 	eAcct := datastore.Account(*c)
 	err = ds.AccountStore().Update(&eAcct)
 	if err != nil {
-		return fmt.Errorf("ds.AccountStore().Store:%w", err)
+		return fmt.Errorf("ds.AccountStore().Update:%w", err)
+	}
+	// now get the fullName, after the Update
+	fullName, err := retrieveAccountFullName(ds, eAcct.AccountID)
+	if err != nil {
+		return fmt.Errorf("retrieveAccountFullName:%w [account:%+v]", err, eAcct)
+	}
+	eAcct.AccountFullName = fullName
+	err = ds.AccountStore().Update(&eAcct)
+	if err != nil {
+		return fmt.Errorf("ds.AccountStore().Update:%w", err)
+	}
+	//Update all the children
+	shift := c.AccountLeft - acctB4Update.AccountLeft
+	for idx := range children {
+		child := children[idx]
+		child.AccountLeft += shift
+		child.AccountRight += shift
+		fullName, err := retrieveAccountFullName(ds, children[idx].AccountID)
+		if err != nil {
+			return fmt.Errorf("retrieveAccountFullName:%w [account:%+v]", err, eAcct)
+		}
+		child.AccountFullName = fullName
+		childEAcct := datastore.Account(*child)
+		err = ds.AccountStore().Update(&childEAcct)
+		if err != nil {
+			return fmt.Errorf("accountStore().Update:%w", err)
+		}
 	}
 	*c = Account(eAcct)
 	return nil
@@ -258,4 +283,20 @@ func entAccountToAccounts(eAccts []datastore.Account) (ua []*Account) {
 		ua[idx] = &act
 	}
 	return
+}
+func retrieveAccountFullName(ds *datastore.Datastores, accountID uint64) (string, error) {
+	accountFullName := ""
+	as := ds.AccountStore()
+	actSet, err := as.GetParents(accountID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return accountFullName, nil
+		}
+		return "", fmt.Errorf("AccountStore().GetParents:%w", err)
+	}
+	for idx := range actSet {
+		accountFullName += actSet[idx].AccountName + ":"
+	}
+	accountFullName = strings.TrimSuffix(accountFullName, ":")
+	return accountFullName, nil
 }

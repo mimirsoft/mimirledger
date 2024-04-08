@@ -225,6 +225,48 @@ func TestAccountStore_GetAllChildren(t *testing.T) {
 	g.Expect(children[0].AccountRight).To(gomega.Equal(uint64(4)))
 }
 
+func TestAccountStore_GetParents(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDB(g)
+
+	aStore := createAccountStore()
+	a1 := Account{AccountName: "myBank", AccountFullName: "BankAccounts:myBank",
+		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
+		AccountBalance: 3000, AccountDecimals: 2, AccountSubtotal: 2000,
+		AccountLeft: 1, AccountRight: 6}
+	err := aStore.Store(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	a2 := Account{AccountName: "subact2", AccountFullName: "BankAccounts:myBank",
+		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
+		AccountBalance: 3000, AccountDecimals: 2, AccountSubtotal: 2000,
+		AccountLeft: 2, AccountRight: 5, AccountParent: a1.AccountID}
+	err = aStore.Store(&a2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	a3 := Account{AccountName: "sub_subact3", AccountFullName: "BankAccounts:MyBank",
+		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
+		AccountBalance: 3000, AccountDecimals: 2, AccountSubtotal: 2000,
+		AccountLeft: 3, AccountRight: 4, AccountParent: a2.AccountID}
+	err = aStore.Store(&a3)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	children, err := aStore.GetParents(a3.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(children).To(gomega.HaveLen(3))
+	g.Expect(children[0].AccountName).To(gomega.Equal(a1.AccountName))
+	g.Expect(children[0].AccountID).To(gomega.Equal(a1.AccountID))
+	g.Expect(children[0].AccountLeft).To(gomega.Equal(uint64(1)))
+	g.Expect(children[0].AccountRight).To(gomega.Equal(uint64(6)))
+	g.Expect(children[1].AccountName).To(gomega.Equal(a2.AccountName))
+	g.Expect(children[1].AccountID).To(gomega.Equal(a2.AccountID))
+	g.Expect(children[1].AccountLeft).To(gomega.Equal(uint64(2)))
+	g.Expect(children[1].AccountRight).To(gomega.Equal(uint64(5)))
+	g.Expect(children[2].AccountName).To(gomega.Equal(a3.AccountName))
+	g.Expect(children[2].AccountID).To(gomega.Equal(a3.AccountID))
+	g.Expect(children[2].AccountLeft).To(gomega.Equal(uint64(3)))
+	g.Expect(children[2].AccountRight).To(gomega.Equal(uint64(4)))
+}
+
 func setupDB(g *gomega.WithT) {
 	query := `delete  from transaction_accounts `
 	_, err := TestPostgresClient.Exec(query)

@@ -210,6 +210,32 @@ func (store AccountStore) GetDirectChildren(id uint64) (as []Account, err error)
 	return
 }
 
+// GetDirectChildren gets first level children of an account
+func (store AccountStore) GetParents(id uint64) (as []Account, err error) {
+	query := `select Parents.* 
+         FROM transaction_accounts AS Parents, transaction_accounts AS BaseAccount
+WHERE (BaseAccount.account_left BETWEEN Parents.account_left AND Parents.account_right)
+AND (BaseAccount.account_id =$1)
+ORDER BY Parents.account_left`
+	rows, err := store.Client.Queryx(query, id)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var acct Account
+		if err = rows.StructScan(&acct); err != nil {
+			return
+		}
+		as = append(as, acct)
+	}
+	if len(as) == 0 {
+		return nil, sql.ErrNoRows
+	}
+	return
+}
+
 // Gets All Children of a given account, regardless of dept
 func (store AccountStore) GetAllChildren(id uint64) (as []Account, err error) {
 	query := `SELECT 

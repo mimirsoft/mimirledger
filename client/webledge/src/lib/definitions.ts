@@ -17,4 +17,10 @@ export type TransactionAccount = {
 
 export type TransactionAccountType = {
     name:string
+    sign:string
+};
+
+
+export type Transaction = {
+    transactionID: number;
 };

@@ -31,7 +31,7 @@ func TestTransactionStore_StoreValidEmpty(t *testing.T) {
 		gomega.ContainSubstring(`new row for relation "transaction_main" violates check constraint "transaction_main_transaction_comment_check"`))
 }
 
-func TestTransactionStore_StoreValid(t *testing.T) {
+func TestTransactionStore_StoreValidAndRetrieve(t *testing.T) {
 	g := gomega.NewWithT(t)
 	gomega.RegisterFailHandler(ginkgo.Fail)
 
@@ -51,7 +51,7 @@ func TestTransactionStore_StoreValid(t *testing.T) {
 	g.Expect(myTrans.TransactionAmount).To(gomega.Equal(uint64(1000)))
 }
 
-func TestTransactionStore_StoreUpdate(t *testing.T) {
+func TestTransactionStore_StoreUpdateAndRetrieve(t *testing.T) {
 	g := gomega.NewWithT(t)
 	gomega.RegisterFailHandler(ginkgo.Fail)
 

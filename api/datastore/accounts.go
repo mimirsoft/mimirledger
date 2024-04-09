@@ -62,7 +62,7 @@ type Account struct {
 	AccountType          AccountType    `db:"account_type"`
 }
 
-// Store inserts a UserNotification into postgres
+// Store inserts an Account into postgres
 func (store AccountStore) Store(acct *Account) (err error) {
 	query := `    INSERT INTO transaction_accounts 
 		           (account_parent,
@@ -108,7 +108,7 @@ func (store AccountStore) Store(acct *Account) (err error) {
 	return stmt.QueryRow(acct).StructScan(acct)
 }
 
-// Store inserts a UserNotification into postgres
+// Update  updates Accounts into postgres
 func (store AccountStore) Update(acct *Account) (err error) {
 	query := `    UPDATE  transaction_accounts 
 		    SET       (account_parent,

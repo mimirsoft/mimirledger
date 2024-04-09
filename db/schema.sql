@@ -26,26 +26,26 @@ CREATE INDEX transaction_accounts_account_left_idx ON transaction_accounts (acco
 CREATE INDEX transaction_accounts_account_right_idx ON transaction_accounts (account_right);
 
 
-CREATE TABLE transactions_main (
+CREATE TABLE transaction_main (
     transaction_id SERIAL PRIMARY KEY,
     transaction_date DATE NOT NULL DEFAULT CURRENT_DATE,
-    transaction_comment varchar(250) DEFAULT NULL,
-    transaction_amount decimal(11,2) DEFAULT '0.00',
-    transaction_check_num varchar(32) DEFAULT NULL,
-    transaction_reconcile bool NOT NULL default FALSE,
+    transaction_comment varchar(250) NOT NULL CHECK (transaction_comment <> ''),
+    transaction_amount integer NOT NULL CHECK (transaction_amount > 0),
+    transaction_reference varchar(32) DEFAULT NULL,
+    is_reconciled bool NOT NULL default FALSE,
     transaction_reconcile_date date DEFAULT NULL,
     is_split bool NOT NULL default FALSE) ;
 
-CREATE TABLE transactions_debit_credit (
+CREATE TABLE transaction_debit_credit (
     transaction_dc_id SERIAL PRIMARY KEY,
     account_id integer NOT NULL,
     transaction_id integer NOT NULL,
     transaction_dc_amount decimal(11,2) DEFAULT '0.00',
     transaction_dc transaction_account_sign_type NOT NULL DEFAULT 'DEBIT') ;
 
-ALTER TABLE transactions_debit_credit
-    ADD CONSTRAINT transactions_debit_credit_transaction_id_fkey FOREIGN KEY (transaction_id) REFERENCES transactions_main(transaction_id) ON DELETE CASCADE;
-CREATE INDEX transactions_debit_credit_transaction_id_idx ON transactions_debit_credit (transaction_id);
-ALTER TABLE transactions_debit_credit
+ALTER TABLE transaction_debit_credit
+    ADD CONSTRAINT transactions_debit_credit_transaction_id_fkey FOREIGN KEY (transaction_id) REFERENCES transaction_main(transaction_id) ON DELETE CASCADE;
+CREATE INDEX transactions_debit_credit_transaction_id_idx ON transaction_debit_credit (transaction_id);
+ALTER TABLE transaction_debit_credit
     ADD CONSTRAINT transactions_debit_credit_transaction_account_id_fkey FOREIGN KEY (account_id) REFERENCES transaction_accounts(account_id) ON DELETE CASCADE;
-CREATE INDEX transactions_debit_credit_transaction_account_idx ON transactions_debit_credit (account_id);
+CREATE INDEX transactions_debit_credit_transaction_account_idx ON transaction_debit_credit (account_id);

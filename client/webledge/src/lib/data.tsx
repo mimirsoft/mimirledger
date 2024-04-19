@@ -17,12 +17,10 @@ export function useTransactionAccounts() {
 }
 
 export function useTransactionAccountTypes() {
-
     const myURL = new URL('/accounttypes', process.env.REACT_APP_MIMIRLEDGER_API_URL);
     console.log(myURL);
     const { data, error, isLoading } = useSWR(myURL, fetcher)
     console.log(data);
-
     return {
         data: data,
         isLoading,

@@ -50,6 +50,8 @@ func NewRouter(ds *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 	})
 	r.Get("/accounts", NewRootHandler(GetAccounts(acctsController)).ServeHTTP)
 	r.Post("/accounts", NewRootHandler(PostAccounts(acctsController)).ServeHTTP)
+	r.Get("/accounts/{accountID}", NewRootHandler(GetAccount(acctsController)).ServeHTTP)
+	r.Post("/accounts/{accountID}", NewRootHandler(PostAccountUpdate(acctsController)).ServeHTTP)
 
 	r.Get("/accounttypes", NewRootHandler(GetAccountTypes(acctsController)).ServeHTTP)
 	return r

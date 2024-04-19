@@ -11,6 +11,7 @@ export type TransactionAccount = {
     accountParent: number;
     accountName: string;
     accountFullName: string;
+    accountType: string;
     accountMemo: string;
     accountBalance: number;
 };

@@ -57,7 +57,17 @@ func TestAccount_Store(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(myAcct).NotTo(gomega.BeNil())
 	g.Expect(myAcct.AccountID).To(gomega.Equal(a1.AccountID))
+}
 
+func TestAccount_RetrieveByIDInvalid(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+
+	setupDB(g)
+	acctSet, err := RetrieveAccountByID(testDS, 5555)
+	g.Expect(err).To(gomega.HaveOccurred())
+	g.Expect(errors.Is(err, ErrAccountNotFound)).To(gomega.BeTrue())
+	g.Expect(acctSet).To(gomega.BeNil())
 }
 
 // test make account and children and grand children

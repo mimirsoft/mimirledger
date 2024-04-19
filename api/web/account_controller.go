@@ -74,11 +74,29 @@ func (ac *AccountsController) AccountList(ctx context.Context) ([]*models.Accoun
 	return accounts, nil
 }
 
+// GET /accounts/{accountID}
+func (ac *AccountsController) AccountGetByID(ctx context.Context, accountID uint64) (*models.Account, error) {
+	account, err := models.RetrieveAccountByID(ac.DataStores, accountID)
+	if err != nil {
+		return nil, fmt.Errorf("models.RetrieveAccountByID:%w", err)
+	}
+	return account, nil
+}
+
 // POST /accounts
 func (ac *AccountsController) CreateAccount(ctx context.Context, account *models.Account) (*models.Account, error) {
 	err := account.Store(ac.DataStores)
 	if err != nil {
 		return nil, fmt.Errorf("account.Store:%w", err)
+	}
+	return account, nil
+}
+
+// POST /accounts/{accountID}
+func (ac *AccountsController) UpdateAccount(ctx context.Context, account *models.Account) (*models.Account, error) {
+	err := account.Update(ac.DataStores)
+	if err != nil {
+		return nil, fmt.Errorf("account.Update:%w", err)
 	}
 	return account, nil
 }

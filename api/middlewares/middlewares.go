@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"bytes"
 	"context"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/zerolog"
@@ -26,7 +27,6 @@ func RequestId(next http.Handler) http.Handler {
 		}
 		ctx := context.WithValue(r.Context(), ridKey, rid)
 		rw.Header().Add("X-Request-ID", rid)
-
 		next.ServeHTTP(rw, r.WithContext(ctx))
 	}
 
@@ -36,6 +36,8 @@ func Logger(logger zerolog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(rw http.ResponseWriter, r *http.Request) {
 			ww := middleware.NewWrapResponseWriter(rw, r.ProtoMajor)
+			var bodyBuf bytes.Buffer
+			ww.Tee(&bodyBuf)
 			start := time.Now()
 			defer func() {
 				logger.Info().
@@ -49,6 +51,7 @@ func Logger(logger zerolog.Logger) func(http.Handler) http.Handler {
 					Str("trace.id", trace.SpanFromContext(r.Context()).SpanContext().TraceID().String()).
 					Str("user-agent", r.UserAgent()).
 					Dur("latency", time.Since(start)).
+					Str("resp_body", bodyBuf.String()).
 					Msg("request completed")
 			}()
 

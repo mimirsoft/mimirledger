@@ -34,6 +34,7 @@ type Account struct {
 var errParentAccountNotFound = errors.New("cannot find parent account with ID")
 var errAccountNameEmptyString = errors.New("account name cannot be empty")
 var errAccountTypeInvalid = errors.New("accountType is not valid, cannot determine AccountSign")
+var ErrAccountNotFound = errors.New("account not found")
 
 // Store inserts a URLComment
 func (c *Account) Store(ds *datastore.Datastores) error { //nolint:gocyclo
@@ -54,6 +55,7 @@ func (c *Account) Store(ds *datastore.Datastores) error { //nolint:gocyclo
 		c.AccountType = parentAccount.AccountType
 		c.AccountSign = parentAccount.AccountSign
 	}
+	// fill in sign from AccountType
 	var ok bool
 	var accountSign datastore.AccountSign
 	if accountSign, ok = datastore.AccountTypeToSign[c.AccountType]; !ok {
@@ -115,6 +117,13 @@ func (c *Account) Update(ds *datastore.Datastores) (err error) { //nolint:gocycl
 			c.AccountSign = parentAccount.AccountSign
 		}
 	}
+	// fill in sign from AccountType
+	var ok bool
+	var accountSign datastore.AccountSign
+	if accountSign, ok = datastore.AccountTypeToSign[c.AccountType]; !ok {
+		return fmt.Errorf("%w c.AccountType:%s:", errAccountTypeInvalid, c.AccountType)
+	}
+	c.AccountSign = accountSign
 	//Find all children
 	children, err := findAllChildren(ds, c.AccountID)
 	if err != nil {
@@ -185,6 +194,20 @@ func RetrieveAccounts(ds *datastore.Datastores) ([]*Account, error) {
 	}
 	accts := entAccountToAccounts(actSet)
 	return accts, nil
+}
+
+// RetrieveAccountByID retrieves a specific account
+func RetrieveAccountByID(ds *datastore.Datastores, accountID uint64) (*Account, error) {
+	as := ds.AccountStore()
+	eAcct, err := as.GetAccountByID(accountID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrAccountNotFound
+		}
+		return nil, fmt.Errorf("AccountStore().GetAccountByID:%w", err)
+	}
+	acct := Account(*eAcct)
+	return &acct, nil
 }
 
 func findSpotInTree(ds *datastore.Datastores, parentAccountID uint64, name string) (uint64, error) {

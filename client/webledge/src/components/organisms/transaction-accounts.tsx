@@ -1,13 +1,11 @@
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
-import clsx from 'clsx';
 import { TransactionAccount, TransactionAccountRequest } from '../../lib/definitions';
 import {useState} from "react";
 import Modal from '../molecules/Modal'
-
-import { useTransactionAccounts } from '../../lib/data';
 import useSWR from "swr";
 import React, {FormEvent} from "react";
 import {Link} from "react-router-dom";
+import AccountSelector from "../molecules/account-selector";
+import AccountTypeSelector from "../molecules/account-type-selector";
 const fetcher = (...args: Parameters<typeof fetch>) => fetch(...args).then(res => res.json())
 const myURL = new URL('/accounts', process.env.REACT_APP_MIMIRLEDGER_API_URL);
 
@@ -17,6 +15,7 @@ const postFormData = async (formData: FormData) => {
         console.log(myURL)
         // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);
+        console.log(formEntries.accountParent)
 
         const newAccount : TransactionAccountRequest = {
             accountParent : Number(formEntries.accountParent),
@@ -42,9 +41,7 @@ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     window.location.reload();
 };
 export default function TransactionAccounts(){
-
     const [openModal, setOpenModal]  = useState(false)
-
     const { data, error, isLoading } = useSWR(myURL, fetcher)
 
     if (isLoading) return <div className="Loading">Loading...</div>
@@ -68,25 +65,10 @@ export default function TransactionAccounts(){
             </label>
             <label className="my-4 text-xl font-bold mx-4 bg-slate-200">
                 AccountParent:
-                <select name="accountParent">
-                    <option value="0">Top Level</option>
-                    {data.accounts && data.accounts.map((account: TransactionAccount, index: number) => {
-                        return (
-                            <option value="{account.accountID}"> {account.accountFullName}</option>
-                        );
-                    })}
-                </select>
+                <AccountSelector id={0}/>
             </label>
             <label className="my-4 text-xl font-bold">AccountType:
-                <select name="accountType">
-                    <option value="ASSET">ASSET</option>
-                    <option value="LIABILITY">LIABILITY</option>
-                    <option value="EQUITY">EQUITY</option>
-                    <option value="INCOME">INCOME</option>
-                    <option value="ASSET">EXPENSE</option>
-                    <option value="ASSET">GAIN</option>
-                    <option value="ASSET">LOSS</option>
-                </select>
+                <AccountTypeSelector selectedName="" />
             </label>
             <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Memo:
                 <input className=" bg-slate-300" type="text" name="accountMemo"/>
@@ -98,7 +80,7 @@ export default function TransactionAccounts(){
         </div>
     <div>
         <div className="flex">
-            <div className="w-80">
+            <div className="w-32">
                 AccountID
             </div>
             <div className="w-80">
@@ -107,15 +89,17 @@ export default function TransactionAccounts(){
             <div className="w-80">
                 Name
             </div>
-            <div className="w-80">
+            <div className="w-32">
+                Type
+            </div>
+            <div className="w-32">
                 Balance
             </div>
         </div>
         {data.accounts && data.accounts.map((account: TransactionAccount, index: number) => {
             return (
-                <Link to="/transactions" className={`nav__item p-4 }`}>
-                    <div className="flex">
-                        <div className="w-80">
+                    <div className="flex" key={index} >
+                        <div className="w-32">
                             {account.accountID}
                         </div>
                         <div className="w-80">
@@ -124,11 +108,20 @@ export default function TransactionAccounts(){
                         <div className="w-80">
                             {account.accountName}
                         </div>
-                        <div className="w-80">
+                        <div className="w-32">
+                            {account.accountType}
+                        </div>
+                        <div className="w-32">
                             {account.accountBalance}
                         </div>
+                        <Link to={'/transactions/'+account.accountID} className={`nav__item p-4 }`}>
+                            LEDGER
+                        </Link>
+                        <Link to={'/accounts/'+account.accountID} className={`nav__item p-4 }`}>
+                            EDIT ACCOUNT
+                        </Link>
                     </div>
-                </Link>
+
 
 
             );

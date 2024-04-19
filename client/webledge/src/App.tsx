@@ -5,10 +5,12 @@ import logo from './logo.svg';
 import './App.css';
 import Home from "./pages/Home";
 import Accounts from "./pages/Accounts";
+
 import AccountTypes from "./pages/AccountTypes";
 import Transactions from "./pages/Transactions";
 import NoPage from "./pages/NoPage";
 import OuterContainer from './components/templates/OuterContainer';
+import AccountEditPage from "./pages/AccountEdit";
 
 function App() {
   return (
@@ -16,10 +18,11 @@ function App() {
         <Routes>
           <Route path="/" element={<OuterContainer />}>
             <Route index element={<Home />} />
-            <Route path="accounts" element={<Accounts />} />
-            <Route path="accounttypes" element={<AccountTypes />} />
+              <Route path="accounts" element={<Accounts />} />
+              <Route path="accounts/:accountID" element={<AccountEditPage/>} />
+              <Route path="accounttypes" element={<AccountTypes />} />
               <Route path="transactions" element={<Transactions />} />
-              <Route path="*" element={<NoPage />} />df
+              <Route path="*" element={<NoPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

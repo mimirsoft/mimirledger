@@ -4,7 +4,6 @@ import React, { useEffect, useState, FormEvent  } from 'react';
 const postFormData = async (formData: FormData) => {
     try {
         const myURL = new URL('/accounts', process.env.REACT_APP_MIMIRLEDGER_API_URL);
-        console.log(myURL)
         var json =JSON.stringify(Object.fromEntries(formData));
         console.log(json)
         const settings :RequestInit = {

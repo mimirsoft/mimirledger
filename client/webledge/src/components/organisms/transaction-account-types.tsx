@@ -1,14 +1,7 @@
-import styles from '@/app/ui//Home.module.css';
 import useSWR from 'swr'
-
 import type { TransactionAccountType} from  "../../lib/definitions"
-
-
 const fetcher = (...args: Parameters<typeof fetch>) => fetch(...args).then(res => res.json())
-
-console.log(process.env.MIMIRLEDGER_API_URL);
 const myURL = new URL('/accounttypes', process.env.REACT_APP_MIMIRLEDGER_API_URL);
-console.log(myURL);
 
 export default function TransactionAccountTypes() {
 
@@ -22,7 +15,7 @@ export default function TransactionAccountTypes() {
         <div>
             {data.accountTypes &&  data.accountTypes.map((accountType:TransactionAccountType, index:number) => {
                     return (
-                        <div className="flex">
+                        <div key={index} className="flex">
                             <div className="w-64">
                             <h1 key={index}>{accountType.name}</h1>
                             </div>

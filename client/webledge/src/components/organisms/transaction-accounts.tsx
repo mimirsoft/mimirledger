@@ -80,8 +80,14 @@ export default function TransactionAccounts(){
         </div>
     <div>
         <div className="flex">
-            <div className="w-32">
-                AccountID
+            <div className="w-8">
+                ID
+            </div>
+            <div className="w-8">
+                L
+            </div>
+            <div className="w-8">
+                R
             </div>
             <div className="w-80">
                 FullName
@@ -99,8 +105,14 @@ export default function TransactionAccounts(){
         {data.accounts && data.accounts.map((account: TransactionAccount, index: number) => {
             return (
                     <div className="flex" key={index} >
-                        <div className="w-32">
+                        <div className="w-8">
                             {account.accountID}
+                        </div>
+                        <div className="w-8">
+                            {account.accountLeft}
+                        </div>
+                        <div className="w-8">
+                            {account.accountRight}
                         </div>
                         <div className="w-80">
                             {account.accountFullName}

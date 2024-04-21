@@ -96,6 +96,7 @@ func (c *Account) Store(ds *datastore.Datastores) error { //nolint:gocyclo
 func (c *Account) Update(ds *datastore.Datastores) (err error) { //nolint:gocyclo
 	// get existing Account record
 	acctB4Update, err := getAccountByID(ds, c.AccountID)
+	oldAccountLeft := acctB4Update.AccountLeft
 	if err != nil {
 		return fmt.Errorf("getAccountByID: %w [accountID: %d ", err, c.AccountID)
 	}
@@ -129,13 +130,15 @@ func (c *Account) Update(ds *datastore.Datastores) (err error) { //nolint:gocycl
 	if err != nil {
 		return fmt.Errorf("findAllChildren: %w [ AccountID:%d]", err, c.AccountID)
 	}
+	// if this account has no children, spread is 2
+	// we calculate it this way so that any error in accountRight is fix
+	spread := uint64(len(children)*2) + 2
 	// close old spot in tree
-	spread := acctB4Update.AccountRight - acctB4Update.AccountLeft + 1
 	err = closeSpotInTree(ds, acctB4Update.AccountRight, spread)
 	if err != nil {
 		return fmt.Errorf("closeSpotInTree:%w", err)
 	}
-	//Find the new spot in the tree.
+	//Find the new spot in the tree. after value is the value which this account's AccountLeft should be
 	afterValue, err := findSpotInTree(ds, c.AccountParent, c.AccountName)
 	if err != nil {
 		return fmt.Errorf("findSpotInTree:%w", err)
@@ -151,7 +154,30 @@ func (c *Account) Update(ds *datastore.Datastores) (err error) { //nolint:gocycl
 	if err != nil {
 		return fmt.Errorf("ds.AccountStore().Update:%w", err)
 	}
-	// now get the fullName, after the Update
+	//Update all the children
+	shift := c.AccountLeft - oldAccountLeft
+	for idx := range children {
+		child := children[idx]
+		child.AccountLeft += shift
+		child.AccountRight += shift
+		childEAcct := datastore.Account(*child)
+		err = ds.AccountStore().Update(&childEAcct)
+		if err != nil {
+			return fmt.Errorf("accountStore().Update:%w", err)
+		}
+		// retrieve name after updating left and right
+		fullName, err := retrieveAccountFullName(ds, children[idx].AccountID)
+		if err != nil {
+			return fmt.Errorf("retrieveAccountFullName:%w [account:%+v]", err, eAcct)
+		}
+		// update the record again, with the full name
+		childEAcct.AccountFullName = fullName
+		err = ds.AccountStore().Update(&childEAcct)
+		if err != nil {
+			return fmt.Errorf("accountStore().Update:%w", err)
+		}
+	}
+	// now get the fullName, after the Update to all AccountLefts and Account Rights
 	fullName, err := retrieveAccountFullName(ds, eAcct.AccountID)
 	if err != nil {
 		return fmt.Errorf("retrieveAccountFullName:%w [account:%+v]", err, eAcct)
@@ -160,23 +186,6 @@ func (c *Account) Update(ds *datastore.Datastores) (err error) { //nolint:gocycl
 	err = ds.AccountStore().Update(&eAcct)
 	if err != nil {
 		return fmt.Errorf("ds.AccountStore().Update:%w", err)
-	}
-	//Update all the children
-	shift := c.AccountLeft - acctB4Update.AccountLeft
-	for idx := range children {
-		child := children[idx]
-		child.AccountLeft += shift
-		child.AccountRight += shift
-		fullName, err := retrieveAccountFullName(ds, children[idx].AccountID)
-		if err != nil {
-			return fmt.Errorf("retrieveAccountFullName:%w [account:%+v]", err, eAcct)
-		}
-		child.AccountFullName = fullName
-		childEAcct := datastore.Account(*child)
-		err = ds.AccountStore().Update(&childEAcct)
-		if err != nil {
-			return fmt.Errorf("accountStore().Update:%w", err)
-		}
 	}
 	*c = Account(eAcct)
 	return nil

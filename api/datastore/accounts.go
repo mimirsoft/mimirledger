@@ -34,10 +34,10 @@ var AccountTypeToSign = map[AccountType]AccountSign{
 	AccountTypeGain:      AccountSignCredit,
 	AccountTypeLoss:      AccountSignDebit}
 
-// UserNotificationStatus is an enum for UserNotification statuses
+// AccountSign is an enum for account signs "DEBIT" or "CREDIT"
 type AccountSign string
 
-// UserNotificationType is an enum for UserNotification type
+// AccountType is an enum for account type
 type AccountType string
 
 type Account struct {

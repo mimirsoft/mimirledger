@@ -40,12 +40,12 @@ CREATE TABLE transaction_debit_credit (
     transaction_dc_id SERIAL PRIMARY KEY,
     account_id integer NOT NULL,
     transaction_id integer NOT NULL,
-    transaction_dc_amount decimal(11,2) DEFAULT '0.00',
-    transaction_dc transaction_account_sign_type NOT NULL DEFAULT 'DEBIT') ;
+    transaction_dc_amount integer NOT NULL CHECK (transaction_dc_amount > 0),
+    debit_or_credit transaction_account_sign_type NOT NULL DEFAULT 'DEBIT') ;
 
 ALTER TABLE transaction_debit_credit
     ADD CONSTRAINT transactions_debit_credit_transaction_id_fkey FOREIGN KEY (transaction_id) REFERENCES transaction_main(transaction_id) ON DELETE CASCADE;
 CREATE INDEX transactions_debit_credit_transaction_id_idx ON transaction_debit_credit (transaction_id);
 ALTER TABLE transaction_debit_credit
-    ADD CONSTRAINT transactions_debit_credit_transaction_account_id_fkey FOREIGN KEY (account_id) REFERENCES transaction_accounts(account_id) ON DELETE CASCADE;
+    ADD CONSTRAINT transactions_debit_credit_transaction_account_id_fkey FOREIGN KEY (account_id) REFERENCES transaction_accounts(account_id);
 CREATE INDEX transactions_debit_credit_transaction_account_idx ON transaction_debit_credit (account_id);

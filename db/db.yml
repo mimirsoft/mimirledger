@@ -9,6 +9,7 @@ services:
     ports:
       - "5433:5432"
     shm_size: "1G"
+    user: '1000:139'
     volumes:
       - ./:/db
       - ./.postgres-data:/var/lib/postgresql/data

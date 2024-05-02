@@ -34,6 +34,7 @@ func NewRouter(ds *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 
 	healthController := NewHealthController(ds)
 	acctsController := NewAccountsController(ds)
+	transController := NewTransactionsController(ds)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write([]byte("ok2"))
@@ -51,7 +52,11 @@ func NewRouter(ds *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 	r.Get("/accounts", NewRootHandler(GetAccounts(acctsController)).ServeHTTP)
 	r.Post("/accounts", NewRootHandler(PostAccounts(acctsController)).ServeHTTP)
 	r.Get("/accounts/{accountID}", NewRootHandler(GetAccount(acctsController)).ServeHTTP)
-	r.Post("/accounts/{accountID}", NewRootHandler(PostAccountUpdate(acctsController)).ServeHTTP)
+	r.Put("/accounts/{accountID}", NewRootHandler(PutAccountUpdate(acctsController)).ServeHTTP)
+	r.Post("/tranasctions", NewRootHandler(PostTransactions(transController)).ServeHTTP)
+	r.Get("/tranasctions/account/{accountID}", NewRootHandler(GetTransactionsOnAccount(transController)).ServeHTTP)
+	r.Get("/tranasctions/{transactionID}", NewRootHandler(GetTransaction(transController)).ServeHTTP)
+	r.Put("/tranasctions/{transactionID}", NewRootHandler(PutTransactionUpdate(transController)).ServeHTTP)
 
 	r.Get("/accounttypes", NewRootHandler(GetAccountTypes(acctsController)).ServeHTTP)
 	return r

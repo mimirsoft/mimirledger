@@ -36,7 +36,6 @@ var errAccountNameEmptyString = errors.New("account name cannot be empty")
 var errAccountTypeInvalid = errors.New("accountType is not valid, cannot determine AccountSign")
 var ErrAccountNotFound = errors.New("account not found")
 
-// Store inserts a URLComment
 func (c *Account) Store(ds *datastore.Datastores) error { //nolint:gocyclo
 	//check if this is top level.  if it is not, the type must be the parent type
 	if c.AccountName == "" {

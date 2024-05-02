@@ -43,9 +43,18 @@ func TestMain(m *testing.M) {
 
 // setupDatastores wipes postgres for tests
 func setupDatastores(ds *datastore.Datastores) {
+	if err := TeardownTestTransactionDebitsCredits(ds.PGClient()); err != nil {
+		log.Panicln(err)
+	}
 	if err := TeardownTestAccounts(ds.PGClient()); err != nil {
 		log.Panicln(err)
 	}
+}
+
+// TeardownTestTransactionDebitsCredits truncates the transactions_accounts table
+func TeardownTestTransactionDebitsCredits(client *sqlx.DB) (err error) {
+	_, err = client.Exec("TRUNCATE TABLE transaction_debit_credit CASCADE;")
+	return
 }
 
 // TeardownTestAccounts truncates the transactions_accounts table

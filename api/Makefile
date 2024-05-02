@@ -12,5 +12,5 @@ start-web: # [INTERNAL]
 	air -c .air.toml
 
 test-direct: # [INTERNAL]
-	go test -bench -v -race $(TEST_MODULES) $(TESTRUN)
+	go test -p 1 -v -race $(TEST_MODULES) $(TESTRUN)
 

@@ -79,8 +79,8 @@ func PostAccounts(acctController *AccountsController) func(w http.ResponseWriter
 	}
 }
 
-// POST /accounts/{accountID}
-func PostAccountUpdate(acctController *AccountsController) func(w http.ResponseWriter, r *http.Request) error {
+// PUT /accounts/{accountID}
+func PutAccountUpdate(acctController *AccountsController) func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		accountIDStr := chi.URLParam(r, "accountID")
 		accountID, err := strconv.ParseUint(accountIDStr, 10, 64)

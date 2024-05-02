@@ -129,6 +129,7 @@ func TestAccount_StoreParentAndChildren(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(myAcct).NotTo(gomega.BeNil())
 	g.Expect(myAcct.AccountID).To(gomega.Equal(a1.AccountID))
+	g.Expect(myAcct.AccountName).To(gomega.Equal("MyBank"))
 	g.Expect(myAcct.AccountLeft).To(gomega.Equal(uint64(1)))
 	g.Expect(myAcct.AccountRight).To(gomega.Equal(uint64(4)))
 
@@ -399,7 +400,10 @@ func TestAccount_RetrieveAccountFullName(t *testing.T) {
 
 // test make account and children and grand children and move them around
 func setupDB(g *gomega.WithT) {
-	query := `delete  from transaction_accounts `
+	query := `delete from transaction_debit_credit `
 	_, err := dbClient.Exec(query)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	query = `delete from transaction_accounts `
+	_, err = dbClient.Exec(query)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 }

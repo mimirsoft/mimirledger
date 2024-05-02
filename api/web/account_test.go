@@ -230,7 +230,7 @@ func TestAccountPost_Update(t *testing.T) {
 	gomega.RegisterFailHandler(ginkgo.Fail)
 	setupDatastores(TestDataStore)
 
-	// store 1 accounts manually
+	// store 1 account manually
 	a1 := models.Account{AccountName: "MY BANK", AccountSign: datastore.AccountSignDebit,
 		AccountType: datastore.AccountTypeAsset}
 	err := a1.Store(TestDataStore)
@@ -240,6 +240,7 @@ func TestAccountPost_Update(t *testing.T) {
 		"accountName": "my bank",
 		"accountType": "ASSET",
 	}
+	// create the account
 	var test = RouterTest{Request: Request{
 		Method:     http.MethodPost,
 		Router:     TestRouter,
@@ -257,8 +258,9 @@ func TestAccountPost_Update(t *testing.T) {
 		"accountName": "my_bank_update",
 		"accountType": "ASSET",
 	}
+	// update the account name
 	var test2 = RouterTest{Request: Request{
-		Method:     http.MethodPost,
+		Method:     http.MethodPut,
 		Router:     TestRouter,
 		RequestURL: fmt.Sprintf("/accounts/%d", accountRes.AccountID),
 		Payload:    acctReq,
@@ -278,7 +280,7 @@ func TestAccountPost_Update(t *testing.T) {
 		"accountMemo":   "updated_memo",
 	}
 	var test3 = RouterTest{Request: Request{
-		Method:     http.MethodPost,
+		Method:     http.MethodPut,
 		Router:     TestRouter,
 		RequestURL: fmt.Sprintf("/accounts/%d", accountRes.AccountID),
 		Payload:    acctReq,

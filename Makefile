@@ -62,6 +62,10 @@ update: stop-api docker-clean # rebuild image and restart service
 logs:
 	${DOCKER_COMPOSE} logs --tail $(LOG_TAIL_LENGTH) -f ${SERVICE_NAME}
 
+logs-db:
+	${DB_DOCKER_COMPOSE} logs --tail $(LOG_TAIL_LENGTH) -f ${DB_SERVICE_NAME}
+
+
 logs-web:
 	${WEB_DOCKER_COMPOSE} logs --tail $(LOG_TAIL_LENGTH) -f ${WEB_SERVICE_NAME}
 

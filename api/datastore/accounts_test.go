@@ -33,7 +33,7 @@ func TestAccountStoreInvalid(t *testing.T) {
 func TestAccountStoreValid(t *testing.T) {
 	g := gomega.NewWithT(t)
 	gomega.RegisterFailHandler(ginkgo.Fail)
-
+	setupDB(g)
 	aStore := createAccountStore()
 	a3 := Account{AccountName: "my bank", AccountFullName: "BankAccounts:MyBank",
 		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
@@ -41,14 +41,14 @@ func TestAccountStoreValid(t *testing.T) {
 		AccountLeft: 1, AccountRight: 2}
 	err := aStore.Store(&a3)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(a3.AccountID).To(gomega.Equal(uint64(1)))
+	g.Expect(a3.AccountID).NotTo(gomega.BeZero())
 
 	acctSet, err := aStore.GetAccounts()
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(acctSet).To(gomega.HaveLen(1))
 	g.Expect(acctSet[0].AccountName).To(gomega.Equal(a3.AccountName))
 	g.Expect(acctSet[0].AccountFullName).To(gomega.Equal("BankAccounts:MyBank"))
-	g.Expect(acctSet[0].AccountID).To(gomega.Equal(uint64(1)))
+	g.Expect(acctSet[0].AccountID).To(gomega.Equal(a3.AccountID))
 	g.Expect(acctSet[0].AccountLeft).To(gomega.Equal(uint64(1)))
 	g.Expect(acctSet[0].AccountRight).To(gomega.Equal(uint64(2)))
 	g.Expect(acctSet[0].AccountBalance).To(gomega.Equal(uint64(3000)))
@@ -59,7 +59,7 @@ func TestAccountStoreValid(t *testing.T) {
 func TestAccountStoreGetByID(t *testing.T) {
 	g := gomega.NewWithT(t)
 	gomega.RegisterFailHandler(ginkgo.Fail)
-
+	setupDB(g)
 	aStore := createAccountStore()
 	a3 := Account{AccountName: "otherBank2", AccountFullName: "BankAccounts:otherBank2",
 		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
@@ -67,13 +67,12 @@ func TestAccountStoreGetByID(t *testing.T) {
 		AccountLeft: 3, AccountRight: 4}
 	err := aStore.Store(&a3)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(a3.AccountID).To(gomega.Equal(uint64(2)))
 
-	acct, err := aStore.GetAccountByID(2)
+	acct, err := aStore.GetAccountByID(a3.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(acct.AccountName).To(gomega.Equal("otherBank2"))
 	g.Expect(acct.AccountFullName).To(gomega.Equal("BankAccounts:otherBank2"))
-	g.Expect(acct.AccountID).To(gomega.Equal(uint64(2)))
+	g.Expect(acct.AccountID).To(gomega.Equal(a3.AccountID))
 	g.Expect(acct.AccountLeft).To(gomega.Equal(uint64(3)))
 	g.Expect(acct.AccountRight).To(gomega.Equal(uint64(4)))
 	g.Expect(acct.AccountBalance).To(gomega.Equal(uint64(3000)))
@@ -231,19 +230,19 @@ func TestAccountStore_GetParents(t *testing.T) {
 	setupDB(g)
 
 	aStore := createAccountStore()
-	a1 := Account{AccountName: "myBank", AccountFullName: "BankAccounts:myBank",
+	a1 := Account{AccountName: "myBank", AccountFullName: "myBank",
 		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
 		AccountBalance: 3000, AccountDecimals: 2, AccountSubtotal: 2000,
 		AccountLeft: 1, AccountRight: 6}
 	err := aStore.Store(&a1)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	a2 := Account{AccountName: "subact2", AccountFullName: "BankAccounts:myBank",
+	a2 := Account{AccountName: "subact2", AccountFullName: "myBank:subact2",
 		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
 		AccountBalance: 3000, AccountDecimals: 2, AccountSubtotal: 2000,
 		AccountLeft: 2, AccountRight: 5, AccountParent: a1.AccountID}
 	err = aStore.Store(&a2)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	a3 := Account{AccountName: "sub_subact3", AccountFullName: "BankAccounts:MyBank",
+	a3 := Account{AccountName: "sub_subact3", AccountFullName: "myBank:subact2:sub_subact3",
 		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
 		AccountBalance: 3000, AccountDecimals: 2, AccountSubtotal: 2000,
 		AccountLeft: 3, AccountRight: 4, AccountParent: a2.AccountID}
@@ -268,7 +267,11 @@ func TestAccountStore_GetParents(t *testing.T) {
 }
 
 func setupDB(g *gomega.WithT) {
-	query := `delete  from transaction_accounts `
+	query := `delete from transaction_debit_credit `
 	_, err := TestPostgresClient.Exec(query)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	query = `delete from transaction_accounts `
+	_, err = TestPostgresClient.Exec(query)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 }

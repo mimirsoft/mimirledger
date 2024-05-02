@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"time"
 )
@@ -71,6 +72,7 @@ func (store TransactionStore) Update(trn *Transaction) (err error) {
 	defer stmt.Close()
 	return stmt.QueryRow(trn).StructScan(trn)
 }
+
 func (store TransactionStore) GetByID(id uint64) (*Transaction, error) {
 	query := `select * from transaction_main where transaction_id = $1`
 	row := store.Client.QueryRowx(query, id)
@@ -79,4 +81,25 @@ func (store TransactionStore) GetByID(id uint64) (*Transaction, error) {
 		return nil, err
 	}
 	return &tn, nil
+}
+
+func (store TransactionStore) GetTransactionsForAccount(id uint64) ([]*Transaction, error) {
+	query := `select * from transaction_main where transaction_id = $1`
+	rows, err := store.Client.Queryx(query, id)
+	if err != nil {
+		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
+	}
+	defer rows.Close()
+	var txnSet []*Transaction
+	for rows.Next() {
+		var txn Transaction
+		if err = rows.StructScan(&txn); err != nil {
+			return nil, fmt.Errorf("rows.StructScan:%w", err)
+		}
+		txnSet = append(txnSet, &txn)
+	}
+	if len(txnSet) == 0 {
+		return nil, sql.ErrNoRows
+	}
+	return txnSet, nil
 }

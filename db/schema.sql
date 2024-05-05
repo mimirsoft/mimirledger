@@ -2,7 +2,7 @@ CREATE TYPE transaction_account_sign_type AS ENUM ('CREDIT','DEBIT');
 CREATE TYPE transaction_account_type AS ENUM ('ASSET','LIABILITY','EQUITY','INCOME','EXPENSE','GAIN','LOSS');
 
 CREATE TABLE transaction_accounts (
-    account_id SERIAL PRIMARY KEY,
+    account_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     account_parent integer NOT NULL DEFAULT '0',
     account_name varchar(50) DEFAULT '',
     account_full_name varchar(200) DEFAULT '',
@@ -27,7 +27,7 @@ CREATE INDEX transaction_accounts_account_right_idx ON transaction_accounts (acc
 
 
 CREATE TABLE transaction_main (
-    transaction_id SERIAL PRIMARY KEY,
+    transaction_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     transaction_date DATE NOT NULL DEFAULT CURRENT_DATE,
     transaction_comment varchar(250) NOT NULL CHECK (transaction_comment <> ''),
     transaction_amount integer NOT NULL CHECK (transaction_amount > 0),
@@ -37,7 +37,7 @@ CREATE TABLE transaction_main (
     is_split bool NOT NULL default FALSE) ;
 
 CREATE TABLE transaction_debit_credit (
-    transaction_dc_id SERIAL PRIMARY KEY,
+    transaction_dc_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
     account_id integer NOT NULL,
     transaction_id integer NOT NULL,
     transaction_dc_amount integer NOT NULL CHECK (transaction_dc_amount > 0),

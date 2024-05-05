@@ -148,3 +148,54 @@ func TestTransactionDebitCreditStore_StoreAndRetrieve(t *testing.T) {
 	g.Expect(myDCSet[1].TransactionDCAmount).To(gomega.Equal(uint64(20000)))
 
 }
+
+func TestTransactionDebitCreditStore_StoreThenDelete(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+
+	aStore := createAccountStore()
+	myAcct := Account{AccountName: "myBank", AccountFullName: "BankAccounts:myBank",
+		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
+		AccountBalance: 0, AccountDecimals: 2, AccountSubtotal: 0,
+		AccountLeft: 1, AccountRight: 2}
+	err := aStore.Store(&myAcct)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myAcct2 := Account{AccountName: "revenue", AccountFullName: "IncomeToBank",
+		AccountSign: AccountSignCredit, AccountType: AccountTypeIncome,
+		AccountBalance: 0, AccountDecimals: 2, AccountSubtotal: 0,
+		AccountLeft: 3, AccountRight: 4}
+	err = aStore.Store(&myAcct2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	transStore := createTransactionStore()
+	myTrans := Transaction{TransactionComment: "woot", TransactionAmount: 1000}
+	err = transStore.Store(&myTrans)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	dcStore := createTransactionDCStore()
+	// succeed
+	myDC := TransactionDebitCredit{DebitOrCredit: AccountSignDebit, TransactionDCAmount: 10000,
+		TransactionID: myTrans.TransactionID, AccountID: myAcct.AccountID}
+	err = dcStore.Store(&myDC)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myDC2 := TransactionDebitCredit{DebitOrCredit: AccountSignCredit, TransactionDCAmount: 20000,
+		TransactionID: myTrans.TransactionID, AccountID: myAcct2.AccountID}
+	err = dcStore.Store(&myDC2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myDCSet, err := dcStore.GetDCForTransactionID(myTrans.TransactionID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myDCSet).To(gomega.HaveLen(2))
+
+	err = dcStore.DeleteForTransactionID(myTrans.TransactionID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myDCSet).To(gomega.HaveLen(2))
+
+	myDCSet, err = dcStore.GetDCForTransactionID(myTrans.TransactionID)
+	g.Expect(err).To(gomega.HaveOccurred())
+	g.Expect(errors.Is(err, sql.ErrNoRows)).To(gomega.BeTrue())
+	g.Expect(myDCSet).To(gomega.HaveLen(0))
+
+}

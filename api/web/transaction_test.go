@@ -1,6 +1,7 @@
 package web
 
 import (
+	"github.com/mimirsoft/mimirledger/api/datastore"
 	"github.com/mimirsoft/mimirledger/api/models"
 	"github.com/mimirsoft/mimirledger/api/web/response"
 	"github.com/onsi/ginkgo"
@@ -139,9 +140,18 @@ func TestTransaction_PostNewTransaction(t *testing.T) {
 	gomega.RegisterFailHandler(ginkgo.Fail)
 	setupDatastores(TestDataStore)
 
+	// create an account first
+	a1 := models.Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err := a1.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a2 := models.Account{AccountName: "Income", AccountSign: datastore.AccountSignCredit, AccountType: datastore.AccountTypeIncome}
+	err = a2.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
 	mapSlice4 := []map[string]interface{}{}
-	map4a := map[string]interface{}{"transactionDCAmount": 9999, "accountID": 1, "debitOrCredit": "DEBIT"}
-	map4b := map[string]interface{}{"transactionDCAmount": 9999, "accountID": 2, "debitOrCredit": "CREDIT"}
+	map4a := map[string]interface{}{"transactionDCAmount": 9999, "accountID": a1.AccountID, "debitOrCredit": "DEBIT"}
+	map4b := map[string]interface{}{"transactionDCAmount": 9999, "accountID": a2.AccountID, "debitOrCredit": "CREDIT"}
 	mapSlice4 = append(mapSlice4, map4a, map4b)
 
 	acctReq := map[string]interface{}{

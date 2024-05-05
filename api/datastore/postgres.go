@@ -31,8 +31,8 @@ func (ds *Datastores) TransactionStore() TransactionStore {
 	return ds.transactionStore
 }
 
-// TransactionDCStore is the way to access the TransactionDebitCreditStore
-func (ds *Datastores) TransactionDCStore() TransactionDebitCreditStore {
+// TransactionDebitCreditStore is the way to access the TransactionDebitCreditStore
+func (ds *Datastores) TransactionDebitCreditStore() TransactionDebitCreditStore {
 	return ds.transactionDCStore
 }
 
@@ -47,6 +47,9 @@ func NewDatastores(conn *sqlx.DB) *Datastores {
 			Client: conn,
 		},
 		transactionStore: TransactionStore{
+			Client: conn,
+		},
+		transactionDCStore: TransactionDebitCreditStore{
 			Client: conn,
 		},
 	}

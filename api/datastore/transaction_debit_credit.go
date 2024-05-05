@@ -58,3 +58,12 @@ func (store TransactionDebitCreditStore) GetDCForTransactionID(id uint64) ([]*Tr
 	}
 	return txnSet, nil
 }
+
+func (store TransactionDebitCreditStore) DeleteForTransactionID(id uint64) error {
+	query := `DELETE from transaction_debit_credit where transaction_id = $1`
+	_, err := store.Client.Exec(query, id)
+	if err != nil {
+		return fmt.Errorf("store.Client.Exec:%w", err)
+	}
+	return nil
+}

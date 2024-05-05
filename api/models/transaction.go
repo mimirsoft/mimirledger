@@ -56,6 +56,19 @@ func (c *Transaction) Store(ds *datastore.Datastores) error { //nolint:gocyclo
 	if err != nil {
 		return fmt.Errorf("ds.TransactionStore().Store:%w [transaction:%+v]", err, eTxn)
 	}
+	// set c.TransactionCore
+	c.TransactionCore = TransactionCore(eTxn)
+	// store the debit/credits
+	for idx := range c.DebitCreditSet {
+		c.DebitCreditSet[idx].TransactionID = eTxn.TransactionID
+		entDC := transactionDCToEntTransactionDC(c.DebitCreditSet[idx])
+		err = ds.TransactionDebitCreditStore().Store(&entDC)
+		if err != nil {
+			return fmt.Errorf("ds.TransactionDCStore().Store:%w [transaction:%+v]", err, eTxn)
+		}
+		myTransDC := TransactionDebitCredit(entDC)
+		c.DebitCreditSet[idx] = &myTransDC
+	}
 
 	return nil
 }
@@ -77,6 +90,25 @@ func (c *Transaction) Update(ds *datastore.Datastores) error { //nolint:gocyclo
 	if err != nil {
 		return fmt.Errorf("ds.TransactionStore().Update:%w [transaction:%+v]", err, eTxn)
 	}
+	// set c.TransactionCore
+	c.TransactionCore = TransactionCore(eTxn)
+	// delete the existing TransactionDebitCredits
+	err = ds.TransactionDebitCreditStore().DeleteForTransactionID(c.TransactionID)
+	if err != nil {
+		return fmt.Errorf("ds.TransactionDebitCreditStore().DeleteForTransactionID:%w [transaction:%+v]", err, c)
+	}
+	// store the new debit/credits
+	for idx := range c.DebitCreditSet {
+		c.DebitCreditSet[idx].TransactionID = eTxn.TransactionID
+		entDC := transactionDCToEntTransactionDC(c.DebitCreditSet[idx])
+		err = ds.TransactionDebitCreditStore().Store(&entDC)
+		if err != nil {
+			return fmt.Errorf("ds.TransactionDCStore().Store:%w [transaction:%+v]", err, eTxn)
+		}
+		myTransDC := TransactionDebitCredit(entDC)
+		c.DebitCreditSet[idx] = &myTransDC
+	}
+
 	return nil
 }
 
@@ -157,6 +189,11 @@ func RetrieveTransactionByID(ds *datastore.Datastores, transactionID uint64) (*T
 	}
 	myTransCore := TransactionCore(*eTxn)
 	myTrans := Transaction{TransactionCore: myTransCore}
+	myDCSet, err := ds.TransactionDebitCreditStore().GetDCForTransactionID(transactionID)
+	if err != nil {
+		return nil, fmt.Errorf("TransactionDebitCreditStore().GetDCForTransactionID:%w", err)
+	}
+	myTrans.DebitCreditSet = entTransactionsDCToTransactionsDC(myDCSet)
 	return &myTrans, nil
 }
 
@@ -172,4 +209,18 @@ func entTransactionsToTransactions(eTxn []*datastore.Transaction) (txnSet []*Tra
 func transactionToEntTransaction(txn *Transaction) datastore.Transaction {
 	etxn := datastore.Transaction(txn.TransactionCore)
 	return etxn
+}
+
+func entTransactionsDCToTransactionsDC(eTxn []*datastore.TransactionDebitCredit) (tdcSet []*TransactionDebitCredit) {
+	tdcSet = make([]*TransactionDebitCredit, len(eTxn))
+	for idx := range eTxn {
+		myTDC := TransactionDebitCredit(*eTxn[idx])
+		tdcSet[idx] = &myTDC
+	}
+	return
+}
+
+func transactionDCToEntTransactionDC(txn *TransactionDebitCredit) datastore.TransactionDebitCredit {
+	eTxn := datastore.TransactionDebitCredit(*txn)
+	return eTxn
 }

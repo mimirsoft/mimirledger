@@ -1,6 +1,7 @@
 package web
 
 import (
+	"fmt"
 	"github.com/mimirsoft/mimirledger/api/datastore"
 	"github.com/mimirsoft/mimirledger/api/models"
 	"github.com/mimirsoft/mimirledger/api/web/response"
@@ -34,6 +35,11 @@ func TestTransaction_Invalid(t *testing.T) {
 	map4 := map[string]interface{}{"transactionDCAmount": 9999, "accountID": 2, "debitOrCredit": "DEBIT"}
 	map4b := map[string]interface{}{"transactionDCAmount": 1999, "accountID": 2, "debitOrCredit": "CREDIT"}
 	mapSlice4 = append(mapSlice4, map4, map4b)
+
+	mapSlice5 := []map[string]interface{}{}
+	map5a := map[string]interface{}{"transactionDCAmount": 3000, "accountID": 5555, "debitOrCredit": "DEBIT"}
+	map5b := map[string]interface{}{"transactionDCAmount": 3000, "accountID": 5555, "debitOrCredit": "CREDIT"}
+	mapSlice5 = append(mapSlice5, map5a, map5b)
 
 	NewRouterTableTest([]RouterTest{
 		{
@@ -132,6 +138,20 @@ func TestTransaction_Invalid(t *testing.T) {
 			GomegaWithT: g,
 			Code:        http.StatusBadRequest, RespBody: models.ErrTransactionDebitCreditsNotBalanced.Error(),
 		},
+		{
+			Request: Request{
+				Method:     http.MethodPost,
+				Router:     TestRouter,
+				RequestURL: "/tranasctions",
+				Payload: map[string]interface{}{
+					"transactionComment": "getting paid",
+					"transactionAmount":  10000,
+					"debitCreditSet":     mapSlice5,
+				},
+			},
+			GomegaWithT: g,
+			Code:        http.StatusBadRequest, RespBody: "myTxn.Store:ds.TransactionDCStore().Store:ERROR: insert or update on table \\\"transaction_debit_credit\\\"",
+		},
 	}).Exec()
 }
 
@@ -171,4 +191,68 @@ func TestTransaction_PostNewTransaction(t *testing.T) {
 	g.Expect(res.TransactionComment).To(gomega.Equal("getting paid"))
 	g.Expect(res.TransactionAmount).To(gomega.Equal(uint64(9999)))
 	g.Expect(res.DebitCreditSet).To(gomega.HaveLen(2))
+}
+
+func TestTransaction_PutTransactionUpdate(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDatastores(TestDataStore)
+
+	// create accounts first
+	a1 := models.Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err := a1.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a2 := models.Account{AccountName: "Income", AccountSign: datastore.AccountSignCredit, AccountType: datastore.AccountTypeIncome}
+	err = a2.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a3 := models.Account{AccountName: "OtherIncome", AccountSign: datastore.AccountSignCredit, AccountType: datastore.AccountTypeIncome}
+	err = a3.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	txn := models.Transaction{TransactionCore: models.TransactionCore{TransactionComment: "woot"},
+		DebitCreditSet: []*models.TransactionDebitCredit{
+			&models.TransactionDebitCredit{AccountID: a2.AccountID,
+				DebitOrCredit:       datastore.AccountSignCredit,
+				TransactionDCAmount: 10000},
+			&models.TransactionDebitCredit{AccountID: a1.AccountID,
+				DebitOrCredit:       datastore.AccountSignDebit,
+				TransactionDCAmount: 10000},
+		},
+	}
+	err = txn.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	mapSlice4 := []map[string]interface{}{}
+	map4a := map[string]interface{}{"transactionDCAmount": 34000, "accountID": a1.AccountID, "debitOrCredit": "DEBIT"}
+	map4b := map[string]interface{}{"transactionDCAmount": 34000, "accountID": a3.AccountID, "debitOrCredit": "CREDIT"}
+	mapSlice4 = append(mapSlice4, map4b, map4a)
+
+	acctReq := map[string]interface{}{
+		"transactionComment": "getting paid from other person",
+		"transactionAmount":  10000,
+		"debitCreditSet":     mapSlice4,
+	}
+	var test = RouterTest{Request: Request{
+		Method:     http.MethodPut,
+		Router:     TestRouter,
+		RequestURL: fmt.Sprintf("/tranasctions/%d", txn.TransactionID),
+		Payload:    acctReq,
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	var res response.Transaction
+	test.ExecWithUnmarshal(&res)
+	g.Expect(res.TransactionComment).To(gomega.Equal("getting paid from other person"))
+	g.Expect(res.TransactionAmount).To(gomega.Equal(uint64(34000)))
+	g.Expect(res.DebitCreditSet).To(gomega.HaveLen(2))
+	g.Expect(res.DebitCreditSet).To(gomega.HaveLen(2))
+	g.Expect(res.DebitCreditSet[0].TransactionID).To(gomega.Equal(txn.TransactionID))
+	g.Expect(res.DebitCreditSet[0].AccountID).To(gomega.Equal(a3.AccountID))
+	g.Expect(res.DebitCreditSet[0].DebitOrCredit).To(gomega.Equal(datastore.AccountSignCredit))
+	g.Expect(res.DebitCreditSet[0].TransactionDCAmount).To(gomega.Equal(uint64(34000)))
+	g.Expect(res.DebitCreditSet[1].TransactionID).To(gomega.Equal(txn.TransactionID))
+	g.Expect(res.DebitCreditSet[1].AccountID).To(gomega.Equal(a1.AccountID))
+	g.Expect(res.DebitCreditSet[1].DebitOrCredit).To(gomega.Equal(datastore.AccountSignDebit))
+	g.Expect(res.DebitCreditSet[1].TransactionDCAmount).To(gomega.Equal(uint64(34000)))
 }

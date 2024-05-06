@@ -174,3 +174,46 @@ func TestTransaction_StoreAndUpdate(t *testing.T) {
 	g.Expect(myTxn.DebitCreditSet[1].DebitOrCredit).To(gomega.Equal(datastore.AccountSignDebit))
 	g.Expect(myTxn.DebitCreditSet[1].TransactionDCAmount).To(gomega.Equal(uint64(33000)))
 }
+
+func TestTransaction_RetrieveTransactionLedgerForAccountID(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDB(g)
+
+	// create an account first
+	a1 := Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err := a1.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a2 := Account{AccountName: "Income", AccountSign: datastore.AccountSignCredit, AccountType: datastore.AccountTypeIncome}
+	err = a2.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	txn := Transaction{TransactionCore: TransactionCore{TransactionComment: "woot"},
+		DebitCreditSet: []*TransactionDebitCredit{
+			&TransactionDebitCredit{AccountID: a2.AccountID,
+				DebitOrCredit:       datastore.AccountSignCredit,
+				TransactionDCAmount: 10000},
+			&TransactionDebitCredit{AccountID: a1.AccountID,
+				DebitOrCredit:       datastore.AccountSignDebit,
+				TransactionDCAmount: 10000},
+		},
+	}
+	err = txn.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myTxn, err := RetrieveTransactionLedgerForAccountID(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myTxn).To(gomega.HaveLen(1))
+	g.Expect(myTxn[0].TransactionComment).To(gomega.Equal("woot"))
+	g.Expect(myTxn[0].TransactionDCAmount).To(gomega.Equal(uint64(10000)))
+
+	myTxn2, err := RetrieveTransactionLedgerForAccountID(testDS, a2.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myTxn2).To(gomega.HaveLen(1))
+	g.Expect(myTxn2[0].TransactionComment).To(gomega.Equal("woot"))
+	g.Expect(myTxn2[0].TransactionDCAmount).To(gomega.Equal(uint64(10000)))
+
+	g.Expect(myTxn2[0].TransactionID).To(gomega.Equal(myTxn[0].TransactionID))
+
+}

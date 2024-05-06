@@ -66,7 +66,7 @@ func GetTransactionsOnAccount(contoller *TransactionsController) func(w http.Res
 		if err != nil {
 			return NewRequestError(http.StatusNotFound, err)
 		}
-		jsonResponse := response.ConvertTransactionsToRespTransactions(transactions)
+		jsonResponse := response.ConvertTransactionLedgerToRespTransactionLedger(transactions)
 		return RespondOK(w, jsonResponse)
 	}
 }

@@ -163,20 +163,6 @@ func (c *Transaction) transactionTotal() (uint64, error) { //nolint:gocyclo
 	return debitTotal, nil
 }
 
-// RetrieveTransactionsForAccountID retrieves all transactions on an account
-func RetrieveTransactionsForAccountID(ds *datastore.Datastores, transactionID uint64) ([]*Transaction, error) {
-	ts := ds.TransactionStore()
-	eTransSet, err := ts.GetTransactionsForAccount(transactionID)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("TransactionStore().GetTransactionsForAccount:%w", err)
-	}
-	transSet := entTransactionsToTransactions(eTransSet)
-	return transSet, nil
-}
-
 // RetrieveTransactionByID retrieves a specific transactions
 func RetrieveTransactionByID(ds *datastore.Datastores, transactionID uint64) (*Transaction, error) {
 	ts := ds.TransactionStore()
@@ -197,7 +183,7 @@ func RetrieveTransactionByID(ds *datastore.Datastores, transactionID uint64) (*T
 	return &myTrans, nil
 }
 
-func entTransactionsToTransactions(eTxn []*datastore.Transaction) (txnSet []*Transaction) {
+func entTransactionsToTransactions(eTxn []*datastore.Transaction) (txnSet []*Transaction) { //nolint:unused
 	txnSet = make([]*Transaction, len(eTxn))
 	for idx := range eTxn {
 		myTransCore := TransactionCore(*eTxn[idx])
@@ -223,4 +209,41 @@ func entTransactionsDCToTransactionsDC(eTxn []*datastore.TransactionDebitCredit)
 func transactionDCToEntTransactionDC(txn *TransactionDebitCredit) datastore.TransactionDebitCredit {
 	eTxn := datastore.TransactionDebitCredit(*txn)
 	return eTxn
+}
+
+type TransactionLedger struct {
+	TransactionID            uint64
+	TransactionDate          time.Time
+	TransactionReconcileDate sql.NullTime
+	TransactionComment       string
+	TransactionReference     string
+	IsReconciled             bool
+	IsSplit                  bool
+	TransactionDCAmount      uint64
+	DebitOrCredit            datastore.AccountSign
+	// split is a generated field, a comma separated list of the other d/c
+	Split string
+}
+
+// RetrieveTransactionLedgerForAccountID retrieves all transactions ledger records in an account
+func RetrieveTransactionLedgerForAccountID(ds *datastore.Datastores, transactionID uint64) ([]*TransactionLedger, error) {
+	ts := ds.TransactionStore()
+	eTransSet, err := ts.GetTransactionsForAccount(transactionID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("TransactionStore().GetTransactionsForAccount:%w", err)
+	}
+	transSet := entTransactionsLedgerToTransactionsLedger(eTransSet)
+	return transSet, nil
+}
+
+func entTransactionsLedgerToTransactionsLedger(eTxn []*datastore.TransactionLedger) (tdcSet []*TransactionLedger) {
+	tdcSet = make([]*TransactionLedger, len(eTxn))
+	for idx := range eTxn {
+		myTDC := TransactionLedger(*eTxn[idx])
+		tdcSet[idx] = &myTDC
+	}
+	return
 }

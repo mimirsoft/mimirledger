@@ -8,6 +8,7 @@ import Accounts from "./pages/Accounts";
 
 import AccountTypes from "./pages/AccountTypes";
 import Transactions from "./pages/Transactions";
+import TransactionsAccount from "./pages/TransactionsAccount";
 import NoPage from "./pages/NoPage";
 import OuterContainer from './components/templates/OuterContainer';
 import AccountEditPage from "./pages/AccountEdit";
@@ -21,7 +22,7 @@ function App() {
               <Route path="accounts" element={<Accounts />} />
               <Route path="accounts/:accountID" element={<AccountEditPage/>} />
               <Route path="accounttypes" element={<AccountTypes />} />
-              <Route path="transactions" element={<Transactions />} />
+              <Route path="transactions/account/:accountID" element={<Transactions />} />
               <Route path="*" element={<NoPage />} />
           </Route>
         </Routes>

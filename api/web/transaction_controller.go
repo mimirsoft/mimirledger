@@ -30,9 +30,9 @@ func (tc *TransactionsController) CreateTransaction(ctx context.Context, myTxn *
 }
 
 // GET /tranasctions/account/{accountID}
-func (tc *TransactionsController) GetTransactionsForAccount(ctx context.Context, transactionID uint64) ([]*models.Transaction,
+func (tc *TransactionsController) GetTransactionsForAccount(ctx context.Context, transactionID uint64) ([]*models.TransactionLedger,
 	error) {
-	myTxn, err := models.RetrieveTransactionsForAccountID(tc.DataStores, transactionID)
+	myTxn, err := models.RetrieveTransactionLedgerForAccountID(tc.DataStores, transactionID)
 	if err != nil {
 		return nil, fmt.Errorf("models.RetrieveTransactionsForAccountID:%w", err)
 	}

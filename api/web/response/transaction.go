@@ -65,3 +65,31 @@ func ConvertTransactionsToRespTransactions(txns []*models.Transaction) *Transact
 	}
 	return &TransactionSet{Transactions: tas}
 }
+
+// TransactionLedgerSet is for use in transaction controller responses for a single acount
+type TransactionLedgerSet struct {
+	Transactions []*TransactionLedger `json:"transactions"`
+}
+
+type TransactionLedger struct {
+	TransactionID            uint64                `json:"transaction_id,omitempty"`
+	TransactionDate          time.Time             `json:"transaction_date"`
+	TransactionReconcileDate sql.NullTime          `json:"transaction_reconcile_date"`
+	TransactionComment       string                `json:"transaction_comment"`
+	TransactionReference     string                `json:"transaction_reference"` // this could be a check number, batch ,etc
+	IsReconciled             bool                  `json:"is_reconciled"`
+	IsSplit                  bool                  `json:"is_split"`
+	TransactionDCAmount      uint64                `json:"transactionDCAmount"`
+	DebitOrCredit            datastore.AccountSign `json:"debitOrCredit"`
+	Split                    string                `json:"split"` // this could be a check number, batch ,etc
+}
+
+// ConvertTransactionLedgerToRespTransactionLedger converts []models.TransactionLedger to TransactionLedger
+func ConvertTransactionLedgerToRespTransactionLedger(txns []*models.TransactionLedger) *TransactionLedgerSet {
+	var tas = make([]*TransactionLedger, len(txns))
+	for idx := range txns {
+		myDS := TransactionLedger(*txns[idx])
+		tas[idx] = &myDS
+	}
+	return &TransactionLedgerSet{Transactions: tas}
+}

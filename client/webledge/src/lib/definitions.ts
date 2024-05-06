@@ -25,5 +25,7 @@ export type TransactionAccountType = {
 
 
 export type Transaction = {
-    transactionID: number;
+    transactionID: number
+    transactionComment: string
+    transactionAmount: number
 };

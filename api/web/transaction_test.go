@@ -256,3 +256,58 @@ func TestTransaction_PutTransactionUpdate(t *testing.T) {
 	g.Expect(res.DebitCreditSet[1].DebitOrCredit).To(gomega.Equal(datastore.AccountSignDebit))
 	g.Expect(res.DebitCreditSet[1].TransactionDCAmount).To(gomega.Equal(uint64(34000)))
 }
+
+func TestTransaction_GetTransactionsOnAccount(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDatastores(TestDataStore)
+
+	// create accounts first
+	a1 := models.Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err := a1.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a2 := models.Account{AccountName: "Income", AccountSign: datastore.AccountSignCredit, AccountType: datastore.AccountTypeIncome}
+	err = a2.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	txn := models.Transaction{TransactionCore: models.TransactionCore{TransactionComment: "woot"},
+		DebitCreditSet: []*models.TransactionDebitCredit{
+			&models.TransactionDebitCredit{AccountID: a2.AccountID,
+				DebitOrCredit:       datastore.AccountSignCredit,
+				TransactionDCAmount: 10000},
+			&models.TransactionDebitCredit{AccountID: a1.AccountID,
+				DebitOrCredit:       datastore.AccountSignDebit,
+				TransactionDCAmount: 10000},
+		},
+	}
+	err = txn.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	txn2 := models.Transaction{TransactionCore: models.TransactionCore{TransactionComment: "woot2"},
+		DebitCreditSet: []*models.TransactionDebitCredit{
+			&models.TransactionDebitCredit{AccountID: a2.AccountID,
+				DebitOrCredit:       datastore.AccountSignCredit,
+				TransactionDCAmount: 30000},
+			&models.TransactionDebitCredit{AccountID: a1.AccountID,
+				DebitOrCredit:       datastore.AccountSignDebit,
+				TransactionDCAmount: 30000},
+		},
+	}
+	err = txn2.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	var test = RouterTest{Request: Request{
+		Method:     http.MethodGet,
+		Router:     TestRouter,
+		RequestURL: fmt.Sprintf("/tranasctions/account/%d", a2.AccountID),
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	var res response.TransactionLedgerSet
+	test.ExecWithUnmarshal(&res)
+	g.Expect(res.Transactions).To(gomega.HaveLen(2))
+	g.Expect(res.Transactions[0].TransactionComment).To(gomega.Equal("woot"))
+	g.Expect(res.Transactions[0].TransactionDCAmount).To(gomega.Equal(uint64(10000)))
+	g.Expect(res.Transactions[1].TransactionComment).To(gomega.Equal("woot2"))
+	g.Expect(res.Transactions[1].TransactionDCAmount).To(gomega.Equal(uint64(30000)))
+}

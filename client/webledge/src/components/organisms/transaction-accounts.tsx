@@ -126,7 +126,7 @@ export default function TransactionAccounts(){
                         <div className="w-32">
                             {account.accountBalance}
                         </div>
-                        <Link to={'/transactions/'+account.accountID} className={`nav__item p-4 }`}>
+                        <Link to={'/transactions/account/'+account.accountID} className={`nav__item p-4 }`}>
                             LEDGER
                         </Link>
                         <Link to={'/accounts/'+account.accountID} className={`nav__item p-4 }`}>

@@ -1,4 +1,4 @@
-import { TransactionAccount, TransactionAccountRequest } from '../../lib/definitions';
+import { TransactionAccount, TransactionAccountPostRequest } from '../../lib/definitions';
 import {useState} from "react";
 import Modal from '../molecules/Modal'
 import useSWR from "swr";
@@ -17,7 +17,7 @@ const postFormData = async (formData: FormData) => {
         const formEntries = Object.fromEntries(formData);
         console.log(formEntries.accountParent)
 
-        const newAccount : TransactionAccountRequest = {
+        const newAccount : TransactionAccountPostRequest = {
             accountParent : Number(formEntries.accountParent),
             accountName : String(formEntries.accountName),
             accountType : String(formEntries.accountType),
@@ -65,7 +65,7 @@ export default function TransactionAccounts(){
             </label>
             <label className="my-4 text-xl font-bold mx-4 bg-slate-200">
                 AccountParent:
-                <AccountSelector id={0}/>
+                <AccountSelector id={0} includeTop={true} excludeID={0}/>
             </label>
             <label className="my-4 text-xl font-bold">AccountType:
                 <AccountTypeSelector selectedName="" />

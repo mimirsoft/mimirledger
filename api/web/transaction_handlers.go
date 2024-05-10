@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/mimirsoft/mimirledger/api/web/request"
 	"github.com/mimirsoft/mimirledger/api/web/response"
+	"github.com/rs/zerolog/log"
 	"net/http"
 	"strconv"
 )
@@ -62,11 +63,12 @@ func GetTransactionsOnAccount(contoller *TransactionsController) func(w http.Res
 		if accountID == 0 {
 			return NewRequestError(http.StatusBadRequest, ErrInvalidAccountID)
 		}
-		transactions, err := contoller.GetTransactionsForAccount(r.Context(), accountID)
+		account, transactions, err := contoller.GetTransactionsForAccount(r.Context(), accountID)
 		if err != nil {
+			log.Error().Err(err).Msg("wtf err herer")
 			return NewRequestError(http.StatusNotFound, err)
 		}
-		jsonResponse := response.ConvertTransactionLedgerToRespTransactionLedger(transactions)
+		jsonResponse := response.ConvertTransactionLedgerToRespTransactionLedger(account, transactions)
 		return RespondOK(w, jsonResponse)
 	}
 }

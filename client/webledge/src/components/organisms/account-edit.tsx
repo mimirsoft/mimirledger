@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { TransactionAccount, TransactionAccountRequest } from '../../lib/definitions';
+import { TransactionAccount, TransactionAccountPostRequest } from '../../lib/definitions';
 import useSWR, { Fetcher } from "swr";
 import React, {FormEvent} from "react";
 import AccountSelector from "../molecules/account-selector";
@@ -12,12 +12,12 @@ const fetcher = (...args: Parameters<typeof fetch>) => fetch(...args).then(res =
 
 const postFormData = async (formData: FormData) => {
     try {
-       // Do a bit of work to convert the entries to a plain JS object
+        // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);
         const accountID = Number(formEntries.accountID)
         const myURL = new URL('/accounts/'+accountID, process.env.REACT_APP_MIMIRLEDGER_API_URL);
 
-        const newAccount : TransactionAccountRequest = {
+        const newAccount : TransactionAccountPostRequest = {
             accountParent : Number(formEntries.accountParent),
             accountName : String(formEntries.accountName),
             accountType : String(formEntries.accountType),
@@ -25,7 +25,7 @@ const postFormData = async (formData: FormData) => {
         };
         var json = JSON.stringify(newAccount);
         const settings :RequestInit = {
-            method: 'POST',
+            method: 'PUT',
             body: json,
         };
         return await fetch(myURL, settings);
@@ -63,7 +63,7 @@ export default function AccountEditForm(){
             </label>
             <label className="my-4 text-xl font-bold mx-4 bg-slate-200">
                 AccountParent:
-                <AccountSelector id={data?.accountParent} />
+                <AccountSelector id={data?.accountParent} includeTop={true} excludeID={0}/>
             </label>
             <label className="my-4 text-xl font-bold">AccountType:
                 <AccountTypeSelector selectedName={data?.accountType} />

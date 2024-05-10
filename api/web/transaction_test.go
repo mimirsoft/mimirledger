@@ -257,7 +257,32 @@ func TestTransaction_PutTransactionUpdate(t *testing.T) {
 	g.Expect(res.DebitCreditSet[1].TransactionDCAmount).To(gomega.Equal(uint64(34000)))
 }
 
-func TestTransaction_GetTransactionsOnAccount(t *testing.T) {
+func TestTransaction_GetTransactionsOnAccountEmpty(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDatastores(TestDataStore)
+
+	// create accounts first
+	a1 := models.Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err := a1.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	var test = RouterTest{Request: Request{
+		Method:     http.MethodGet,
+		Router:     TestRouter,
+		RequestURL: fmt.Sprintf("/transactions/account/%d", a1.AccountID),
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	var res response.TransactionLedgerSet
+	test.ExecWithUnmarshal(&res)
+	g.Expect(res.Transactions).To(gomega.HaveLen(0))
+	g.Expect(res.AccountID).To(gomega.Equal(a1.AccountID))
+	g.Expect(res.AccountFullName).To(gomega.Equal(a1.AccountFullName))
+	g.Expect(res.AccountName).To(gomega.Equal(string(a1.AccountName)))
+	g.Expect(res.AccountSign).To(gomega.Equal(string(a1.AccountSign)))
+}
+
+func TestTransaction_GetTransactionsOnAccountValid(t *testing.T) {
 	g := gomega.NewWithT(t)
 	gomega.RegisterFailHandler(ginkgo.Fail)
 	setupDatastores(TestDataStore)
@@ -300,12 +325,16 @@ func TestTransaction_GetTransactionsOnAccount(t *testing.T) {
 	var test = RouterTest{Request: Request{
 		Method:     http.MethodGet,
 		Router:     TestRouter,
-		RequestURL: fmt.Sprintf("/tranasctions/account/%d", a2.AccountID),
+		RequestURL: fmt.Sprintf("/transactions/account/%d", a2.AccountID),
 	}, GomegaWithT: g, Code: http.StatusOK}
 
 	var res response.TransactionLedgerSet
 	test.ExecWithUnmarshal(&res)
 	g.Expect(res.Transactions).To(gomega.HaveLen(2))
+	g.Expect(res.AccountID).To(gomega.Equal(a2.AccountID))
+	g.Expect(res.AccountSign).To(gomega.Equal(string(a2.AccountSign)))
+	g.Expect(res.AccountFullName).To(gomega.Equal(a2.AccountFullName))
+	g.Expect(res.AccountName).To(gomega.Equal(string(a2.AccountName)))
 	g.Expect(res.Transactions[0].TransactionComment).To(gomega.Equal("woot"))
 	g.Expect(res.Transactions[0].TransactionDCAmount).To(gomega.Equal(uint64(10000)))
 	g.Expect(res.Transactions[1].TransactionComment).To(gomega.Equal("woot2"))

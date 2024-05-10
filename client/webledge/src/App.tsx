@@ -22,7 +22,7 @@ function App() {
               <Route path="accounts" element={<Accounts />} />
               <Route path="accounts/:accountID" element={<AccountEditPage/>} />
               <Route path="accounttypes" element={<AccountTypes />} />
-              <Route path="transactions/account/:accountID" element={<Transactions />} />
+              <Route path="transactions/account/:accountID" element={<TransactionsAccount />} />
               <Route path="*" element={<NoPage />} />
           </Route>
         </Routes>

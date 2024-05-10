@@ -1,10 +1,9 @@
-export type TransactionAccountRequest = {
+export type TransactionAccountPostRequest = {
     accountParent: number;
     accountName: string;
     accountMemo: string;
     accountType: string;
 };
-
 
 export type TransactionAccount = {
     accountID: number;
@@ -29,3 +28,18 @@ export type Transaction = {
     transactionComment: string
     transactionAmount: number
 };
+
+export type TransactionLedgerResponse = {
+    accountID: number;
+    accountName: string;
+    accountFullName: string;
+    accountSign: string;
+    transactions: Transaction[];
+};
+
+
+export type TransactionPostRequest = {
+    transactionComment: string
+    debitCreditSet: string
+};
+

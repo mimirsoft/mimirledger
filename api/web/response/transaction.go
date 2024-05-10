@@ -68,7 +68,11 @@ func ConvertTransactionsToRespTransactions(txns []*models.Transaction) *Transact
 
 // TransactionLedgerSet is for use in transaction controller responses for a single acount
 type TransactionLedgerSet struct {
-	Transactions []*TransactionLedger `json:"transactions"`
+	AccountID       uint64               `json:"accountID"`
+	AccountSign     string               `json:"accountSign"`
+	AccountName     string               `json:"accountName"`
+	AccountFullName string               `json:"accountFullName"`
+	Transactions    []*TransactionLedger `json:"transactions"`
 }
 
 type TransactionLedger struct {
@@ -85,11 +89,16 @@ type TransactionLedger struct {
 }
 
 // ConvertTransactionLedgerToRespTransactionLedger converts []models.TransactionLedger to TransactionLedger
-func ConvertTransactionLedgerToRespTransactionLedger(txns []*models.TransactionLedger) *TransactionLedgerSet {
+func ConvertTransactionLedgerToRespTransactionLedger(act *models.Account, txns []*models.TransactionLedger) *TransactionLedgerSet {
 	var tas = make([]*TransactionLedger, len(txns))
 	for idx := range txns {
 		myDS := TransactionLedger(*txns[idx])
 		tas[idx] = &myDS
 	}
-	return &TransactionLedgerSet{Transactions: tas}
+	return &TransactionLedgerSet{
+		AccountID:       act.AccountID,
+		AccountName:     act.AccountName,
+		AccountFullName: act.AccountFullName,
+		AccountSign:     string(act.AccountSign),
+		Transactions:    tas}
 }

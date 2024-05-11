@@ -76,13 +76,13 @@ type TransactionLedgerSet struct {
 }
 
 type TransactionLedger struct {
-	TransactionID            uint64                `json:"transaction_id,omitempty"`
-	TransactionDate          time.Time             `json:"transaction_date"`
-	TransactionReconcileDate sql.NullTime          `json:"transaction_reconcile_date"`
-	TransactionComment       string                `json:"transaction_comment"`
-	TransactionReference     string                `json:"transaction_reference"` // this could be a check number, batch ,etc
-	IsReconciled             bool                  `json:"is_reconciled"`
-	IsSplit                  bool                  `json:"is_split"`
+	TransactionID            uint64                `json:"transactionID"`
+	TransactionDate          time.Time             `json:"transactionDate"`
+	TransactionReconcileDate sql.NullTime          `json:"transactionReconcileDate"`
+	TransactionComment       string                `json:"transactionComment"`
+	TransactionReference     string                `json:"transactionReference"` // this could be a check number, batch ,etc
+	IsReconciled             bool                  `json:"isReconciled"`
+	IsSplit                  bool                  `json:"isSplit"`
 	TransactionDCAmount      uint64                `json:"transactionDCAmount"`
 	DebitOrCredit            datastore.AccountSign `json:"debitOrCredit"`
 	Split                    string                `json:"split"` // this could be a check number, batch ,etc

@@ -1,9 +1,14 @@
-import { useParams, useNavigate } from "react-router-dom";
+import {useParams, useNavigate, Link} from "react-router-dom";
 import useSWR, { Fetcher } from "swr";
 import React, {FormEvent} from "react";
-import {TransactionAccount, TransactionLedgerResponse, TransactionPostRequest} from "../../lib/definitions";
+import {
+    Transaction,
+    TransactionAccount,
+    TransactionDebitCreditRequest, TransactionLedgerEntry,
+    TransactionLedgerResponse,
+    TransactionPostRequest
+} from "../../lib/definitions";
 import AccountSelector from "../molecules/account-selector";
-import AccountTypeSelector from "../molecules/account-type-selector";
 
 const fetcher = (...args: Parameters<typeof fetch>) => fetch(...args).then(res => res.json())
 
@@ -11,17 +16,24 @@ const postFormData = async (formData: FormData) => {
     try {
         // Do a bit of work to convert the entries to a plain JS object
         const myURL = new URL('/transactions', process.env.REACT_APP_MIMIRLEDGER_API_URL);
-        console.log(myURL)
 
         // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);
         const accountID = Number(formEntries.accountID)
-        console.log(formEntries.accountParent)
-        // make debitAndCreditSet of two
+        const accountSign = String(formEntries.accountSign)
+        const otherAccountSign = accountSign == "DEBIT"  ? "CREDIT" : "DEBIT";
+        const otherAccountID = Number(formEntries.otherAccountID)
+        const amount = Number(formEntries.amount)
+
+        // make debitAndCreditSet of two from this account and the selected account
+        let dcSet: Array<TransactionDebitCreditRequest> = [
+            {accountID: accountID, transactionDCAmount: amount, debitOrCredit: accountSign },
+            {accountID: otherAccountID, transactionDCAmount: amount, debitOrCredit: otherAccountSign },
+        ];
 
         const newTransaction : TransactionPostRequest = {
             transactionComment : String(formEntries.transactionComment),
-            debitCreditSet :"",
+            debitCreditSet : dcSet,
         };
         var json = JSON.stringify(newTransaction);
         console.log(json)
@@ -57,8 +69,8 @@ export default function TransactionAccountLedger() {
     if (isLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>
 
-    console.log(data)
-    return (<div className="flex w-full flex-col md:col-span-4">
+    return (
+        <div className="flex w-full flex-col md:col-span-4">
             <h2 className={` mb-4 text-xl md:text-2xl`}>
                 Add Transaction to {data?.accountFullName}
             </h2>
@@ -72,7 +84,7 @@ export default function TransactionAccountLedger() {
                     </label>
                     <label className="my-4 text-xl font-bold mx-4 bg-slate-200">
                         To Account:
-                        <AccountSelector id={0} includeTop={false} excludeID={data?.accountID}/>
+                        <AccountSelector name={"otherAccountID"} id={0} includeTop={false} excludeID={data?.accountID}/>
                     </label>
                     <div className="bg-slate-300 flex">
                         <input className=" bg-slate-300" type="hidden" name="accountID" defaultValue={data?.accountID}/>
@@ -82,7 +94,35 @@ export default function TransactionAccountLedger() {
                     </div>
                 </form>
             </div>
-
+            <div className="flex">
+                <div className="w-8">
+                    id
+                </div>
+                <div className="w-80">
+                    Comment
+                </div>
+                <div className="w-8">
+                    Amount
+                </div>
+            </div>
+            {data?.transactions && data.transactions.map((transaction: TransactionLedgerEntry, index: number) => {
+                return (
+                    <div className="flex" key={index}>
+                        <div className="w-8">
+                            {transaction.transactionID}
+                        </div>
+                        <div className="w-80">
+                            {transaction.transactionComment}
+                        </div>
+                        <div className="w-8">
+                            {transaction.transactionDCAmount}
+                        </div>
+                        <Link to={'/transactions/' + transaction.transactionID} className={`nav__item p-4 }`}>
+                            EDIT Transaction
+                        </Link>
+                    </div>
+                );
+            })}
         </div>
     );
 }

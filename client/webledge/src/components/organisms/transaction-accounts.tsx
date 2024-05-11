@@ -51,21 +51,21 @@ export default function TransactionAccounts(){
         <div className="flex w-full flex-col md:col-span-4">
             <button className="w-80 bg-blue-500 openModalbtn">Open the modal</button>
             <Modal open={openModal}></Modal>
-        <h2 className={` mb-4 text-xl md:text-2xl`}>
-        My Accounts
-        </h2>
+            <h2 className={` mb-4 text-xl md:text-2xl`}>
+            My Accounts
+            </h2>
         <div className="flex grow flex-col justify-between rounded-xl bg-slate-100 p-4">
-        <div className="text-xl font-bold">
-            Create New Account
-        </div>
-        <div className="flex">
-         <form className="flex" onSubmit={handleSubmit}>
+            <div className="text-xl font-bold">
+                Create New Account
+            </div>
+            <div className="flex">
+            <form className="flex" onSubmit={handleSubmit}>
             <label className="my-4 text-xl font-bold mx-4 bg-slate-200">AccountName:
                 <input className="bg-slate-300 font-normal" type="text" name="accountName"/>
             </label>
             <label className="my-4 text-xl font-bold mx-4 bg-slate-200">
                 AccountParent:
-                <AccountSelector id={0} includeTop={true} excludeID={0}/>
+                <AccountSelector name={"accountParent"} id={0} includeTop={true} excludeID={0}/>
             </label>
             <label className="my-4 text-xl font-bold">AccountType:
                 <AccountTypeSelector selectedName="" />
@@ -76,9 +76,8 @@ export default function TransactionAccounts(){
             <div className="bg-slate-300 flex">
             <button className="p-3 font-bold" type="submit">Create Account</button>
             </div>
-        </form>
-        </div>
-    <div>
+            </form>
+            </div>
         <div className="flex">
             <div className="w-8">
                 ID
@@ -104,43 +103,38 @@ export default function TransactionAccounts(){
         </div>
         {data.accounts && data.accounts.map((account: TransactionAccount, index: number) => {
             return (
-                    <div className="flex" key={index} >
-                        <div className="w-8">
-                            {account.accountID}
-                        </div>
-                        <div className="w-8">
-                            {account.accountLeft}
-                        </div>
-                        <div className="w-8">
-                            {account.accountRight}
-                        </div>
-                        <div className="w-80">
-                            {account.accountFullName}
-                        </div>
-                        <div className="w-80">
-                            {account.accountName}
-                        </div>
-                        <div className="w-32">
-                            {account.accountType}
-                        </div>
-                        <div className="w-32">
-                            {account.accountBalance}
-                        </div>
-                        <Link to={'/transactions/account/'+account.accountID} className={`nav__item p-4 }`}>
-                            LEDGER
-                        </Link>
-                        <Link to={'/accounts/'+account.accountID} className={`nav__item p-4 }`}>
-                            EDIT ACCOUNT
-                        </Link>
+                <div className="flex" key={index} >
+                    <div className="w-8">
+                        {account.accountID}
                     </div>
-
-
-
+                    <div className="w-8">
+                        {account.accountLeft}
+                    </div>
+                    <div className="w-8">
+                        {account.accountRight}
+                    </div>
+                    <div className="w-80">
+                        {account.accountFullName}
+                    </div>
+                    <div className="w-80">
+                        {account.accountName}
+                    </div>
+                    <div className="w-32">
+                        {account.accountType}
+                    </div>
+                    <div className="w-32">
+                        {account.accountBalance}
+                    </div>
+                    <Link to={'/transactions/account/'+account.accountID} className={`nav__item p-4 }`}>
+                        LEDGER
+                    </Link>
+                    <Link to={'/accounts/'+account.accountID} className={`nav__item p-4 }`}>
+                        EDIT ACCOUNT
+                    </Link>
+                </div>
             );
         })}
+        </div>
     </div>
-        </div>
-
-        </div>
     );
 }

@@ -29,17 +29,28 @@ export type Transaction = {
     transactionAmount: number
 };
 
+export type TransactionLedgerEntry = {
+    transactionID: number
+    transactionComment: string
+    transactionDCAmount: number
+};
+
 export type TransactionLedgerResponse = {
     accountID: number;
     accountName: string;
     accountFullName: string;
     accountSign: string;
-    transactions: Transaction[];
+    transactions: TransactionLedgerEntry[];
 };
 
+export type TransactionDebitCreditRequest = {
+    accountID: number
+    transactionDCAmount: number
+    debitOrCredit: string
+};
 
 export type TransactionPostRequest = {
     transactionComment: string
-    debitCreditSet: string
+    debitCreditSet: TransactionDebitCreditRequest[]
 };
 

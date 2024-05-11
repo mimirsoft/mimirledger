@@ -19,7 +19,7 @@ func NewTransactionsController(ds *datastore.Datastores) *TransactionsController
 	}
 }
 
-// POST /tranasctions
+// POST /transactions
 func (tc *TransactionsController) CreateTransaction(ctx context.Context, myTxn *models.Transaction) (*models.Transaction,
 	error) {
 	err := myTxn.Store(tc.DataStores)
@@ -29,7 +29,7 @@ func (tc *TransactionsController) CreateTransaction(ctx context.Context, myTxn *
 	return myTxn, nil
 }
 
-// GET /tranasctions/account/{accountID}
+// GET /transactions/account/{accountID}
 func (tc *TransactionsController) GetTransactionsForAccount(ctx context.Context, accountID uint64) (*models.Account,
 	[]*models.TransactionLedger,
 	error) {
@@ -44,7 +44,7 @@ func (tc *TransactionsController) GetTransactionsForAccount(ctx context.Context,
 	return account, myTxn, nil
 }
 
-// GET /tranasctions/{transactionID}
+// GET /transactions/{transactionID}
 func (tc *TransactionsController) GetTransactionByID(ctx context.Context, transactionID uint64) (*models.Transaction, error) {
 	myTxn, err := models.RetrieveTransactionByID(tc.DataStores, transactionID)
 	if err != nil {
@@ -53,7 +53,7 @@ func (tc *TransactionsController) GetTransactionByID(ctx context.Context, transa
 	return myTxn, nil
 }
 
-// PUT /tranasctions/{transactionID}
+// PUT /transactions/{transactionID}
 func (tc *TransactionsController) UpdateTransaction(ctx context.Context, myTxn *models.Transaction) (*models.Transaction,
 	error) {
 	err := myTxn.Update(tc.DataStores)

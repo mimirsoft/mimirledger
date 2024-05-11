@@ -40,19 +40,21 @@ func Logger(logger zerolog.Logger) func(http.Handler) http.Handler {
 			ww.Tee(&bodyBuf)
 			start := time.Now()
 			defer func() {
-				logger.Info().
-					Str("request-id", GetReqID(r.Context())).
-					Int("status", ww.Status()).
-					Int("bytes", ww.BytesWritten()).
-					Str("method", r.Method).
-					Str("path", r.URL.Path).
-					Str("query", r.URL.RawQuery).
-					Str("ip", r.RemoteAddr).
-					Str("trace.id", trace.SpanFromContext(r.Context()).SpanContext().TraceID().String()).
-					Str("user-agent", r.UserAgent()).
-					Dur("latency", time.Since(start)).
-					Str("resp_body", bodyBuf.String()).
-					Msg("request completed")
+				if ww.Status() != http.StatusOK {
+					logger.Info().
+						Str("request-id", GetReqID(r.Context())).
+						Int("status", ww.Status()).
+						Int("bytes", ww.BytesWritten()).
+						Str("method", r.Method).
+						Str("path", r.URL.Path).
+						Str("query", r.URL.RawQuery).
+						Str("ip", r.RemoteAddr).
+						Str("trace.id", trace.SpanFromContext(r.Context()).SpanContext().TraceID().String()).
+						Str("user-agent", r.UserAgent()).
+						Dur("latency", time.Since(start)).
+						Str("resp_body", bodyBuf.String()).
+						Msg("request completed")
+				}
 			}()
 
 			next.ServeHTTP(ww, r)

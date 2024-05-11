@@ -6,12 +6,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/mimirsoft/mimirledger/api/web/request"
 	"github.com/mimirsoft/mimirledger/api/web/response"
-	"github.com/rs/zerolog/log"
 	"net/http"
 	"strconv"
 )
 
-// GET /tranasctions/{transactionID}
+// GET /transactions/{transactionID}
 func GetTransaction(contoller *TransactionsController) func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		idStr := chi.URLParam(r, "transactionID")
@@ -31,7 +30,7 @@ func GetTransaction(contoller *TransactionsController) func(w http.ResponseWrite
 	}
 }
 
-// POST /tranasctions
+// POST /transactions
 func PostTransactions(contoller *TransactionsController) func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		var reqTransaction request.Transaction
@@ -45,14 +44,14 @@ func PostTransactions(contoller *TransactionsController) func(w http.ResponseWri
 		mdlTransaction := request.ReqTransactionToTransaction(&reqTransaction)
 		transaction, err := contoller.CreateTransaction(r.Context(), mdlTransaction)
 		if err != nil {
-			return NewRequestError(http.StatusBadRequest, err)
+			return NewRequestError(http.StatusBadRequest, fmt.Errorf("reqTransaction:%+v %w", reqTransaction, err))
 		}
 		jsonResponse := response.TransactionToRespTransaction(transaction)
 		return RespondOK(w, jsonResponse)
 	}
 }
 
-// GET /tranasctions/account/{accountID}
+// GET /transactions/account/{accountID}
 func GetTransactionsOnAccount(contoller *TransactionsController) func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		accountIDStr := chi.URLParam(r, "accountID")
@@ -65,7 +64,6 @@ func GetTransactionsOnAccount(contoller *TransactionsController) func(w http.Res
 		}
 		account, transactions, err := contoller.GetTransactionsForAccount(r.Context(), accountID)
 		if err != nil {
-			log.Error().Err(err).Msg("wtf err herer")
 			return NewRequestError(http.StatusNotFound, err)
 		}
 		jsonResponse := response.ConvertTransactionLedgerToRespTransactionLedger(account, transactions)
@@ -73,7 +71,7 @@ func GetTransactionsOnAccount(contoller *TransactionsController) func(w http.Res
 	}
 }
 
-// PUT /tranasctions/{transactionID}
+// PUT /transactions/{transactionID}
 func PutTransactionUpdate(contoller *TransactionsController) func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		idStr := chi.URLParam(r, "transactionID")

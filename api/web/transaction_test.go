@@ -46,7 +46,7 @@ func TestTransaction_Invalid(t *testing.T) {
 			Request: Request{
 				Method:     http.MethodGet,
 				Router:     TestRouter,
-				RequestURL: "/tranasctions/5555",
+				RequestURL: "/transactions/5555",
 			},
 			GomegaWithT: g,
 			Code:        http.StatusNotFound, RespBody: models.ErrTransactionNotFound.Error(),
@@ -55,7 +55,7 @@ func TestTransaction_Invalid(t *testing.T) {
 			Request: Request{
 				Method:     http.MethodPost,
 				Router:     TestRouter,
-				RequestURL: "/tranasctions",
+				RequestURL: "/transactions",
 			},
 			GomegaWithT: g,
 			Code:        http.StatusBadRequest, RespBody: ErrNoRequestBody.Error(),
@@ -64,7 +64,7 @@ func TestTransaction_Invalid(t *testing.T) {
 			Request: Request{
 				Method:     http.MethodPost,
 				Router:     TestRouter,
-				RequestURL: "/tranasctions",
+				RequestURL: "/transactions",
 				Payload: map[string]interface{}{
 					"woot": "stuff",
 				},
@@ -76,7 +76,7 @@ func TestTransaction_Invalid(t *testing.T) {
 			Request: Request{
 				Method:     http.MethodPost,
 				Router:     TestRouter,
-				RequestURL: "/tranasctions",
+				RequestURL: "/transactions",
 				Payload: map[string]interface{}{
 					"transactionComment": "getting paid",
 				},
@@ -88,7 +88,7 @@ func TestTransaction_Invalid(t *testing.T) {
 			Request: Request{
 				Method:     http.MethodPost,
 				Router:     TestRouter,
-				RequestURL: "/tranasctions",
+				RequestURL: "/transactions",
 				Payload: map[string]interface{}{
 					"transactionComment": "getting paid",
 					"debitCreditSet":     mapSlice,
@@ -100,7 +100,7 @@ func TestTransaction_Invalid(t *testing.T) {
 			Request: Request{
 				Method:     http.MethodPost,
 				Router:     TestRouter,
-				RequestURL: "/tranasctions",
+				RequestURL: "/transactions",
 				Payload: map[string]interface{}{
 					"transactionComment": "getting paid",
 					"transactionAmount":  10000,
@@ -114,7 +114,7 @@ func TestTransaction_Invalid(t *testing.T) {
 			Request: Request{
 				Method:     http.MethodPost,
 				Router:     TestRouter,
-				RequestURL: "/tranasctions",
+				RequestURL: "/transactions",
 				Payload: map[string]interface{}{
 					"transactionComment": "getting paid",
 					"transactionAmount":  10000,
@@ -128,7 +128,7 @@ func TestTransaction_Invalid(t *testing.T) {
 			Request: Request{
 				Method:     http.MethodPost,
 				Router:     TestRouter,
-				RequestURL: "/tranasctions",
+				RequestURL: "/transactions",
 				Payload: map[string]interface{}{
 					"transactionComment": "getting paid",
 					"transactionAmount":  10000,
@@ -142,7 +142,7 @@ func TestTransaction_Invalid(t *testing.T) {
 			Request: Request{
 				Method:     http.MethodPost,
 				Router:     TestRouter,
-				RequestURL: "/tranasctions",
+				RequestURL: "/transactions",
 				Payload: map[string]interface{}{
 					"transactionComment": "getting paid",
 					"transactionAmount":  10000,
@@ -182,7 +182,7 @@ func TestTransaction_PostNewTransaction(t *testing.T) {
 	var test = RouterTest{Request: Request{
 		Method:     http.MethodPost,
 		Router:     TestRouter,
-		RequestURL: "/tranasctions",
+		RequestURL: "/transactions",
 		Payload:    acctReq,
 	}, GomegaWithT: g, Code: http.StatusOK}
 
@@ -237,7 +237,7 @@ func TestTransaction_PutTransactionUpdate(t *testing.T) {
 	var test = RouterTest{Request: Request{
 		Method:     http.MethodPut,
 		Router:     TestRouter,
-		RequestURL: fmt.Sprintf("/tranasctions/%d", txn.TransactionID),
+		RequestURL: fmt.Sprintf("/transactions/%d", txn.TransactionID),
 		Payload:    acctReq,
 	}, GomegaWithT: g, Code: http.StatusOK}
 

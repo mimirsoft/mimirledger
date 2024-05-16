@@ -1,11 +1,8 @@
-export type TransactionAccountPostRequest = {
-    accountParent: number;
-    accountName: string;
-    accountMemo: string;
-    accountType: string;
+export type AccountSet = {
+    accounts: Account[];
 };
 
-export type TransactionAccount = {
+export type Account = {
     accountID: number;
     accountParent: number;
     accountLeft: number;
@@ -17,23 +14,58 @@ export type TransactionAccount = {
     accountBalance: number;
 };
 
+
+
+export type TransactionAccountPostRequest = {
+    accountParent: number;
+    accountName: string;
+    accountMemo: string;
+    accountType: string;
+};
+
+export type TransactionAccountTypeSet = {
+    accountTypes:TransactionAccountType[]
+};
+
+
 export type TransactionAccountType = {
     name:string
     sign:string
 };
 
 
-export type Transaction = {
+export type TransactionResponse = {
     transactionID: number
     transactionComment: string
     transactionAmount: number
+    debitCreditSet: TransactionDebitCreditResponse[]
 };
 
-export type TransactionLedgerEntry = {
+export type TransactionDebitCreditResponse = {
+    transactionID: number
+    accountID: number
+    transactionDCAmount: number
+    debitOrCredit: string
+};
+
+export type TransactionPostRequest = {
+    transactionComment: string
+    debitCreditSet: TransactionDebitCreditRequest[]
+};
+
+export type TransactionEditPostRequest = {
     transactionID: number
     transactionComment: string
-    transactionDCAmount: number
+    debitCreditSet: TransactionDebitCreditRequest[]
 };
+
+export type TransactionDebitCreditRequest = {
+    accountID: number
+    transactionDCAmount: number
+    debitOrCredit: string
+};
+
+
 
 export type TransactionLedgerResponse = {
     accountID: number;
@@ -43,14 +75,10 @@ export type TransactionLedgerResponse = {
     transactions: TransactionLedgerEntry[];
 };
 
-export type TransactionDebitCreditRequest = {
-    accountID: number
-    transactionDCAmount: number
-    debitOrCredit: string
-};
-
-export type TransactionPostRequest = {
+export type TransactionLedgerEntry = {
+    transactionID: number
     transactionComment: string
-    debitCreditSet: TransactionDebitCreditRequest[]
+    split: string
+    transactionDCAmount: number
 };
 

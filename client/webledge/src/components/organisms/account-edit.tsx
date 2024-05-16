@@ -1,15 +1,9 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { TransactionAccount, TransactionAccountPostRequest } from '../../lib/definitions';
-import useSWR, { Fetcher } from "swr";
+import { TransactionAccountPostRequest } from '../../lib/definitions';
 import React, {FormEvent} from "react";
 import AccountSelector from "../molecules/account-selector";
 import AccountTypeSelector from "../molecules/account-type-selector";
-
-const fetcher = (...args: Parameters<typeof fetch>) => fetch(...args).then(res => res.json())
-
-// const fetcher2 = (url:string) => fetch(url).then(res => res.json())
-
-
+import {useGetAccount} from "../../lib/data";
 const postFormData = async (formData: FormData) => {
     try {
         // Do a bit of work to convert the entries to a plain JS object
@@ -33,14 +27,7 @@ const postFormData = async (formData: FormData) => {
         console.error('Error making POST request:', error);
     }
 }
-const useBlogPostsByUser = (accountID:string |undefined):{data:TransactionAccount | undefined, isLoading:boolean, error: string|undefined} => {
-    const { data, error , isLoading} = useSWR<TransactionAccount, string>(process.env.REACT_APP_MIMIRLEDGER_API_URL+'/accounts/'+accountID, fetcher);
-    return {
-        data,
-        isLoading,
-        error
-    };
-};
+
 async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
@@ -50,7 +37,7 @@ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
 
 export default function AccountEditForm(){
     const { accountID } = useParams();
-    const { data, isLoading, error } = useBlogPostsByUser(accountID);
+    const { data, isLoading, error } = useGetAccount(accountID);
 
     if (isLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>

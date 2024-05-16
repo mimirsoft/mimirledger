@@ -1,16 +1,11 @@
 import {useParams, useNavigate, Link} from "react-router-dom";
-import useSWR, { Fetcher } from "swr";
 import React, {FormEvent} from "react";
 import {
-    Transaction,
-    TransactionAccount,
     TransactionDebitCreditRequest, TransactionLedgerEntry,
-    TransactionLedgerResponse,
     TransactionPostRequest
 } from "../../lib/definitions";
 import AccountSelector from "../molecules/account-selector";
-
-const fetcher = (...args: Parameters<typeof fetch>) => fetch(...args).then(res => res.json())
+import {useGetTransactionsOnAccountLedger} from "../../lib/data";
 
 const postFormData = async (formData: FormData) => {
     try {
@@ -52,20 +47,11 @@ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     const result = await postFormData(formData);
     window.location.reload();
 };
-// get the transactions
-const useTransactionOnAccount = (accountID:string |undefined):{data:TransactionLedgerResponse | undefined, isLoading:boolean, error: string|undefined} => {
-    const { data,
-        error ,
-        isLoading} = useSWR<TransactionLedgerResponse, string>(process.env.REACT_APP_MIMIRLEDGER_API_URL+'/transactions/account/'+accountID, fetcher);
-    return {
-        data,
-        isLoading,
-        error
-    };
-};
+
+
 export default function TransactionAccountLedger() {
     const { accountID } = useParams();
-    const { data, isLoading, error } = useTransactionOnAccount(accountID);
+    const { data, isLoading, error } = useGetTransactionsOnAccountLedger(accountID);
     if (isLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>
 
@@ -101,7 +87,10 @@ export default function TransactionAccountLedger() {
                 <div className="w-80">
                     Comment
                 </div>
-                <div className="w-8">
+                <div className="w-80">
+                    Account
+                </div>
+                <div className="w-16">
                     Amount
                 </div>
             </div>
@@ -114,7 +103,10 @@ export default function TransactionAccountLedger() {
                         <div className="w-80">
                             {transaction.transactionComment}
                         </div>
-                        <div className="w-8">
+                        <div className="w-80">
+                            {transaction.split}
+                        </div>
+                        <div className="w-16 text-right">
                             {transaction.transactionDCAmount}
                         </div>
                         <Link to={'/transactions/' + transaction.transactionID} className={`nav__item p-4 }`}>

@@ -1,13 +1,14 @@
-import { TransactionAccount, TransactionAccountPostRequest } from '../../lib/definitions';
+import {
+    Account,
+    TransactionAccountPostRequest,
+} from '../../lib/definitions';
 import {useState} from "react";
 import Modal from '../molecules/Modal'
-import useSWR from "swr";
 import React, {FormEvent} from "react";
 import {Link} from "react-router-dom";
 import AccountSelector from "../molecules/account-selector";
 import AccountTypeSelector from "../molecules/account-type-selector";
-const fetcher = (...args: Parameters<typeof fetch>) => fetch(...args).then(res => res.json())
-const myURL = new URL('/accounts', process.env.REACT_APP_MIMIRLEDGER_API_URL);
+import {useGetAccounts} from "../../lib/data";
 
 const postFormData = async (formData: FormData) => {
     try {
@@ -34,15 +35,18 @@ const postFormData = async (formData: FormData) => {
         console.error('Error making POST request:', error);
     }
 }
+
 async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const result = await postFormData(formData);
     window.location.reload();
 };
+
+
 export default function TransactionAccounts(){
     const [openModal, setOpenModal]  = useState(false)
-    const { data, error, isLoading } = useSWR(myURL, fetcher)
+    const { data, error, isLoading } = useGetAccounts()
 
     if (isLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>
@@ -101,7 +105,7 @@ export default function TransactionAccounts(){
                 Balance
             </div>
         </div>
-        {data.accounts && data.accounts.map((account: TransactionAccount, index: number) => {
+        {data?.accounts && data.accounts.map((account: Account, index: number) => {
             return (
                 <div className="flex" key={index} >
                     <div className="w-8">

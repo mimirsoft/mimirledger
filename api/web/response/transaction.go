@@ -13,14 +13,14 @@ type TransactionSet struct {
 }
 
 type Transaction struct {
-	TransactionID            uint64                    `json:"transaction_id,omitempty"`
-	TransactionDate          time.Time                 `json:"transaction_date"`
-	TransactionReconcileDate sql.NullTime              `json:"transaction_reconcile_date"`
-	TransactionComment       string                    `json:"transaction_comment"`
-	TransactionAmount        uint64                    `json:"transaction_amount"`
-	TransactionReference     string                    `json:"transaction_reference"` // this could be a check number, batch ,etc
-	IsReconciled             bool                      `json:"is_reconciled"`
-	IsSplit                  bool                      `json:"is_split"`
+	TransactionID            uint64                    `json:"transactionID,omitempty"`
+	TransactionDate          time.Time                 `json:"transactionDate"`
+	TransactionReconcileDate sql.NullTime              `json:"transactionReconcileDate"`
+	TransactionComment       string                    `json:"transactionComment"`
+	TransactionAmount        uint64                    `json:"transactionAmount"`
+	TransactionReference     string                    `json:"transactionReference"` // this could be a check number, batch ,etc
+	IsReconciled             bool                      `json:"isReconciled"`
+	IsSplit                  bool                      `json:"isSplit"`
 	DebitCreditSet           []*TransactionDebitCredit `json:"debitCreditSet"`
 }
 type TransactionDebitCredit struct {

@@ -1,19 +1,15 @@
-import useSWR from 'swr'
 import type { TransactionAccountType} from  "../../lib/definitions"
-const fetcher = (...args: Parameters<typeof fetch>) => fetch(...args).then(res => res.json())
-const myURL = new URL('/accounttypes', process.env.REACT_APP_MIMIRLEDGER_API_URL);
+import {useGetTransactionAccountTypes} from "../../lib/data";
 
 export default function TransactionAccountTypes() {
-
-    const { data, error, isLoading } = useSWR(myURL, fetcher)
+    const { data, error, isLoading } = useGetTransactionAccountTypes()
 
     if (error) return <div>Failed to load</div>
     if (isLoading) return <div className="Loading">Loading...</div>;
 
-
     return (
         <div>
-            {data.accountTypes &&  data.accountTypes.map((accountType:TransactionAccountType, index:number) => {
+            {data?.accountTypes &&  data.accountTypes.map((accountType:TransactionAccountType, index:number) => {
                     return (
                         <div key={index} className="flex">
                             <div className="w-64">

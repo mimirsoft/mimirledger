@@ -1,14 +1,13 @@
-import {useParams, useNavigate, Link} from "react-router-dom";
+import {useParams, useSearchParams, useNavigate, Link} from "react-router-dom";
 import {
     TransactionDebitCreditRequest,
     TransactionDebitCreditResponse,
-    TransactionEditPostRequest,
-    TransactionLedgerEntry
+    TransactionEditPostRequest
 } from '../../lib/definitions';
 import React, {FormEvent} from "react";
 import AccountSelector from "../molecules/account-selector";
-import AccountTypeSelector from "../molecules/account-type-selector";
 import {useGetTransaction} from "../../lib/data";
+
 const postFormData = async (formData: FormData) => {
     try {
         // Do a bit of work to convert the entries to a plain JS object
@@ -45,21 +44,24 @@ const postFormData = async (formData: FormData) => {
     }
 }
 
-async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const formData = new FormData(event.currentTarget)
-    const result = await postFormData(formData);
-    window.location.reload();
-};
-
 export default function TransactionEditForm(){
+    let [searchParams] = useSearchParams();
+    let returnAccountID = searchParams.get("returnAccount"); // is the string "Jonathan Smith"
+
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        const formData = new FormData(event.currentTarget)
+        const result = await postFormData(formData);
+        navigate("/transactions/account/"+returnAccountID);
+    };
+
+    const navigate = useNavigate();
     const { transactionID } = useParams();
     const { data, isLoading, error } = useGetTransaction(transactionID);
 
     if (isLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>
 
-    console.log(data)
      return (
          <div >
              <form onSubmit={handleSubmit}>

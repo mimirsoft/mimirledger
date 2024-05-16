@@ -1,4 +1,4 @@
-import {useParams, useNavigate, Link} from "react-router-dom";
+import {useParams, useSearchParams, useNavigate, Link} from "react-router-dom";
 import React, {FormEvent} from "react";
 import {
     TransactionDebitCreditRequest, TransactionLedgerEntry,
@@ -109,7 +109,7 @@ export default function TransactionAccountLedger() {
                         <div className="w-16 text-right">
                             {transaction.transactionDCAmount}
                         </div>
-                        <Link to={'/transactions/' + transaction.transactionID} className={`nav__item p-4 }`}>
+                        <Link to={{pathname: '/transactions/' + transaction.transactionID, search: '?returnAccount='+accountID}} className={`nav__item p-4 }`}>
                             EDIT Transaction
                         </Link>
                     </div>

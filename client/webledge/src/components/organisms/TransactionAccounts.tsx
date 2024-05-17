@@ -6,8 +6,8 @@ import {useState} from "react";
 import Modal from '../molecules/Modal'
 import React, {FormEvent} from "react";
 import {Link} from "react-router-dom";
-import AccountSelector from "../molecules/account-selector";
-import AccountTypeSelector from "../molecules/account-type-selector";
+import AccountSelector from "../molecules/AccountSelector";
+import AccountTypeSelector from "../molecules/AccountTypeSelector";
 import {useGetAccounts} from "../../lib/data";
 
 const postFormData = async (formData: FormData) => {

@@ -5,7 +5,8 @@ import {
     TransactionEditPostRequest
 } from '../../lib/definitions';
 import React, {FormEvent} from "react";
-import AccountSelector from "../molecules/account-selector";
+import AccountSelector from "../molecules/AccountSelector";
+import DebitCreditSelector from "../molecules/DebitCreditSelector";
 import {useGetTransaction} from "../../lib/data";
 
 const postFormData = async (formData: FormData) => {
@@ -51,8 +52,14 @@ export default function TransactionEditForm(){
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
         const formData = new FormData(event.currentTarget)
-        const result = await postFormData(formData);
-        navigate("/transactions/account/"+returnAccountID);
+        const response = await postFormData(formData);
+        if (response?.status == 200){
+            navigate("/transactions/account/"+returnAccountID);
+        }
+        else {
+            console.log(response)
+        }
+
     };
 
     const navigate = useNavigate();
@@ -80,10 +87,9 @@ export default function TransactionEditForm(){
                                                                            index: number) => {
                              return (
                                  <div className="mx-0  flex flex-row flex-wrap text-right" key={index}>
-                                     <div className="w-16 text-right">
-                                         <input className="w-16 bg-slate-300 text-right" type="text"
-                                                name={"debitOrCredit" + index}
-                                                defaultValue={transaction.debitOrCredit}/>
+                                     <div className="w-20 text-right">
+                                         <DebitCreditSelector name={"debitOrCredit" + index}
+                                                          selectedValue={transaction.debitOrCredit}/>
                                      </div>
                                      <div className="w-16 text-right">
                                          <input className="w-16 bg-slate-300 text-right" type="text"

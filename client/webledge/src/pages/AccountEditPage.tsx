@@ -1,5 +1,5 @@
 import React, { useEffect, useState, FormEvent } from 'react'
-import AccountEditForm from '../components/organisms/account-edit';
+import AccountEditForm from '../components/organisms/AccountEditForm';
 
 export default function AccountEditPage() {
     return (

@@ -4,7 +4,7 @@ import {
     TransactionDebitCreditRequest, TransactionLedgerEntry,
     TransactionPostRequest
 } from "../../lib/definitions";
-import AccountSelector from "../molecules/account-selector";
+import AccountSelector from "../molecules/AccountSelector";
 import {useGetTransactionsOnAccountLedger} from "../../lib/data";
 
 const postFormData = async (formData: FormData) => {

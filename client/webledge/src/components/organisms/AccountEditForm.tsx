@@ -1,8 +1,8 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { TransactionAccountPostRequest } from '../../lib/definitions';
 import React, {FormEvent} from "react";
-import AccountSelector from "../molecules/account-selector";
-import AccountTypeSelector from "../molecules/account-type-selector";
+import AccountSelector from "../molecules/AccountSelector";
+import AccountTypeSelector from "../molecules/AccountTypeSelector";
 import {useGetAccount} from "../../lib/data";
 const postFormData = async (formData: FormData) => {
     try {

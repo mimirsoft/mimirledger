@@ -6,7 +6,6 @@ import {
 } from '../../lib/definitions';
 import React, {FormEvent} from "react";
 import AccountSelector from "../molecules/AccountSelector";
-import DebitCreditSelector from "../molecules/DebitCreditSelector";
 import {useGetTransaction} from "../../lib/data";
 
 const postFormData = async (formData: FormData) => {
@@ -19,11 +18,19 @@ const postFormData = async (formData: FormData) => {
 
         let dcSet: Array<TransactionDebitCreditRequest> = []
         //iterate over all the debit/credit inputs
-        for (let step = 0; step < 2; step++) {
-            const accountSign = String(formEntries['debitOrCredit' +step])
-            const tdcAmount = Number(formEntries['tdcAmount' +step])
-            const tdcAccount = Number(formEntries['tdc' +step])
-            let tdc = {accountID: tdcAccount, transactionDCAmount: tdcAmount, debitOrCredit: accountSign }
+        // get debits
+        for (let step = 0; step < 1; step++) {
+            const tdcAmount = Number(formEntries['debitAmount' +step])
+            const tdcAccount = Number(formEntries['debitAccount' +step])
+            let tdc = {accountID: tdcAccount, transactionDCAmount: tdcAmount, debitOrCredit: "DEBIT" }
+            console.log(tdc)
+            dcSet.push(tdc)
+        }
+        // get credits
+        for (let step = 0; step < 1; step++) {
+            const tdcAmount = Number(formEntries['creditAmount' +step])
+            const tdcAccount = Number(formEntries['creditAccount' +step])
+            let tdc = {accountID: tdcAccount, transactionDCAmount: tdcAmount, debitOrCredit: "CREDIT" }
             dcSet.push(tdc)
         }
 
@@ -69,6 +76,20 @@ export default function TransactionEditForm(){
     if (isLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>
 
+    let creditSet: Array<TransactionDebitCreditResponse> = []
+    let debitSet: Array<TransactionDebitCreditResponse> = []
+    {data?.debitCreditSet && data.debitCreditSet.map((transaction: TransactionDebitCreditResponse,
+                                                      index: number) => {
+        if (transaction.debitOrCredit == "CREDIT"){
+            creditSet.push(transaction)
+        }
+        if (transaction.debitOrCredit == "DEBIT"){
+            debitSet.push(transaction)
+        }
+
+    })}
+    // sort debitCreditSet into debits and credits
+    // render debits and credits
      return (
          <div >
              <form onSubmit={handleSubmit}>
@@ -81,29 +102,59 @@ export default function TransactionEditForm(){
                                 defaultValue={data?.transactionComment}/>
                      </div>
                      <div className="my-2 mx-4 flex flex-col flex-wrap">
-                         <label className="my-2 w-80 text-xl font-bold bg-slate-200 w-full">Debits/Credits
+                         <label className="my-2 w-80 text-xl font-bold bg-slate-200 w-full">Debits
                          </label>
-                         {data?.debitCreditSet && data.debitCreditSet.map((transaction: TransactionDebitCreditResponse,
+                         {debitSet.map((transaction: TransactionDebitCreditResponse,
                                                                            index: number) => {
-                             return (
-                                 <div className="mx-0  flex flex-row flex-wrap text-right" key={index}>
-                                     <div className="w-20 text-right">
-                                         <DebitCreditSelector name={"debitOrCredit" + index}
-                                                          selectedValue={transaction.debitOrCredit}/>
+                             if (transaction.debitOrCredit == "DEBIT") {
+                                 return (
+                                     <div className="mx-0  flex flex-row flex-wrap text-right" key={index}>
+                                         <div className="w-16 text-right">
+                                             <input className="w-16 bg-slate-300 text-right" type="text"
+                                                    name={"debitAmount" + index}
+                                                    defaultValue={transaction.transactionDCAmount}/>
+                                         </div>
+                                         <div className="text-right">
+                                             <AccountSelector name={"debitAccount" + index} id={transaction.accountID}
+                                                              includeTop={true}
+                                                              excludeID={0}/>
+                                         </div>
                                      </div>
-                                     <div className="w-16 text-right">
-                                         <input className="w-16 bg-slate-300 text-right" type="text"
-                                                name={"tdcAmount" + index}
-                                                defaultValue={transaction.transactionDCAmount}/>
-                                     </div>
-                                     <div className="text-right">
-                                         <AccountSelector name={"tdc" + index} id={transaction.accountID}
-                                                          includeTop={true}
-                                                          excludeID={0}/>
-                                     </div>
-                                 </div>
-                             );
+                                 );
+                             }
+                             return;
                          })}
+                         <div className="my-2 w-80 text-xl font-bold  w-full">
+                             <button className="bg-slate-300 my-2 p-3 font-bold" type="button">Add Debit</button>
+                         </div>
+
+                     </div>
+                     <div className="my-2 mx-4 flex flex-col flex-wrap">
+                         <label className="my-2 w-80 text-xl font-bold bg-slate-200 w-full">Credits
+                         </label>
+                         {creditSet.map((transaction: TransactionDebitCreditResponse,
+                                                                           index: number) => {
+                             if (transaction.debitOrCredit == "CREDIT") {
+                                 return (
+                                     <div className="mx-0  flex flex-row flex-wrap text-right" key={index}>
+                                         <div className="w-16 text-right">
+                                             <input className="w-16 bg-slate-300 text-right" type="text"
+                                                    name={"creditAmount" + index}
+                                                    defaultValue={transaction.transactionDCAmount}/>
+                                         </div>
+                                         <div className="text-right">
+                                             <AccountSelector name={"creditAccount" + index} id={transaction.accountID}
+                                                              includeTop={true}
+                                                              excludeID={0}/>
+                                         </div>
+                                     </div>
+                                 );
+                             }
+                             return;
+                         })}
+                         <div className="my-2 w-80 text-xl font-bold  w-full">
+                             <button className="bg-slate-300 my-2 p-3 font-bold" type="button">Add Credit</button>
+                         </div>
                      </div>
                      <div className="flex my-2">
                          <input className=" bg-slate-300" type="hidden" name="transactionID"

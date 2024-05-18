@@ -51,8 +51,9 @@ func TestAccountStoreValid(t *testing.T) {
 	g.Expect(acctSet[0].AccountID).To(gomega.Equal(a3.AccountID))
 	g.Expect(acctSet[0].AccountLeft).To(gomega.Equal(uint64(1)))
 	g.Expect(acctSet[0].AccountRight).To(gomega.Equal(uint64(2)))
-	g.Expect(acctSet[0].AccountBalance).To(gomega.Equal(uint64(3000)))
-	g.Expect(acctSet[0].AccountSubtotal).To(gomega.Equal(uint64(2000)))
+	// regular store call cannot update AccountBalance or AccountSubtotal
+	g.Expect(acctSet[0].AccountBalance).To(gomega.Equal(int64(0)))
+	g.Expect(acctSet[0].AccountSubtotal).To(gomega.Equal(int64(0)))
 	g.Expect(acctSet[0].AccountDecimals).To(gomega.Equal(uint64(2)))
 }
 
@@ -75,8 +76,8 @@ func TestAccountStoreGetByID(t *testing.T) {
 	g.Expect(acct.AccountID).To(gomega.Equal(a3.AccountID))
 	g.Expect(acct.AccountLeft).To(gomega.Equal(uint64(3)))
 	g.Expect(acct.AccountRight).To(gomega.Equal(uint64(4)))
-	g.Expect(acct.AccountBalance).To(gomega.Equal(uint64(3000)))
-	g.Expect(acct.AccountSubtotal).To(gomega.Equal(uint64(2000)))
+	g.Expect(acct.AccountBalance).To(gomega.Equal(int64(0)))
+	g.Expect(acct.AccountSubtotal).To(gomega.Equal(int64(0)))
 	g.Expect(acct.AccountDecimals).To(gomega.Equal(uint64(2)))
 }
 func TestAccountStore_OpenSpotInTree(t *testing.T) {
@@ -131,8 +132,8 @@ func TestAccountStoreAndUpdate(t *testing.T) {
 	g.Expect(acct.AccountID).To(gomega.Equal(a1.AccountID))
 	g.Expect(acct.AccountLeft).To(gomega.Equal(uint64(5)))
 	g.Expect(acct.AccountRight).To(gomega.Equal(uint64(6)))
-	g.Expect(acct.AccountBalance).To(gomega.Equal(uint64(4000)))
-	g.Expect(acct.AccountSubtotal).To(gomega.Equal(uint64(3000)))
+	g.Expect(acct.AccountBalance).To(gomega.Equal(int64(0)))
+	g.Expect(acct.AccountSubtotal).To(gomega.Equal(int64(0)))
 	g.Expect(acct.AccountDecimals).To(gomega.Equal(uint64(2)))
 }
 
@@ -264,6 +265,33 @@ func TestAccountStore_GetParents(t *testing.T) {
 	g.Expect(children[2].AccountID).To(gomega.Equal(a3.AccountID))
 	g.Expect(children[2].AccountLeft).To(gomega.Equal(uint64(3)))
 	g.Expect(children[2].AccountRight).To(gomega.Equal(uint64(4)))
+}
+
+func TestAccountStore_UpdateSubtotal(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDB(g)
+
+	aStore := createAccountStore()
+	a1 := Account{AccountName: "my bank", AccountFullName: "BankAccounts:MyBank",
+		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
+		AccountBalance: 3000, AccountDecimals: 2, AccountSubtotal: 2000,
+		AccountLeft: 1, AccountRight: 2}
+	err := aStore.Store(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	acct, err := aStore.GetAccountByID(a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(acct.AccountSubtotal).To(gomega.Equal(int64(0)))
+
+	acct.AccountSubtotal = 5555
+
+	err = aStore.UpdateSubtotal(acct)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	acct, err = aStore.GetAccountByID(a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(acct.AccountSubtotal).To(gomega.Equal(int64(5555)))
 }
 
 func setupDB(g *gomega.WithT) {

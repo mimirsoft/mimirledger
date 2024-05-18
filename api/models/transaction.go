@@ -59,6 +59,7 @@ func (c *Transaction) Store(ds *datastore.Datastores) error { //nolint:gocyclo
 	// set c.TransactionCore
 	c.TransactionCore = TransactionCore(eTxn)
 	// store the debit/credits
+	affectedAccountIDs := make(map[uint64]bool)
 	for idx := range c.DebitCreditSet {
 		c.DebitCreditSet[idx].TransactionID = eTxn.TransactionID
 		entDC := transactionDCToEntTransactionDC(c.DebitCreditSet[idx])
@@ -68,8 +69,15 @@ func (c *Transaction) Store(ds *datastore.Datastores) error { //nolint:gocyclo
 		}
 		myTransDC := TransactionDebitCredit(entDC)
 		c.DebitCreditSet[idx] = &myTransDC
+		affectedAccountIDs[c.DebitCreditSet[idx].AccountID] = true
 	}
+	for idx := range affectedAccountIDs {
+		err := UpdateBalanceForAccountID(ds, idx)
+		if err != nil {
+			return fmt.Errorf("UpdateBalanceForAccountID:%w [accountID:%d]", err, idx)
+		}
 
+	}
 	return nil
 }
 

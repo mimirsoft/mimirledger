@@ -197,5 +197,180 @@ func TestTransactionDebitCreditStore_StoreThenDelete(t *testing.T) {
 	g.Expect(err).To(gomega.HaveOccurred())
 	g.Expect(errors.Is(err, sql.ErrNoRows)).To(gomega.BeTrue())
 	g.Expect(myDCSet).To(gomega.HaveLen(0))
+}
 
+func TestTransactionDebitCreditStore_GetSubtotals_Empty(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+
+	aStore := createAccountStore()
+	myAcct := Account{AccountName: "myBank", AccountFullName: "BankAccounts:myBank",
+		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
+		AccountBalance: 0, AccountDecimals: 2, AccountSubtotal: 0,
+		AccountLeft: 1, AccountRight: 2}
+	err := aStore.Store(&myAcct)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	dcStore := createTransactionDCStore()
+	myDCSet, err := dcStore.GetSubtotals(myAcct.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myDCSet).To(gomega.BeNil())
+	g.Expect(myDCSet).To(gomega.HaveLen(0))
+}
+
+func TestTransactionDebitCreditStore_GetSubtotals_OnlyDebits(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+
+	aStore := createAccountStore()
+	myAcct := Account{AccountName: "myBank", AccountFullName: "BankAccounts:myBank",
+		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
+		AccountBalance: 0, AccountDecimals: 2, AccountSubtotal: 0,
+		AccountLeft: 1, AccountRight: 2}
+	err := aStore.Store(&myAcct)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	transStore := createTransactionStore()
+	myTrans := Transaction{TransactionComment: "woot", TransactionAmount: 1000}
+	err = transStore.Store(&myTrans)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// create only a debit
+	dcStore := createTransactionDCStore()
+	myDC := TransactionDebitCredit{DebitOrCredit: AccountSignDebit, TransactionDCAmount: 10000,
+		TransactionID: myTrans.TransactionID, AccountID: myAcct.AccountID}
+	err = dcStore.Store(&myDC)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myDCSet, err := dcStore.GetSubtotals(myAcct.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myDCSet).To(gomega.HaveLen(1))
+	g.Expect(myDCSet[0].DebitOrCredit).To(gomega.Equal(AccountSignDebit))
+	g.Expect(myDCSet[0].Subtotal).To(gomega.Equal(uint64(10000)))
+
+	// add another transaction
+	myTrans2 := Transaction{TransactionComment: "woot2", TransactionAmount: 30000}
+	err = transStore.Store(&myTrans2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// create another transaction with only a debit
+	myDC2 := TransactionDebitCredit{DebitOrCredit: AccountSignDebit, TransactionDCAmount: 30000,
+		TransactionID: myTrans2.TransactionID, AccountID: myAcct.AccountID}
+	err = dcStore.Store(&myDC2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myDCSet, err = dcStore.GetSubtotals(myAcct.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myDCSet).To(gomega.HaveLen(1))
+	g.Expect(myDCSet[0].DebitOrCredit).To(gomega.Equal(AccountSignDebit))
+	g.Expect(myDCSet[0].Subtotal).To(gomega.Equal(uint64(40000)))
+}
+
+func TestTransactionDebitCreditStore_GetSubtotals_OnlyCredits(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+
+	aStore := createAccountStore()
+	myAcct := Account{AccountName: "myBank", AccountFullName: "BankAccounts:myBank",
+		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
+		AccountBalance: 0, AccountDecimals: 2, AccountSubtotal: 0,
+		AccountLeft: 1, AccountRight: 2}
+	err := aStore.Store(&myAcct)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	transStore := createTransactionStore()
+	myTrans := Transaction{TransactionComment: "woot", TransactionAmount: 1000}
+	err = transStore.Store(&myTrans)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// create only a credit
+	dcStore := createTransactionDCStore()
+	myDC := TransactionDebitCredit{DebitOrCredit: AccountSignCredit, TransactionDCAmount: 13000,
+		TransactionID: myTrans.TransactionID, AccountID: myAcct.AccountID}
+	err = dcStore.Store(&myDC)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myDCSet, err := dcStore.GetSubtotals(myAcct.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myDCSet).To(gomega.HaveLen(1))
+	g.Expect(myDCSet[0].DebitOrCredit).To(gomega.Equal(AccountSignCredit))
+	g.Expect(myDCSet[0].Subtotal).To(gomega.Equal(uint64(13000)))
+
+	// add another transaction
+	myTrans2 := Transaction{TransactionComment: "woot2", TransactionAmount: 30000}
+	err = transStore.Store(&myTrans2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// create another transaction with only a credit
+	myDC2 := TransactionDebitCredit{DebitOrCredit: AccountSignCredit, TransactionDCAmount: 34000,
+		TransactionID: myTrans2.TransactionID, AccountID: myAcct.AccountID}
+	err = dcStore.Store(&myDC2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myDCSet, err = dcStore.GetSubtotals(myAcct.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myDCSet).To(gomega.HaveLen(1))
+	g.Expect(myDCSet[0].DebitOrCredit).To(gomega.Equal(AccountSignCredit))
+	g.Expect(myDCSet[0].Subtotal).To(gomega.Equal(uint64(47000)))
+}
+
+func TestTransactionDebitCreditStore_GetSubtotals_DebitsAndCredits(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+
+	aStore := createAccountStore()
+	myAcct := Account{AccountName: "myBank", AccountFullName: "BankAccounts:myBank",
+		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
+		AccountBalance: 0, AccountDecimals: 2, AccountSubtotal: 0,
+		AccountLeft: 1, AccountRight: 2}
+	err := aStore.Store(&myAcct)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	transStore := createTransactionStore()
+	myTrans := Transaction{TransactionComment: "woot", TransactionAmount: 1000}
+	err = transStore.Store(&myTrans)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// create only a credit
+	dcStore := createTransactionDCStore()
+	myDC := TransactionDebitCredit{DebitOrCredit: AccountSignCredit, TransactionDCAmount: 13000,
+		TransactionID: myTrans.TransactionID, AccountID: myAcct.AccountID}
+	err = dcStore.Store(&myDC)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myDCb := TransactionDebitCredit{DebitOrCredit: AccountSignDebit, TransactionDCAmount: 10000,
+		TransactionID: myTrans.TransactionID, AccountID: myAcct.AccountID}
+	err = dcStore.Store(&myDCb)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myDCSet, err := dcStore.GetSubtotals(myAcct.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myDCSet).To(gomega.HaveLen(2))
+	g.Expect(myDCSet[0].DebitOrCredit).To(gomega.Equal(AccountSignCredit))
+	g.Expect(myDCSet[0].Subtotal).To(gomega.Equal(uint64(13000)))
+	g.Expect(myDCSet[1].DebitOrCredit).To(gomega.Equal(AccountSignDebit))
+	g.Expect(myDCSet[1].Subtotal).To(gomega.Equal(uint64(10000)))
+
+	// add another transaction
+	myTrans2 := Transaction{TransactionComment: "woot2", TransactionAmount: 30000}
+	err = transStore.Store(&myTrans2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// create another transaction with only a credit
+	myDC2 := TransactionDebitCredit{DebitOrCredit: AccountSignCredit, TransactionDCAmount: 34000,
+		TransactionID: myTrans2.TransactionID, AccountID: myAcct.AccountID}
+	err = dcStore.Store(&myDC2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	myDC2b := TransactionDebitCredit{DebitOrCredit: AccountSignDebit, TransactionDCAmount: 30000,
+		TransactionID: myTrans2.TransactionID, AccountID: myAcct.AccountID}
+	err = dcStore.Store(&myDC2b)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myDCSet, err = dcStore.GetSubtotals(myAcct.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myDCSet).To(gomega.HaveLen(2))
+	g.Expect(myDCSet[0].DebitOrCredit).To(gomega.Equal(AccountSignCredit))
+	g.Expect(myDCSet[0].Subtotal).To(gomega.Equal(uint64(47000)))
+	g.Expect(myDCSet[1].DebitOrCredit).To(gomega.Equal(AccountSignDebit))
+	g.Expect(myDCSet[1].Subtotal).To(gomega.Equal(uint64(40000)))
 }

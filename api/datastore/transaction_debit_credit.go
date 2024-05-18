@@ -67,3 +67,29 @@ func (store TransactionDebitCreditStore) DeleteForTransactionID(id uint64) error
 	}
 	return nil
 }
+
+type AccountSubtotal struct {
+	Subtotal      uint64      `db:"subtotal"`
+	DebitOrCredit AccountSign `db:"debit_or_credit"`
+}
+
+// Gets one account by account ID
+func (store TransactionDebitCreditStore) GetSubtotals(accountID uint64) ([]*AccountSubtotal, error) {
+	query := `select SUM(transaction_dc_amount) as subtotal,debit_or_credit
+	from transaction_debit_credit 
+	where account_id = $1
+	GROUP BY  debit_or_credit`
+	rows, err := store.Client.Queryx(query, accountID)
+	if err != nil {
+		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
+	}
+	var txnSet []*AccountSubtotal
+	for rows.Next() {
+		var txn AccountSubtotal
+		if err = rows.StructScan(&txn); err != nil {
+			return nil, fmt.Errorf("rows.StructScan:%w", err)
+		}
+		txnSet = append(txnSet, &txn)
+	}
+	return txnSet, nil
+}

@@ -15,8 +15,6 @@ type Account struct {
 	AccountFullName      string                `json:"accountFullname"`
 	AccountMemo          string                `json:"accountMemo"`
 	AccountCurrent       bool                  `json:"accountCurrent"`
-	AccountBalance       uint64                `json:"accountBalance"`
-	AccountSubtotal      uint64                `json:"accountSubtotal"`
 	AccountDecimals      uint64                `json:"accountDecimals"`
 	AccountReconcileDate sql.NullTime          `json:"accountReconcileDate"`
 	AccountFlagged       bool                  `json:"accountFlagged"`
@@ -35,8 +33,6 @@ func ReqAccountToAccount(act *Account) *models.Account {
 		AccountFullName:      act.AccountFullName,
 		AccountMemo:          act.AccountMemo,
 		AccountCurrent:       act.AccountCurrent,
-		AccountBalance:       act.AccountBalance,
-		AccountSubtotal:      act.AccountSubtotal,
 		AccountDecimals:      act.AccountDecimals,
 		AccountReconcileDate: act.AccountReconcileDate,
 		AccountFlagged:       act.AccountFlagged,

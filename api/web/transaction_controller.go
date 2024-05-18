@@ -26,6 +26,7 @@ func (tc *TransactionsController) CreateTransaction(ctx context.Context, myTxn *
 	if err != nil {
 		return nil, fmt.Errorf("myTxn.Store:%w", err)
 	}
+	// after creating transaction, update balance on all affected accounts
 	return myTxn, nil
 }
 
@@ -60,5 +61,6 @@ func (tc *TransactionsController) UpdateTransaction(ctx context.Context, myTxn *
 	if err != nil {
 		return nil, fmt.Errorf("myTxn.Update:%w", err)
 	}
+	// after creating transaction, update balance on all affected accounts
 	return myTxn, nil
 }

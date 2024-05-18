@@ -18,8 +18,8 @@ type Account struct {
 	AccountCurrent       bool
 	AccountLeft          uint64
 	AccountRight         uint64
-	AccountBalance       uint64
-	AccountSubtotal      uint64
+	AccountBalance       int64
+	AccountSubtotal      int64
 	AccountDecimals      uint64
 	AccountReconcileDate sql.NullTime
 	AccountFlagged       bool
@@ -187,6 +187,52 @@ func (c *Account) Update(ds *datastore.Datastores) (err error) { //nolint:gocycl
 		return fmt.Errorf("ds.AccountStore().Update:%w", err)
 	}
 	*c = Account(eAcct)
+	return nil
+}
+
+// updateBalance retrieves a specificAccount
+func (c *Account) updateBalance(ds *datastore.Datastores) error {
+	tcdStore := ds.TransactionDebitCreditStore()
+	subtotals, err := tcdStore.GetSubtotals(c.AccountID)
+	if err != nil {
+		return fmt.Errorf("tcdStore.GetSubtotals:%w", err)
+	}
+	var debitSubtotal int64 = 0
+	var creditSubtotal int64 = 0
+	for idx := range subtotals {
+		switch accountSign := subtotals[idx].DebitOrCredit; accountSign {
+		case datastore.AccountSignDebit:
+			debitSubtotal = int64(subtotals[idx].Subtotal)
+		case datastore.AccountSignCredit:
+			creditSubtotal = int64(subtotals[idx].Subtotal)
+		}
+	}
+
+	switch c.AccountSign {
+	case datastore.AccountSignDebit:
+		c.AccountSubtotal = debitSubtotal - creditSubtotal
+	case datastore.AccountSignCredit:
+		c.AccountSubtotal = creditSubtotal - debitSubtotal
+	}
+	eAcct := datastore.Account(*c)
+	err = ds.AccountStore().UpdateSubtotal(&eAcct)
+	if err != nil {
+		return fmt.Errorf("ds.AccountStore().UpdateSubtotal:%w", err)
+	}
+	*c = Account(eAcct)
+	return nil
+}
+
+// UpdateBalanceForAccountID
+func UpdateBalanceForAccountID(ds *datastore.Datastores, accountID uint64) error {
+	myAcct, err := RetrieveAccountByID(ds, accountID)
+	if err != nil {
+		return fmt.Errorf("RetrieveAccountByID:%w", err)
+	}
+	err = myAcct.updateBalance(ds)
+	if err != nil {
+		return fmt.Errorf("myAcct.updateBalance:%w", err)
+	}
 	return nil
 }
 

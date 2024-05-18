@@ -49,8 +49,8 @@ type Account struct {
 	AccountCurrent       bool           `db:"account_current"`
 	AccountLeft          uint64         `db:"account_left"`
 	AccountRight         uint64         `db:"account_right"`
-	AccountBalance       uint64         `db:"account_balance"`
-	AccountSubtotal      uint64         `db:"account_subtotal"`
+	AccountBalance       int64          `db:"account_balance"`
+	AccountSubtotal      int64          `db:"account_subtotal"`
 	AccountDecimals      uint64         `db:"account_decimals"`
 	AccountReconcileDate sql.NullTime   `db:"account_reconcile_date"`
 	AccountFlagged       bool           `db:"account_flagged"`
@@ -72,8 +72,6 @@ func (store AccountStore) Store(acct *Account) (err error) {
 	account_current,
 	account_left,
 	account_right,
-	account_balance,
-	account_subtotal,
 	account_reconcile_date,
 	account_flagged,
 	account_locked,
@@ -89,8 +87,6 @@ func (store AccountStore) Store(acct *Account) (err error) {
 	:account_current,
 	:account_left,
 	:account_right,
-	:account_balance,
-	:account_subtotal,
 	:account_reconcile_date,
 	:account_flagged,
 	:account_locked,
@@ -118,8 +114,6 @@ func (store AccountStore) Update(acct *Account) (err error) {
 	account_current,
 	account_left,
 	account_right,
-	account_balance,
-	account_subtotal,
 	account_reconcile_date,
 	account_flagged,
 	account_locked,
@@ -134,8 +128,6 @@ func (store AccountStore) Update(acct *Account) (err error) {
 	:account_current,
 	:account_left,
 	:account_right,
-	:account_balance,
-	:account_subtotal,
 	:account_reconcile_date,
 	:account_flagged,
 	:account_locked,
@@ -144,6 +136,20 @@ func (store AccountStore) Update(acct *Account) (err error) {
 	:account_code,
 	:account_sign,
 	:account_type)
+		    WHERE account_id = :account_id
+		 RETURNING *`
+	stmt, err := store.Client.PrepareNamed(query)
+	if err != nil {
+		return
+	}
+	defer stmt.Close()
+	return stmt.QueryRow(acct).StructScan(acct)
+}
+
+// UpdateSubtotal  updates the account_subtotal into postgres
+func (store AccountStore) UpdateSubtotal(acct *Account) (err error) {
+	query := `    UPDATE  transaction_accounts 
+		    SET  account_subtotal = :account_subtotal
 		    WHERE account_id = :account_id
 		 RETURNING *`
 	stmt, err := store.Client.PrepareNamed(query)

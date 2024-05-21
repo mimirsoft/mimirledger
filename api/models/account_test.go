@@ -57,6 +57,78 @@ func TestAccount_Store(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(myAcct).NotTo(gomega.BeNil())
 	g.Expect(myAcct.AccountID).To(gomega.Equal(a1.AccountID))
+
+	a2 := Account{AccountName: "MyBank", AccountSign: datastore.AccountSignCredit, AccountType: datastore.AccountTypeIncome}
+	err = a2.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myAcct, err = getAccountByID(testDS, a2.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myAcct).NotTo(gomega.BeNil())
+	g.Expect(myAcct.AccountID).To(gomega.Equal(a2.AccountID))
+	g.Expect(myAcct.AccountSign).To(gomega.Equal(datastore.AccountSignCredit))
+}
+
+func TestAccount_UpdateBalanceForAccountID(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDB(g)
+
+	a1 := Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err := a1.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	transStore := createTransactionStore()
+	myTrans := datastore.Transaction{TransactionComment: "woot", TransactionAmount: 1000}
+	err = transStore.Store(&myTrans)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	dcStore := createTransactionDCStore()
+	// succeed
+	myDC := datastore.TransactionDebitCredit{DebitOrCredit: datastore.AccountSignDebit, TransactionDCAmount: 54500,
+		TransactionID: myTrans.TransactionID, AccountID: a1.AccountID}
+	err = dcStore.Store(&myDC)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	err = UpdateBalanceForAccountID(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	acct, err := RetrieveAccountByID(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(acct.AccountSubtotal).To(gomega.Equal(int64(54500)))
+	g.Expect(acct.AccountBalance).To(gomega.Equal(int64(54500)))
+}
+
+func TestAccount_UpdateBalance(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDB(g)
+
+	a1 := Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err := a1.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	transStore := createTransactionStore()
+	myTrans := datastore.Transaction{TransactionComment: "woot", TransactionAmount: 1000}
+	err = transStore.Store(&myTrans)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	dcStore := createTransactionDCStore()
+	// succeed
+	myDC := datastore.TransactionDebitCredit{DebitOrCredit: datastore.AccountSignDebit, TransactionDCAmount: 54500,
+		TransactionID: myTrans.TransactionID, AccountID: a1.AccountID}
+	err = dcStore.Store(&myDC)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	err = a1.updateBalance(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(a1.AccountSubtotal).To(gomega.Equal(int64(54500)))
+	g.Expect(a1.AccountBalance).To(gomega.Equal(int64(54500)))
+
+	acct, err := RetrieveAccountByID(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(acct.AccountSubtotal).To(gomega.Equal(int64(54500)))
+	g.Expect(acct.AccountBalance).To(gomega.Equal(int64(54500)))
 }
 
 func TestAccount_RetrieveByIDInvalid(t *testing.T) {
@@ -406,4 +478,16 @@ func setupDB(g *gomega.WithT) {
 	query = `delete from transaction_accounts `
 	_, err = dbClient.Exec(query)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
+}
+
+func createTransactionStore() datastore.TransactionStore {
+	return datastore.TransactionStore{
+		Client: dbClient,
+	}
+}
+
+func createTransactionDCStore() datastore.TransactionDebitCreditStore {
+	return datastore.TransactionDebitCreditStore{
+		Client: dbClient,
+	}
 }

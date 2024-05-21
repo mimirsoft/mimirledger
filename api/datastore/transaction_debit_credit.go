@@ -59,13 +59,26 @@ func (store TransactionDebitCreditStore) GetDCForTransactionID(id uint64) ([]*Tr
 	return txnSet, nil
 }
 
-func (store TransactionDebitCreditStore) DeleteForTransactionID(id uint64) error {
-	query := `DELETE from transaction_debit_credit where transaction_id = $1`
-	_, err := store.Client.Exec(query, id)
+func (store TransactionDebitCreditStore) DeleteForTransactionID(id uint64) ([]*TransactionDebitCredit, error) {
+	query := `DELETE from transaction_debit_credit where transaction_id = $1
+	RETURNING *`
+	rows, err := store.Client.Queryx(query, id)
 	if err != nil {
-		return fmt.Errorf("store.Client.Exec:%w", err)
+		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}
-	return nil
+	defer rows.Close()
+	var txnSet []*TransactionDebitCredit
+	for rows.Next() {
+		var txn TransactionDebitCredit
+		if err = rows.StructScan(&txn); err != nil {
+			return nil, fmt.Errorf("rows.StructScan:%w", err)
+		}
+		txnSet = append(txnSet, &txn)
+	}
+	if len(txnSet) == 0 {
+		return nil, sql.ErrNoRows
+	}
+	return txnSet, nil
 }
 
 type AccountSubtotal struct {

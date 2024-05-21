@@ -66,10 +66,16 @@ func TestTransaction_StoreValidAndRetrieve(t *testing.T) {
 	a1 := Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
 	err := a1.Store(testDS)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(a1.AccountSign).To(gomega.Equal(datastore.AccountSignDebit))
+	g.Expect(a1.AccountType).To(gomega.Equal(datastore.AccountTypeAsset))
 
 	a2 := Account{AccountName: "Income", AccountSign: datastore.AccountSignCredit, AccountType: datastore.AccountTypeIncome}
 	err = a2.Store(testDS)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(a2.AccountID).To(gomega.Equal(a2.AccountID))
+	g.Expect(a2.AccountName).To(gomega.Equal("Income"))
+	g.Expect(a2.AccountSign).To(gomega.Equal(datastore.AccountSignCredit))
+	g.Expect(a2.AccountType).To(gomega.Equal(datastore.AccountTypeIncome))
 
 	txn := Transaction{TransactionCore: TransactionCore{TransactionComment: "woot"},
 		DebitCreditSet: []*TransactionDebitCredit{
@@ -116,6 +122,14 @@ func TestTransaction_StoreValidAndRetrieve(t *testing.T) {
 	g.Expect(myTxn.DebitCreditSet[1].AccountID).To(gomega.Equal(a1.AccountID))
 	g.Expect(myTxn.DebitCreditSet[1].DebitOrCredit).To(gomega.Equal(datastore.AccountSignDebit))
 	g.Expect(myTxn.DebitCreditSet[1].TransactionDCAmount).To(gomega.Equal(uint64(10000)))
+
+	// check balances
+	updatedA2, err := RetrieveAccountByID(testDS, a2.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA2.AccountBalance).To(gomega.Equal(int64(10000)))
+	updatedA1, err := RetrieveAccountByID(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA1.AccountBalance).To(gomega.Equal(int64(10000)))
 }
 
 func TestTransaction_StoreAndUpdate(t *testing.T) {
@@ -149,6 +163,20 @@ func TestTransaction_StoreAndUpdate(t *testing.T) {
 	err = txn.Store(testDS)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
+	// check balances
+	updatedA1, err := RetrieveAccountByID(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA1.AccountSubtotal).To(gomega.Equal(int64(10000)))
+	g.Expect(updatedA1.AccountBalance).To(gomega.Equal(int64(10000)))
+	updatedA2, err := RetrieveAccountByID(testDS, a2.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA2.AccountSubtotal).To(gomega.Equal(int64(10000)))
+	g.Expect(updatedA2.AccountBalance).To(gomega.Equal(int64(10000)))
+	updatedA3, err := RetrieveAccountByID(testDS, a3.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA3.AccountSubtotal).To(gomega.Equal(int64(0)))
+	g.Expect(updatedA3.AccountBalance).To(gomega.Equal(int64(0)))
+
 	txn.TransactionComment = "updated woot"
 	txn.DebitCreditSet[0].TransactionDCAmount = 33000
 	txn.DebitCreditSet[1].TransactionDCAmount = 33000
@@ -173,6 +201,20 @@ func TestTransaction_StoreAndUpdate(t *testing.T) {
 	g.Expect(myTxn.DebitCreditSet[1].AccountID).To(gomega.Equal(a1.AccountID))
 	g.Expect(myTxn.DebitCreditSet[1].DebitOrCredit).To(gomega.Equal(datastore.AccountSignDebit))
 	g.Expect(myTxn.DebitCreditSet[1].TransactionDCAmount).To(gomega.Equal(uint64(33000)))
+
+	// check balances
+	updatedA1, err = RetrieveAccountByID(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA1.AccountSubtotal).To(gomega.Equal(int64(33000)))
+	g.Expect(updatedA1.AccountBalance).To(gomega.Equal(int64(33000)))
+	updatedA2, err = RetrieveAccountByID(testDS, a2.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA2.AccountSubtotal).To(gomega.Equal(int64(0)))
+	g.Expect(updatedA2.AccountBalance).To(gomega.Equal(int64(0)))
+	updatedA3, err = RetrieveAccountByID(testDS, a3.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA3.AccountSubtotal).To(gomega.Equal(int64(33000)))
+	g.Expect(updatedA3.AccountBalance).To(gomega.Equal(int64(33000)))
 }
 
 func TestTransaction_RetrieveTransactionLedgerForAccountID(t *testing.T) {

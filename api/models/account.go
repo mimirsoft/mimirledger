@@ -219,6 +219,15 @@ func (c *Account) updateBalance(ds *datastore.Datastores) error {
 	if err != nil {
 		return fmt.Errorf("ds.AccountStore().UpdateSubtotal:%w", err)
 	}
+	balance, err := ds.AccountStore().GetBalance(c.AccountID)
+	if err != nil {
+		return fmt.Errorf("ds.AccountStore().UpdateBalance:%w", err)
+	}
+	eAcct.AccountBalance = balance
+	err = ds.AccountStore().UpdateBalance(&eAcct)
+	if err != nil {
+		return fmt.Errorf("ds.AccountStore().UpdateBalance:%w", err)
+	}
 	*c = Account(eAcct)
 	return nil
 }

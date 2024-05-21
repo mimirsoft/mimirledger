@@ -101,9 +101,13 @@ func (c *Transaction) Update(ds *datastore.Datastores) error { //nolint:gocyclo
 	// set c.TransactionCore
 	c.TransactionCore = TransactionCore(eTxn)
 	// delete the existing TransactionDebitCredits
-	err = ds.TransactionDebitCreditStore().DeleteForTransactionID(c.TransactionID)
+	deletedDCs, err := ds.TransactionDebitCreditStore().DeleteForTransactionID(c.TransactionID)
 	if err != nil {
 		return fmt.Errorf("ds.TransactionDebitCreditStore().DeleteForTransactionID:%w [transaction:%+v]", err, c)
+	}
+	affectedAccountIDs := make(map[uint64]bool)
+	for idx := range deletedDCs {
+		affectedAccountIDs[deletedDCs[idx].AccountID] = true
 	}
 	// store the new debit/credits
 	for idx := range c.DebitCreditSet {
@@ -115,8 +119,16 @@ func (c *Transaction) Update(ds *datastore.Datastores) error { //nolint:gocyclo
 		}
 		myTransDC := TransactionDebitCredit(entDC)
 		c.DebitCreditSet[idx] = &myTransDC
+		affectedAccountIDs[c.DebitCreditSet[idx].AccountID] = true
 	}
+	// update all account balances
+	for idx := range affectedAccountIDs {
+		err := UpdateBalanceForAccountID(ds, idx)
+		if err != nil {
+			return fmt.Errorf("UpdateBalanceForAccountID:%w [accountID:%d]", err, idx)
+		}
 
+	}
 	return nil
 }
 

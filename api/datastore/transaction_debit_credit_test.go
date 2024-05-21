@@ -189,9 +189,9 @@ func TestTransactionDebitCreditStore_StoreThenDelete(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(myDCSet).To(gomega.HaveLen(2))
 
-	err = dcStore.DeleteForTransactionID(myTrans.TransactionID)
+	deleteDCSet, err := dcStore.DeleteForTransactionID(myTrans.TransactionID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(myDCSet).To(gomega.HaveLen(2))
+	g.Expect(deleteDCSet).To(gomega.HaveLen(2))
 
 	myDCSet, err = dcStore.GetDCForTransactionID(myTrans.TransactionID)
 	g.Expect(err).To(gomega.HaveOccurred())

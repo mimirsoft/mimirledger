@@ -29,8 +29,8 @@ var AccountTypeToSign = map[AccountType]AccountSign{
 	AccountTypeAsset:     AccountSignDebit,
 	AccountTypeLiability: AccountSignCredit,
 	AccountTypeEquity:    AccountSignCredit,
-	AccountTypeIncome:    AccountSignDebit,
-	AccountTypeExpense:   AccountSignCredit,
+	AccountTypeIncome:    AccountSignCredit,
+	AccountTypeExpense:   AccountSignDebit,
 	AccountTypeGain:      AccountSignCredit,
 	AccountTypeLoss:      AccountSignDebit}
 
@@ -158,6 +158,34 @@ func (store AccountStore) UpdateSubtotal(acct *Account) (err error) {
 	}
 	defer stmt.Close()
 	return stmt.QueryRow(acct).StructScan(acct)
+}
+
+// account_balance  updates the account_balance into postgres
+func (store AccountStore) UpdateBalance(acct *Account) (err error) {
+	query := `    UPDATE  transaction_accounts 
+		    SET  account_balance = :account_balance
+		    WHERE account_id = :account_id
+		 RETURNING *`
+	stmt, err := store.Client.PrepareNamed(query)
+	if err != nil {
+		return
+	}
+	defer stmt.Close()
+	return stmt.QueryRow(acct).StructScan(acct)
+}
+
+// GetBalancel  gets the sum of all the subtotals for this accountID and all child accounts
+func (store AccountStore) GetBalance(accountID uint64) (int64, error) {
+	query := `    SELECT SUM(subaccount.account_subtotal) AS balance
+                            FROM transaction_accounts AS p_account, transaction_accounts AS subaccount
+                            WHERE subaccount.account_left BETWEEN p_account.account_left AND p_account.account_right
+                            AND p_account.account_id =$1 `
+	row := store.Client.QueryRowx(query, accountID)
+	var accountBalance int64
+	if err := row.Scan(&accountBalance); err != nil {
+		return 0, err
+	}
+	return accountBalance, nil
 }
 
 // Gets All Accounts

@@ -32,35 +32,9 @@ type AccountTypeSet struct {
 
 // GET /accounttypes
 func (ac *AccountsController) AccountTypeList(ctx context.Context) (*AccountTypeSet, error) {
-	at := []AccountType{
-		{
-			Name: "ASSET",
-			Sign: "DEBIT",
-		},
-		{
-			Name: "LIABILITY",
-			Sign: "CREDIT",
-		},
-		{
-			Name: "EQUITY",
-			Sign: "CREDIT",
-		},
-		{
-			Name: "INCOME",
-			Sign: "DEBIT",
-		},
-		{
-			Name: "EXPENSE",
-			Sign: "CREDIT",
-		},
-		{
-			Name: "GAIN",
-			Sign: "CREDIT",
-		},
-		{
-			Name: "LOSS",
-			Sign: "DEBIT",
-		},
+	var at []AccountType
+	for key, value := range datastore.AccountTypeToSign {
+		at = append(at, AccountType{Name: string(key), Sign: string(value)})
 	}
 	return &AccountTypeSet{AccountTypes: at}, nil
 }

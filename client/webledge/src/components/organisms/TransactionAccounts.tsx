@@ -83,25 +83,28 @@ export default function TransactionAccounts(){
                     My Accounts
                 </div>
                 <div className="flex">
-                    <div className="w-8">
+                    <div className="w-8 font-bold">
                         ID
                     </div>
-                    <div className="w-8">
+                    <div className="w-8 font-bold">
                         L
                     </div>
-                    <div className="w-8">
+                    <div className="w-8 font-bold">
                         R
                     </div>
-                    <div className="w-80">
+                    <div className="w-80 font-bold">
                         FullName
                     </div>
-                    <div className="w-80">
+                    <div className="w-80 font-bold">
                         Name
                     </div>
-                    <div className="w-32">
+                    <div className="w-32 font-bold">
                         Type
                     </div>
-                    <div className="w-32">
+                    <div className="w-32 font-bold">
+                        Sign
+                    </div>
+                    <div className="w-32 font-bold">
                         Balance
                     </div>
                 </div>
@@ -127,13 +130,17 @@ export default function TransactionAccounts(){
                                 {account.accountType}
                             </div>
                             <div className="w-32">
+                                {account.accountSign}
+                            </div>
+                            <div className="w-32">
                                 {account.accountBalance}
                             </div>
-                            <Link to={'/transactions/account/' + account.accountID} className={`nav__item mr-4 }`}>
-                                LEDGER
+                            <Link to={'/transactions/account/' + account.accountID}
+                                  className={`nav__item font-bold mr-4 }`}>
+                            LEDGER
                             </Link>
-                            <Link to={'/accounts/' + account.accountID} className={`nav__item }`}>
-                                EDIT ACCOUNT
+                            <Link to={'/accounts/' + account.accountID} className={`nav__item font-bold`}>
+                                Edit Account
                             </Link>
                         </div>
                     );

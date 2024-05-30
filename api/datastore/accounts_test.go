@@ -416,6 +416,52 @@ func TestAccountStore_GetBalance(t *testing.T) {
 	g.Expect(balance).To(gomega.Equal(int64(101000)))
 }
 
+func TestAccountStore_GetBalance_FromSubaccounts(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDB(g)
+
+	aStore := createAccountStore()
+	// create two accounts
+	a1 := Account{AccountName: "myBank", AccountFullName: "myBank",
+		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
+		AccountBalance: 3000, AccountDecimals: 2, AccountSubtotal: 2000,
+		AccountLeft: 1, AccountRight: 6}
+	err := aStore.Store(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	a2 := Account{AccountName: "subact2", AccountFullName: "myBank:subact2",
+		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
+		AccountBalance: 3000, AccountDecimals: 2, AccountSubtotal: 2000,
+		AccountLeft: 2, AccountRight: 5, AccountParent: a1.AccountID}
+	err = aStore.Store(&a2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// create a transactions
+	transStore := createTransactionStore()
+	myTrans1 := Transaction{TransactionComment: "woot", TransactionAmount: 1000}
+	err = transStore.Store(&myTrans1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// create debits on both
+	dcStore := createTransactionDCStore()
+	myDC1 := TransactionDebitCredit{DebitOrCredit: AccountSignDebit, TransactionDCAmount: 45000,
+		TransactionID: myTrans1.TransactionID, AccountID: a2.AccountID}
+	err = dcStore.Store(&myDC1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a2.AccountSubtotal = 45000
+	err = aStore.UpdateSubtotal(&a2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	balance, err := aStore.GetBalance(a2.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(balance).To(gomega.Equal(int64(45000)))
+
+	balance, err = aStore.GetBalance(a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(balance).To(gomega.Equal(int64(45000)))
+}
+
 func setupDB(g *gomega.WithT) {
 	query := `delete from transaction_debit_credit `
 	_, err := TestPostgresClient.Exec(query)

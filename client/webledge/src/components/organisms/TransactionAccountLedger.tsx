@@ -57,43 +57,49 @@ export default function TransactionAccountLedger() {
 
     return (
         <div className="flex w-full flex-col md:col-span-4">
-            <h2 className={` mb-4 text-xl md:text-2xl`}>
-                Add Transaction to {data?.accountFullName}
-            </h2>
-            <div className="flex">
-                <form className="flex" onSubmit={handleSubmit}>
-                    <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Comment:
-                        <input className="bg-slate-300 font-normal" type="text" name="transactionComment"/>
-                    </label>
-                    <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Amount:
-                        <input className="bg-slate-300" type="text" name="amount"/>
-                    </label>
-                    <label className="my-4 text-xl font-bold mx-4 bg-slate-200">
-                        To Account:
-                        <AccountSelector name={"otherAccountID"} id={0} includeTop={false} excludeID={data?.accountID}/>
-                    </label>
-                    <div className="bg-slate-300 flex">
-                        <input className=" bg-slate-300" type="hidden" name="accountID" defaultValue={data?.accountID}/>
-                        <input className=" bg-slate-300" type="hidden" name="accountSign"
-                               defaultValue={data?.accountSign}/>
-                        <button className="p-3 font-bold" type="submit">Add Transaction</button>
+            <div className="flex grow flex-col justify-between rounded-xl bg-slate-100 p-4">
+                <div className="text-xl font-bold">
+                    Add Transaction to {data?.accountFullName}
+                </div>
+                <div className="flex">
+                    <form className="flex" onSubmit={handleSubmit}>
+                        <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Comment:
+                            <input className="bg-slate-300 font-normal" type="text" name="transactionComment"/>
+                        </label>
+                        <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Amount:
+                            <input className="bg-slate-300" type="text" name="amount"/>
+                        </label>
+                        <label className="my-4 text-xl font-bold mx-4 bg-slate-200">
+                            To Account:
+                            <AccountSelector name={"otherAccountID"} id={0} includeTop={false}
+                                             excludeID={data?.accountID}/>
+                        </label>
+                        <div className="bg-slate-300 flex">
+                            <input className=" bg-slate-300" type="hidden" name="accountID"
+                                   defaultValue={data?.accountID}/>
+                            <input className=" bg-slate-300" type="hidden" name="accountSign"
+                                   defaultValue={data?.accountSign}/>
+                            <button className="p-3 font-bold" type="submit">Add Transaction</button>
+                        </div>
+                    </form>
+                </div>
+                <div className="text-xl font-bold">
+                    Transactions
+                </div>
+                <div className="flex">
+                    <div className="w-8">
+                        id
                     </div>
-                </form>
-            </div>
-            <div className="flex">
-                <div className="w-8">
-                    id
+                    <div className="w-80">
+                        Comment
+                    </div>
+                    <div className="w-80">
+                        Account
+                    </div>
+                    <div className="w-16">
+                        Amount
+                    </div>
                 </div>
-                <div className="w-80">
-                    Comment
-                </div>
-                <div className="w-80">
-                    Account
-                </div>
-                <div className="w-16">
-                    Amount
-                </div>
-            </div>
             {data?.transactions && data.transactions.map((transaction: TransactionLedgerEntry, index: number) => {
                 return (
                     <div className="flex" key={index}>
@@ -106,15 +112,19 @@ export default function TransactionAccountLedger() {
                         <div className="w-80">
                             {transaction.split}
                         </div>
-                        <div className="w-16 text-right">
+                        <div className="w-16 text-right mr-4">
                             {transaction.transactionDCAmount}
                         </div>
-                        <Link to={{pathname: '/transactions/' + transaction.transactionID, search: '?returnAccount='+accountID}} className={`nav__item p-4 }`}>
-                            EDIT Transaction
+                        <Link to={{
+                            pathname: '/transactions/' + transaction.transactionID,
+                            search: '?returnAccount=' + accountID
+                        }} className={`nav__item font-bold`}>
+                            Edit Transaction
                         </Link>
                     </div>
                 );
             })}
+            </div>
         </div>
     );
 }

@@ -188,6 +188,31 @@ func (store AccountStore) GetBalance(accountID uint64) (int64, error) {
 	return accountBalance, nil
 }
 
+// GetBalances  gets the sum of all the subtotals for this accountID and all child accounts
+func (store AccountStore) GetBalances(accountID uint64) (as []Account, err error) {
+	query := `    SELECT subaccount.*
+                            FROM transaction_accounts AS p_account, transaction_accounts AS subaccount
+                            WHERE subaccount.account_left BETWEEN p_account.account_left AND p_account.account_right
+                            AND p_account.account_id =$1 `
+	rows, err := store.Client.Queryx(query, accountID)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var acct Account
+		if err = rows.StructScan(&acct); err != nil {
+			return
+		}
+		as = append(as, acct)
+	}
+	if len(as) == 0 {
+		return nil, sql.ErrNoRows
+	}
+	return
+}
+
 // Gets All Accounts
 func (store AccountStore) GetAccounts() (as []Account, err error) {
 	query := `select * from transaction_accounts order by account_left`

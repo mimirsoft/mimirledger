@@ -10,6 +10,7 @@ export type Account = {
     accountName: string;
     accountFullName: string;
     accountType: string;
+    accountSign: string;
     accountMemo: string;
     accountBalance: number;
 };

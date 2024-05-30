@@ -90,13 +90,52 @@ func TestAccount_UpdateBalanceForAccountID(t *testing.T) {
 	err = dcStore.Store(&myDC)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	err = UpdateBalanceForAccountID(testDS, a1.AccountID)
+	err = UpdateSubtotalForAccountID(testDS, a1.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	acct, err := RetrieveAccountByID(testDS, a1.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(acct.AccountSubtotal).To(gomega.Equal(int64(54500)))
+	g.Expect(acct.AccountBalance).To(gomega.Equal(int64(0)))
+
+	err = UpdateBalanceForAccountID(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	acct, err = RetrieveAccountByID(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(acct.AccountSubtotal).To(gomega.Equal(int64(54500)))
 	g.Expect(acct.AccountBalance).To(gomega.Equal(int64(54500)))
+}
+func TestAccount_updateSubtotal(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDB(g)
+
+	a1 := Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err := a1.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	transStore := createTransactionStore()
+	myTrans := datastore.Transaction{TransactionComment: "woot", TransactionAmount: 1000}
+	err = transStore.Store(&myTrans)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	dcStore := createTransactionDCStore()
+	// succeed
+	myDC := datastore.TransactionDebitCredit{DebitOrCredit: datastore.AccountSignDebit, TransactionDCAmount: 54500,
+		TransactionID: myTrans.TransactionID, AccountID: a1.AccountID}
+	err = dcStore.Store(&myDC)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	err = a1.updateSubtotal(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(a1.AccountSubtotal).To(gomega.Equal(int64(54500)))
+	g.Expect(a1.AccountBalance).To(gomega.Equal(int64(0)))
+
+	acct, err := RetrieveAccountByID(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(acct.AccountSubtotal).To(gomega.Equal(int64(54500)))
+	g.Expect(acct.AccountBalance).To(gomega.Equal(int64(0)))
 }
 
 func TestAccount_UpdateBalance(t *testing.T) {
@@ -119,6 +158,11 @@ func TestAccount_UpdateBalance(t *testing.T) {
 		TransactionID: myTrans.TransactionID, AccountID: a1.AccountID}
 	err = dcStore.Store(&myDC)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	err = a1.updateSubtotal(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(a1.AccountSubtotal).To(gomega.Equal(int64(54500)))
+	g.Expect(a1.AccountBalance).To(gomega.Equal(int64(0)))
 
 	err = a1.updateBalance(testDS)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
@@ -427,6 +471,92 @@ func TestAccount_StoreParentAndChildrenMoved(t *testing.T) {
 	g.Expect(myAcct.AccountFullName).To(gomega.Equal("OtherBank"))
 	g.Expect(myAcct.AccountLeft).To(gomega.Equal(uint64(3)))
 	g.Expect(myAcct.AccountRight).To(gomega.Equal(uint64(8)))
+}
+
+// test make account and children and grand children
+func TestAccount_MoveChildWithBalances(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDB(g)
+	acctSet, err := RetrieveAccounts(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(acctSet).To(gomega.HaveLen(0))
+
+	incomeAcct := Account{AccountName: "Income",
+		AccountSign: datastore.AccountSignCredit, AccountType: datastore.AccountTypeIncome}
+	err = incomeAcct.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a1 := Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err = a1.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a2 := Account{AccountName: "MyBank_subacct", AccountParent: a1.AccountID,
+		AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err = a2.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a4 := Account{AccountName: "OtherBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err = a4.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// add a transaction from income to MyBank_subacct
+	txn := Transaction{TransactionCore: TransactionCore{TransactionComment: "woot"},
+		DebitCreditSet: []*TransactionDebitCredit{
+			&TransactionDebitCredit{AccountID: a2.AccountID,
+				DebitOrCredit:       datastore.AccountSignDebit,
+				TransactionDCAmount: 10000},
+			&TransactionDebitCredit{AccountID: incomeAcct.AccountID,
+				DebitOrCredit:       datastore.AccountSignCredit,
+				TransactionDCAmount: 10000},
+		},
+	}
+	err = txn.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// retreive accounts and check balances and subtotals
+	updatedA2, err := RetrieveAccountByID(testDS, a2.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA2.AccountSubtotal).To(gomega.Equal(int64(10000)))
+	g.Expect(updatedA2.AccountBalance).To(gomega.Equal(int64(10000)))
+
+	updatedA1, err := RetrieveAccountByID(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA1.AccountSubtotal).To(gomega.Equal(int64(0)))
+	g.Expect(updatedA1.AccountBalance).To(gomega.Equal(int64(10000)))
+
+	updatedA4, err := RetrieveAccountByID(testDS, a4.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA4.AccountSubtotal).To(gomega.Equal(int64(0)))
+	g.Expect(updatedA4.AccountBalance).To(gomega.Equal(int64(0)))
+	updatedIncomeAcct, err := RetrieveAccountByID(testDS, incomeAcct.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedIncomeAcct.AccountSubtotal).To(gomega.Equal(int64(10000)))
+	g.Expect(updatedIncomeAcct.AccountBalance).To(gomega.Equal(int64(10000)))
+
+	// move a2 under a4
+	a2.AccountParent = a4.AccountID
+	err = a2.Update(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// retreive accounts and check balances and subtotals
+	updatedA1, err = RetrieveAccountByID(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA1.AccountSubtotal).To(gomega.Equal(int64(0)))
+	g.Expect(updatedA1.AccountBalance).To(gomega.Equal(int64(0)))
+	updatedA2, err = RetrieveAccountByID(testDS, a2.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA2.AccountSubtotal).To(gomega.Equal(int64(10000)))
+	g.Expect(updatedA2.AccountBalance).To(gomega.Equal(int64(10000)))
+	updatedA4, err = RetrieveAccountByID(testDS, a4.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA4.AccountSubtotal).To(gomega.Equal(int64(0)))
+	g.Expect(updatedA4.AccountBalance).To(gomega.Equal(int64(10000)))
+	updatedIncomeAcct, err = RetrieveAccountByID(testDS, incomeAcct.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedIncomeAcct.AccountSubtotal).To(gomega.Equal(int64(10000)))
+	g.Expect(updatedIncomeAcct.AccountBalance).To(gomega.Equal(int64(10000)))
+
 }
 
 // test make account and children and grand children

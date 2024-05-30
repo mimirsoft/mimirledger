@@ -99,9 +99,15 @@ func (c *Account) Update(ds *datastore.Datastores) (err error) { //nolint:gocycl
 	if err != nil {
 		return fmt.Errorf("getAccountByID: %w [accountID: %d ", err, c.AccountID)
 	}
+	affectedBalanceAccountIDs := make(map[uint64]bool)
 	// if we have a new parent, we must close the old spot in the tree and open a new one
 	// before updating
 	if acctB4Update.AccountParent != c.AccountParent {
+		// if these are not equal, then the account tree is changed and will need to be rebalanced
+		oldParentIDs, err := getParentsAccountIDs(ds, acctB4Update.AccountID)
+		if err != nil {
+			return fmt.Errorf("getParentsAccountIDs:%w", err)
+		}
 		//check if this is top level.  if it is not, the type must be the parent type
 		var parentAccount *Account
 		if c.AccountParent != 0 {
@@ -116,7 +122,11 @@ func (c *Account) Update(ds *datastore.Datastores) (err error) { //nolint:gocycl
 			c.AccountType = parentAccount.AccountType
 			c.AccountSign = parentAccount.AccountSign
 		}
+		for idx := range oldParentIDs {
+			affectedBalanceAccountIDs[oldParentIDs[idx]] = true
+		}
 	}
+
 	// fill in sign from AccountType
 	var ok bool
 	var accountSign datastore.AccountSign
@@ -176,6 +186,20 @@ func (c *Account) Update(ds *datastore.Datastores) (err error) { //nolint:gocycl
 			return fmt.Errorf("accountStore().Update:%w", err)
 		}
 	}
+	newParentIDs, err := getParentsAccountIDs(ds, c.AccountID)
+	if err != nil {
+		return fmt.Errorf("getParentsAccountIDs:%w", err)
+	}
+	for idx := range newParentIDs {
+		affectedBalanceAccountIDs[newParentIDs[idx]] = true
+	}
+	for idx := range affectedBalanceAccountIDs {
+		err := UpdateBalanceForAccountID(ds, idx)
+		if err != nil {
+			return fmt.Errorf("UpdateBalanceForAccountID:%w [accountID:%d]", err, idx)
+		}
+	}
+
 	// now get the fullName, after the Update to all AccountLefts and Account Rights
 	fullName, err := retrieveAccountFullName(ds, eAcct.AccountID)
 	if err != nil {
@@ -190,8 +214,8 @@ func (c *Account) Update(ds *datastore.Datastores) (err error) { //nolint:gocycl
 	return nil
 }
 
-// updateBalance retrieves a specificAccount
-func (c *Account) updateBalance(ds *datastore.Datastores) error {
+// updateSubtotal updates the subtotal on account
+func (c *Account) updateSubtotal(ds *datastore.Datastores) error {
 	tcdStore := ds.TransactionDebitCreditStore()
 	subtotals, err := tcdStore.GetSubtotals(c.AccountID)
 	if err != nil {
@@ -219,10 +243,24 @@ func (c *Account) updateBalance(ds *datastore.Datastores) error {
 	if err != nil {
 		return fmt.Errorf("ds.AccountStore().UpdateSubtotal:%w", err)
 	}
+	*c = Account(eAcct)
+	return nil
+}
+
+// updateBalance retrieves a specificAccount
+func (c *Account) updateBalance(ds *datastore.Datastores) error {
+	eAcct := datastore.Account(*c)
 	balance, err := ds.AccountStore().GetBalance(c.AccountID)
 	if err != nil {
-		return fmt.Errorf("ds.AccountStore().UpdateBalance:%w", err)
+		return fmt.Errorf("ds.AccountStore().GetBalance:%w", err)
 	}
+	//getBalances, err := ds.AccountStore().GetBalances(c.AccountID)
+	//if err != nil {
+	//	return fmt.Errorf("ds.AccountStore().getBalances:%w", err)
+	//}
+	//fmt.Printf("account %d balance %d \n", c.AccountID, balance)
+
+	//fmt.Printf("account %d has balances %+v \n", c.AccountID, getBalances)
 	eAcct.AccountBalance = balance
 	err = ds.AccountStore().UpdateBalance(&eAcct)
 	if err != nil {
@@ -241,6 +279,19 @@ func UpdateBalanceForAccountID(ds *datastore.Datastores, accountID uint64) error
 	err = myAcct.updateBalance(ds)
 	if err != nil {
 		return fmt.Errorf("myAcct.updateBalance:%w", err)
+	}
+	return nil
+}
+
+// UpdateSubtotalForAccountID
+func UpdateSubtotalForAccountID(ds *datastore.Datastores, accountID uint64) error {
+	myAcct, err := RetrieveAccountByID(ds, accountID)
+	if err != nil {
+		return fmt.Errorf("RetrieveAccountByID:%w", err)
+	}
+	err = myAcct.updateSubtotal(ds)
+	if err != nil {
+		return fmt.Errorf("myAcct.updateSubtotal:%w", err)
 	}
 	return nil
 }
@@ -385,4 +436,20 @@ func retrieveAccountFullName(ds *datastore.Datastores, accountID uint64) (string
 	}
 	accountFullName = strings.TrimSuffix(accountFullName, ":")
 	return accountFullName, nil
+}
+
+func getParentsAccountIDs(ds *datastore.Datastores, accountID uint64) ([]uint64, error) {
+	as := ds.AccountStore()
+	actSet, err := as.GetParents(accountID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("AccountStore().GetParents:%w", err)
+	}
+	var parentIDs []uint64
+	for idx := range actSet {
+		parentIDs = append(parentIDs, actSet[idx].AccountID)
+	}
+	return parentIDs, nil
 }

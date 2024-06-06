@@ -15,19 +15,30 @@ const postFormData = async (formData: FormData) => {
         // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);
         const accountID = Number(formEntries.accountID)
-        const accountSign = String(formEntries.accountSign)
-        const otherAccountSign = accountSign == "DEBIT"  ? "CREDIT" : "DEBIT";
+        let accountSign = String(formEntries.accountSign)
+        let otherAccountSign = accountSign == "DEBIT"  ? "CREDIT" : "DEBIT";
         const otherAccountID = Number(formEntries.otherAccountID)
-        const amount = Number(formEntries.amount)
+        let amount = Number(formEntries.amount)
 
+        // if amount is negative, swap debgits and credits
+        console.log(amount, accountSign, otherAccountSign)
+        if (amount < 0 ) {
+            amount = -amount
+            accountSign = accountSign == "DEBIT"  ? "CREDIT" : "DEBIT";
+            otherAccountSign = otherAccountSign == "DEBIT"  ? "CREDIT" : "DEBIT";
+        }
+        console.log(amount, accountSign, otherAccountSign)
         // make debitAndCreditSet of two from this account and the selected account
         let dcSet: Array<TransactionDebitCreditRequest> = [
             {accountID: accountID, transactionDCAmount: amount, debitOrCredit: accountSign },
             {accountID: otherAccountID, transactionDCAmount: amount, debitOrCredit: otherAccountSign },
         ];
-
+        const comment = String(formEntries.transactionComment)
+        if (comment == ""){
+            console.warn("comment cannot be empty")
+        }
         const newTransaction : TransactionPostRequest = {
-            transactionComment : String(formEntries.transactionComment),
+            transactionComment: comment,
             debitCreditSet : dcSet,
         };
         var json = JSON.stringify(newTransaction);
@@ -54,7 +65,7 @@ export default function TransactionAccountLedger() {
     const { data, isLoading, error } = useGetTransactionsOnAccountLedger(accountID);
     if (isLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>
-
+    let rowColor = "bg-slate-200"
     return (
         <div className="flex w-full flex-col md:col-span-4">
             <div className="flex grow flex-col justify-between rounded-xl bg-slate-100 p-4">
@@ -67,7 +78,7 @@ export default function TransactionAccountLedger() {
                             <input className="bg-slate-300 font-normal" type="text" name="transactionComment"/>
                         </label>
                         <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Amount:
-                            <input className="bg-slate-300" type="text" name="amount"/>
+                            <input className="bg-slate-300" type="number" name="amount"/>
                         </label>
                         <label className="my-4 text-xl font-bold mx-4 bg-slate-200">
                             To Account:
@@ -96,30 +107,44 @@ export default function TransactionAccountLedger() {
                     <div className="w-80">
                         Account
                     </div>
-                    <div className="w-16">
+                    <div className="w-16 text-right">
                         Amount
                     </div>
+                    <div className="w-16 text-right">
+                        Sign
+                    </div>
                 </div>
-            {data?.transactions && data.transactions.map((transaction: TransactionLedgerEntry, index: number) => {
+                {data?.transactions && data.transactions.map((transaction: TransactionLedgerEntry, index: number) => {
+                if (rowColor == "bg-slate-200"){
+                    rowColor = "bg-slate-300"
+                } else {
+                    rowColor = "bg-slate-200"
+                }
+                let textColor = ""
+                if (transaction.debitOrCredit != data.accountSign) {
+                    textColor = "text-red-500"
+                }
                 return (
-                    <div className="flex" key={index}>
-                        <div className="w-8">
-                            {transaction.transactionID}
-                        </div>
-                        <div className="w-80">
-                            {transaction.transactionComment}
-                        </div>
-                        <div className="w-80">
-                            {transaction.split}
-                        </div>
-                        <div className="w-16 text-right mr-4">
-                            {transaction.transactionDCAmount}
-                        </div>
+                    <div className={'flex '+rowColor}  key={index}>
                         <Link to={{
                             pathname: '/transactions/' + transaction.transactionID,
                             search: '?returnAccount=' + accountID
-                        }} className={`nav__item font-bold`}>
-                            Edit Transaction
+                        }} className={`flex nav__item font-bold`}>
+                            <div className="w-8">
+                                {transaction.transactionID}
+                            </div>
+                            <div className="w-80">
+                                {transaction.transactionComment}
+                            </div>
+                            <div className="w-80">
+                                {transaction.split}
+                            </div>
+                            <div className={"w-16 text-right "+textColor}>
+                                {transaction.transactionDCAmount}
+                            </div>
+                            <div className={"w-16 text-right "+textColor}>
+                                {transaction.debitOrCredit}
+                            </div>
                         </Link>
                     </div>
                 );

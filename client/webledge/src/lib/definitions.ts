@@ -81,5 +81,6 @@ export type TransactionLedgerEntry = {
     transactionComment: string
     split: string
     transactionDCAmount: number
+    debitOrCredit: string
 };
 

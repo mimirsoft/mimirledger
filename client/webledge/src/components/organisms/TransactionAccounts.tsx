@@ -49,7 +49,7 @@ export default function TransactionAccounts(){
 
     if (isLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>
-
+    let rowColor = "bg-slate-200"
     return (
         <div className="flex w-full flex-col md:col-span-4">
             <div className="flex grow flex-col justify-between rounded-xl bg-slate-100 p-4">
@@ -92,7 +92,7 @@ export default function TransactionAccounts(){
                     <div className="w-80 font-bold">
                         FullName
                     </div>
-                    <div className="w-32 font-bold">
+                    <div className="w-32 font-bold text-right mr-4">
                         Balance
                     </div>
                     <div className="w-80 font-bold">
@@ -104,11 +104,19 @@ export default function TransactionAccounts(){
                     <div className="w-32 font-bold">
                         Sign
                     </div>
-
                 </div>
                 {data?.accounts && data.accounts.map((account: Account, index: number) => {
+                    if (rowColor == "bg-slate-200"){
+                        rowColor = "bg-slate-400"
+                    } else {
+                        rowColor = "bg-slate-200"
+                    }
+                    let textColor = ""
+                    if (account.accountBalance < 0) {
+                        textColor = "text-red-500"
+                    }
                     return (
-                        <div className="flex" key={index}>
+                        <div className={'flex '+rowColor} key={index}>
                             <Link to={'/transactions/account/' + account.accountID}
                                   className={`flex nav__item mr-4 }`}>
                                 <div className="w-8">
@@ -123,7 +131,7 @@ export default function TransactionAccounts(){
                                 <div className="w-80">
                                     {account.accountFullName}
                                 </div>
-                                <div className="w-32">
+                                <div className={"w-32 text-right mr-4 "+textColor}>
                                     {account.accountBalance}
                                 </div>
                                 <div className="w-80">

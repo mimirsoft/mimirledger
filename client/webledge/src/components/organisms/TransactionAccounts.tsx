@@ -45,7 +45,6 @@ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
 
 
 export default function TransactionAccounts(){
-    const [openModal, setOpenModal]  = useState(false)
     const { data, error, isLoading } = useGetAccounts()
 
     if (isLoading) return <div className="Loading">Loading...</div>
@@ -53,8 +52,6 @@ export default function TransactionAccounts(){
 
     return (
         <div className="flex w-full flex-col md:col-span-4">
-            <button className="w-80 bg-blue-500 openModalbtn">Open the modal</button>
-            <Modal open={openModal}></Modal>
             <div className="flex grow flex-col justify-between rounded-xl bg-slate-100 p-4">
                 <div className="text-xl font-bold">
                     Create New Account
@@ -95,6 +92,9 @@ export default function TransactionAccounts(){
                     <div className="w-80 font-bold">
                         FullName
                     </div>
+                    <div className="w-32 font-bold">
+                        Balance
+                    </div>
                     <div className="w-80 font-bold">
                         Name
                     </div>
@@ -104,40 +104,37 @@ export default function TransactionAccounts(){
                     <div className="w-32 font-bold">
                         Sign
                     </div>
-                    <div className="w-32 font-bold">
-                        Balance
-                    </div>
+
                 </div>
                 {data?.accounts && data.accounts.map((account: Account, index: number) => {
                     return (
                         <div className="flex" key={index}>
-                            <div className="w-8">
-                                {account.accountID}
-                            </div>
-                            <div className="w-8">
-                                {account.accountLeft}
-                            </div>
-                            <div className="w-8">
-                                {account.accountRight}
-                            </div>
-                            <div className="w-80">
-                                {account.accountFullName}
-                            </div>
-                            <div className="w-80">
-                                {account.accountName}
-                            </div>
-                            <div className="w-32">
-                                {account.accountType}
-                            </div>
-                            <div className="w-32">
-                                {account.accountSign}
-                            </div>
-                            <div className="w-32">
-                                {account.accountBalance}
-                            </div>
                             <Link to={'/transactions/account/' + account.accountID}
-                                  className={`nav__item font-bold mr-4 }`}>
-                            LEDGER
+                                  className={`flex nav__item mr-4 }`}>
+                                <div className="w-8">
+                                    {account.accountID}
+                                </div>
+                                <div className="w-8">
+                                    {account.accountLeft}
+                                </div>
+                                <div className="w-8">
+                                    {account.accountRight}
+                                </div>
+                                <div className="w-80">
+                                    {account.accountFullName}
+                                </div>
+                                <div className="w-32">
+                                    {account.accountBalance}
+                                </div>
+                                <div className="w-80">
+                                    {account.accountName}
+                                </div>
+                                <div className="w-32">
+                                    {account.accountType}
+                                </div>
+                                <div className="w-32">
+                                    {account.accountSign}
+                                </div>
                             </Link>
                             <Link to={'/accounts/' + account.accountID} className={`nav__item font-bold`}>
                                 Edit Account

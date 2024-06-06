@@ -100,3 +100,10 @@ postgres-shell:
 
 psql:
 	$(MAKE) -C db -e psql
+
+
+dumpdatabase:
+	$(MAKE) -C db -e dumpdatabase
+
+loaddatabase:
+	$(MAKE) -C db -e loaddatabase

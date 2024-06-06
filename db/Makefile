@@ -10,6 +10,8 @@ PG_CONTAINER := dev_postgres_1
 DEV_PSQL_OPTS := -h ${PG_DB_HOST} -p ${PG_DB_PORT} -d ${DEVDBNAME} -U ${PG_DB_USER}
 TEST_PSQL_OPTS := -h ${PG_DB_HOST} -p ${PG_DB_PORT} -d ${TESTDBNAME} -U ${PG_DB_USER}
 
+DUMPFILENAME ?= mimir_dump.sql
+
 create-users:
 	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=postgres createuser -h ${PG_DB_HOST} -p ${PG_DB_PORT} -U postgres -s mimirledger || createuser -s mimirledger || true"
 	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=postgres psql -h ${PG_DB_HOST} -p ${PG_DB_PORT} -U postgres -d postgres -c \"ALTER USER mimirledger WITH PASSWORD 'mimirledger';\""
@@ -40,6 +42,12 @@ drop-testdb:
 psql:
 	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=mimirledger psql -h ${PG_DB_HOST} -p ${PG_DB_PORT} -U mimirledger -d mimirledger"
 
+dumpdatabase:
+	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=mimirledger pg_dump -h ${PG_DB_HOST} -p ${PG_DB_PORT} -U mimirledger -d mimirledger -C -f ./db/${DUMPFILENAME}"
+
+loaddatabase:
+	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=${PG_DB_PASSWORD} createdb -h ${PG_DB_HOST} -p ${PG_DB_PORT} -U ${PG_DB_USER} ${DEVDBNAME}"
+	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=${PG_DB_PASSWORD} psql -U ${PG_DB_USER} -f ./db/${DUMPFILENAME}"
 
 
 PGPASSWORD=postgres dropdb -h localhost -p 5432 -U postgres mimirledgertest || true

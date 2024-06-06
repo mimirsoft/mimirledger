@@ -36,3 +36,4 @@ c.out
 
 .var
 .postgres-data
+db/mimir_dump.sql

@@ -43,7 +43,6 @@ const DebitsCreditsColumn = ( props:{name:string;
         []
     );
     return (
-
         <div className="my-2 mx-2 flex flex-col flex-wrap">
             <label className="my-2 w-80 text-xl font-bold bg-slate-200 w-full">{title}S
             </label>
@@ -57,7 +56,7 @@ const DebitsCreditsColumn = ( props:{name:string;
                         <input className="w-16 text-xl bg-slate-300 text-right" type="text"
                                name={props.name+"Amount" + index}
                                defaultValue={transaction.transactionDCAmount}/>
-                        <button onClick={removeDebitCredit} data-index={index}>
+                        <button className="mx-1 text-xl font-bold" onClick={removeDebitCredit} data-index={index}>
                             &times;
                         </button>
                     </div>

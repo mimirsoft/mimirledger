@@ -28,12 +28,12 @@ CREATE INDEX transaction_accounts_account_right_idx ON transaction_accounts (acc
 
 CREATE TABLE transaction_main (
     transaction_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-    transaction_date DATE NOT NULL DEFAULT CURRENT_DATE,
+    transaction_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
     transaction_comment varchar(250) NOT NULL CHECK (transaction_comment <> ''),
     transaction_amount integer NOT NULL CHECK (transaction_amount > 0),
     transaction_reference varchar(32) DEFAULT NULL,
     is_reconciled bool NOT NULL default FALSE,
-    transaction_reconcile_date date DEFAULT NULL,
+    transaction_reconcile_date TIMESTAMP WITH TIME ZONE DEFAULT NULL,
     is_split bool NOT NULL default FALSE) ;
 
 CREATE TABLE transaction_debit_credit (

@@ -1,9 +1,11 @@
 package datastore
 
 import (
+	"database/sql"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	"testing"
+	"time"
 )
 
 func createTransactionStore() TransactionStore {
@@ -49,6 +51,8 @@ func TestTransactionStore_StoreValidAndRetrieve(t *testing.T) {
 	g.Expect(myTrans).NotTo(gomega.BeNil())
 	g.Expect(myTrans.TransactionComment).To(gomega.Equal("woot"))
 	g.Expect(myTrans.TransactionAmount).To(gomega.Equal(uint64(1000)))
+	g.Expect(myTrans.TransactionDate).To(gomega.BeTemporally("~", time.Now(), time.Second))
+	g.Expect(myTrans.TransactionReconcileDate).To(gomega.Equal(sql.NullTime{Time: time.Time{}, Valid: false}))
 }
 
 func TestTransactionStore_StoreUpdateAndRetrieve(t *testing.T) {
@@ -72,4 +76,6 @@ func TestTransactionStore_StoreUpdateAndRetrieve(t *testing.T) {
 	g.Expect(myTrans).NotTo(gomega.BeNil())
 	g.Expect(myTrans.TransactionComment).To(gomega.Equal("updated woot"))
 	g.Expect(myTrans.TransactionAmount).To(gomega.Equal(uint64(4444)))
+	g.Expect(myTrans.TransactionDate).To(gomega.BeTemporally("~", time.Now(), time.Second))
+	g.Expect(myTrans.TransactionReconcileDate).To(gomega.Equal(sql.NullTime{Time: time.Time{}, Valid: false}))
 }

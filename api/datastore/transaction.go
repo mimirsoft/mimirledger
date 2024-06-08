@@ -12,7 +12,7 @@ type TransactionStore struct {
 }
 type Transaction struct {
 	TransactionID            uint64       `db:"transaction_id,omitempty"`
-	TransactionDate          time.Time    `db:"transaction_date"`
+	TransactionDate          time.Time    `db:"transaction_date,omitempty"`
 	TransactionReconcileDate sql.NullTime `db:"transaction_reconcile_date"`
 	TransactionComment       string       `db:"transaction_comment"`
 	TransactionAmount        uint64       `db:"transaction_amount"`
@@ -23,7 +23,10 @@ type Transaction struct {
 
 // Store inserts a UserNotification into postgres
 func (store TransactionStore) Store(trn *Transaction) (err error) {
-	query := `    INSERT INTO transaction_main 
+	if trn.TransactionDate.IsZero() {
+		trn.TransactionDate = time.Now()
+	}
+	query := `INSERT INTO transaction_main 
 		           (transaction_date,
 	transaction_reconcile_date,
 	transaction_comment,

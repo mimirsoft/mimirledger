@@ -19,15 +19,16 @@ const postFormData = async (formData: FormData) => {
         let otherAccountSign = accountSign == "DEBIT"  ? "CREDIT" : "DEBIT";
         const otherAccountID = Number(formEntries.otherAccountID)
         let amount = Number(formEntries.amount)
-
+        let dStr = String(formEntries.transactionDate)
+        let txnDate: Date = new Date(dStr);
         // if amount is negative, swap debgits and credits
-        console.log(amount, accountSign, otherAccountSign)
+        console.log(amount, accountSign, otherAccountSign, txnDate)
         if (amount < 0 ) {
             amount = -amount
             accountSign = accountSign == "DEBIT"  ? "CREDIT" : "DEBIT";
             otherAccountSign = otherAccountSign == "DEBIT"  ? "CREDIT" : "DEBIT";
         }
-        console.log(amount, accountSign, otherAccountSign)
+        console.log(amount, accountSign, otherAccountSign, txnDate)
         // make debitAndCreditSet of two from this account and the selected account
         let dcSet: Array<TransactionDebitCreditRequest> = [
             {accountID: accountID, transactionDCAmount: amount, debitOrCredit: accountSign },
@@ -38,6 +39,7 @@ const postFormData = async (formData: FormData) => {
             console.warn("comment cannot be empty")
         }
         const newTransaction : TransactionPostRequest = {
+            transactionDate: txnDate.toISOString(),
             transactionComment: comment,
             debitCreditSet : dcSet,
         };
@@ -67,89 +69,97 @@ export default function TransactionAccountLedger() {
     if (error) return <div>Failed to load</div>
     let rowColor = "bg-slate-200"
     return (
-        <div className="flex w-full flex-col md:col-span-4">
-            <div className="flex grow flex-col justify-between rounded-xl bg-slate-100 p-4">
-                <div className="text-xl font-bold">
-                    Add Transaction to {data?.accountFullName}
-                </div>
-                <div className="flex">
-                    <form className="flex" onSubmit={handleSubmit}>
-                        <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Comment:
-                            <input className="bg-slate-300 font-normal" type="text" name="transactionComment"/>
-                        </label>
-                        <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Amount:
-                            <input className="bg-slate-300" type="number" name="amount"/>
-                        </label>
-                        <label className="my-4 text-xl font-bold mx-4 bg-slate-200">
-                            To Account:
-                            <AccountSelector name={"otherAccountID"} id={0} includeTop={false}
-                                             excludeID={data?.accountID}/>
-                        </label>
-                        <div className="bg-slate-300 flex">
-                            <input className=" bg-slate-300" type="hidden" name="accountID"
-                                   defaultValue={data?.accountID}/>
-                            <input className=" bg-slate-300" type="hidden" name="accountSign"
-                                   defaultValue={data?.accountSign}/>
-                            <button className="p-3 font-bold" type="submit">Add Transaction</button>
-                        </div>
-                    </form>
-                </div>
-                <div className="text-xl font-bold">
-                    Transactions
-                </div>
-                <div className="flex">
-                    <div className="w-8">
-                        id
-                    </div>
-                    <div className="w-80">
-                        Comment
-                    </div>
-                    <div className="w-80">
-                        Account
-                    </div>
-                    <div className="w-16 text-right">
-                        Amount
-                    </div>
-                    <div className="w-16 text-right">
-                        Sign
-                    </div>
-                </div>
-                {data?.transactions && data.transactions.map((transaction: TransactionLedgerEntry, index: number) => {
-                if (rowColor == "bg-slate-200"){
-                    rowColor = "bg-slate-300"
-                } else {
-                    rowColor = "bg-slate-200"
-                }
-                let textColor = ""
-                if (transaction.debitOrCredit != data.accountSign) {
-                    textColor = "text-red-500"
-                }
-                return (
-                    <div className={'flex '+rowColor}  key={index}>
-                        <Link to={{
-                            pathname: '/transactions/' + transaction.transactionID,
-                            search: '?returnAccount=' + accountID
-                        }} className={`flex nav__item font-bold`}>
-                            <div className="w-8">
-                                {transaction.transactionID}
-                            </div>
-                            <div className="w-80">
-                                {transaction.transactionComment}
-                            </div>
-                            <div className="w-80">
-                                {transaction.split}
-                            </div>
-                            <div className={"w-16 text-right "+textColor}>
-                                {transaction.transactionDCAmount}
-                            </div>
-                            <div className={"w-16 text-right "+textColor}>
-                                {transaction.debitOrCredit}
-                            </div>
-                        </Link>
-                    </div>
-                );
-            })}
+        <div className="flex w-full flex-col md:col-span-4 grow justify-between rounded-xl bg-slate-100 p-4">
+            <div className="text-xl font-bold">
+                Add Transaction to {data?.accountFullName}
             </div>
+            <div className="flex">
+                <form className="flex" onSubmit={handleSubmit}>
+                    <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Date:
+                        <input className="bg-slate-300 font-normal" type="date" name="transactionDate"/>
+                    </label>
+                    <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Comment:
+                        <input className="bg-slate-300 font-normal" type="text" name="transactionComment"/>
+                    </label>
+                    <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Amount:
+                        <input className="bg-slate-300" type="number" name="amount"/>
+                    </label>
+                    <label className="my-4 text-xl font-bold mx-4 bg-slate-200">
+                        To Account:
+                        <AccountSelector name={"otherAccountID"} id={0} includeTop={false}
+                                         excludeID={data?.accountID}/>
+                    </label>
+                    <div className="bg-slate-300 flex">
+                        <input className=" bg-slate-300" type="hidden" name="accountID"
+                               defaultValue={data?.accountID}/>
+                        <input className=" bg-slate-300" type="hidden" name="accountSign"
+                               defaultValue={data?.accountSign}/>
+                        <button className="p-3 font-bold" type="submit">Add Transaction</button>
+                    </div>
+                </form>
+            </div>
+            <div className="text-xl font-bold">
+                Transactions
+            </div>
+            <div className="flex">
+                <div className="w-8">
+                    id
+                </div>
+                <div className="w-80">
+                    Date
+                </div>
+                <div className="w-80">
+                    Comment
+                </div>
+                <div className="w-80">
+                    Account
+                </div>
+                <div className="w-16 text-right">
+                    Amount
+                </div>
+                <div className="w-16 text-right">
+                    Sign
+                </div>
+            </div>
+            {data?.transactions && data.transactions.map((transaction: TransactionLedgerEntry, index: number) => {
+            if (rowColor == "bg-slate-200"){
+                rowColor = "bg-slate-300"
+            } else {
+                rowColor = "bg-slate-200"
+            }
+            let textColor = ""
+            if (transaction.debitOrCredit != data.accountSign) {
+                textColor = "text-red-500"
+            }
+            let txnDate: Date = new Date(transaction.transactionDate);
+            return (
+                <div className={'flex '+rowColor}  key={index}>
+                    <Link to={{
+                        pathname: '/transactions/' + transaction.transactionID,
+                        search: '?returnAccount=' + accountID
+                    }} className={`flex nav__item font-bold`}>
+                        <div className="w-8">
+                            {transaction.transactionID}
+                        </div>
+                        <div className="w-80">
+                            {txnDate.toISOString().split('T')[0]}
+                        </div>
+                        <div className="w-80">
+                            {transaction.transactionComment}
+                        </div>
+                        <div className="w-80">
+                            {transaction.split}
+                        </div>
+                        <div className={"w-16 text-right "+textColor}>
+                            {transaction.transactionDCAmount}
+                        </div>
+                        <div className={"w-16 text-right "+textColor}>
+                            {transaction.debitOrCredit}
+                        </div>
+                    </Link>
+                </div>
+            );
+        })}
         </div>
     );
 }

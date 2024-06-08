@@ -9,17 +9,7 @@ import {
 
 const accountURL = new URL('/accounts', process.env.REACT_APP_MIMIRLEDGER_API_URL);
 export const  useGetAccounts = ():{data:AccountSet | undefined, isLoading:boolean, error: string|undefined} => {
-   // const fetcher = (...args: Parameters<typeof fetch>) => fetch(...args).then(res => res.json())
-    //console.log(fetcher);
    return useSWR<AccountSet, string>(accountURL);
-    /*const { data, error, isLoading } = useSWR<AccountSet, string>(myURL);
-    console.log("data"+data)
-    return {
-        data,
-        isLoading,
-        error,
-    };
-    */
 }
 
 export const useGetAccount = (accountID:string |undefined):{data:Account | undefined, isLoading:boolean, error: string|undefined} => {

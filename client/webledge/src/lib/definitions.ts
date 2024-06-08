@@ -37,6 +37,7 @@ export type TransactionAccountType = {
 
 export type TransactionResponse = {
     transactionID: number
+    transactionDate: string,
     transactionComment: string
     transactionAmount: number
     debitCreditSet: TransactionDebitCreditResponse[]
@@ -50,12 +51,14 @@ export type TransactionDebitCreditResponse = {
 };
 
 export type TransactionPostRequest = {
+    transactionDate: string
     transactionComment: string
     debitCreditSet: TransactionDebitCreditRequest[]
 };
 
 export type TransactionEditPostRequest = {
     transactionID: number
+    transactionDate: string
     transactionComment: string
     debitCreditSet: TransactionDebitCreditRequest[]
 };
@@ -65,8 +68,6 @@ export type TransactionDebitCreditRequest = {
     transactionDCAmount: number
     debitOrCredit: string
 };
-
-
 
 export type TransactionLedgerResponse = {
     accountID: number;
@@ -78,6 +79,7 @@ export type TransactionLedgerResponse = {
 
 export type TransactionLedgerEntry = {
     transactionID: number
+    transactionDate: string,
     transactionComment: string
     split: string
     transactionDCAmount: number

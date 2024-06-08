@@ -9,6 +9,7 @@ import (
 	"github.com/onsi/gomega"
 	"net/http"
 	"testing"
+	"time"
 )
 
 // M is an alias for map[string]interface{}
@@ -191,6 +192,7 @@ func TestTransaction_PostNewTransaction(t *testing.T) {
 	g.Expect(res.TransactionComment).To(gomega.Equal("getting paid"))
 	g.Expect(res.TransactionAmount).To(gomega.Equal(uint64(9999)))
 	g.Expect(res.DebitCreditSet).To(gomega.HaveLen(2))
+	g.Expect(res.TransactionDate).To(gomega.BeTemporally("~", time.Now(), time.Second))
 }
 
 func TestTransaction_PutTransactionUpdate(t *testing.T) {
@@ -229,7 +231,11 @@ func TestTransaction_PutTransactionUpdate(t *testing.T) {
 	map4b := map[string]interface{}{"transactionDCAmount": 34000, "accountID": a3.AccountID, "debitOrCredit": "CREDIT"}
 	mapSlice4 = append(mapSlice4, map4b, map4a)
 
+	oldDate, err := time.Parse("2006-01-02", "2016-07-08")
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
 	acctReq := map[string]interface{}{
+		"transactionDate":    oldDate.Format(time.RFC3339),
 		"transactionComment": "getting paid from other person",
 		"transactionAmount":  10000,
 		"debitCreditSet":     mapSlice4,
@@ -255,6 +261,7 @@ func TestTransaction_PutTransactionUpdate(t *testing.T) {
 	g.Expect(res.DebitCreditSet[1].AccountID).To(gomega.Equal(a1.AccountID))
 	g.Expect(res.DebitCreditSet[1].DebitOrCredit).To(gomega.Equal(datastore.AccountSignDebit))
 	g.Expect(res.DebitCreditSet[1].TransactionDCAmount).To(gomega.Equal(uint64(34000)))
+	g.Expect(res.TransactionDate).To(gomega.BeTemporally("~", oldDate, time.Second))
 }
 
 func TestTransaction_GetTransactionsOnAccountEmpty(t *testing.T) {
@@ -337,6 +344,9 @@ func TestTransaction_GetTransactionsOnAccountValid(t *testing.T) {
 	g.Expect(res.AccountName).To(gomega.Equal(string(a2.AccountName)))
 	g.Expect(res.Transactions[0].TransactionComment).To(gomega.Equal("woot"))
 	g.Expect(res.Transactions[0].TransactionDCAmount).To(gomega.Equal(uint64(10000)))
+	g.Expect(res.Transactions[0].TransactionDate).To(gomega.BeTemporally("~", time.Now(), time.Second))
 	g.Expect(res.Transactions[1].TransactionComment).To(gomega.Equal("woot2"))
 	g.Expect(res.Transactions[1].TransactionDCAmount).To(gomega.Equal(uint64(30000)))
+	g.Expect(res.Transactions[1].TransactionDate).To(gomega.BeTemporally("~", time.Now(), time.Second))
+
 }

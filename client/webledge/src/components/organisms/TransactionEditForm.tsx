@@ -15,7 +15,9 @@ const postFormData = async (formData: FormData, debitsCount: number, creditsCoun
         const formEntries = Object.fromEntries(formData);
         const transactionID = Number(formEntries.transactionID)
         const accountID = Number(formEntries.accountID)
-        const amount = Number(formEntries.amount)
+        let dStr = String(formEntries.transactionDate)
+        let txnDate: Date = new Date(dStr);
+
         console.log("debitscount"+debitsCount);
         console.log("creditsCount"+creditsCount);
 
@@ -42,6 +44,7 @@ const postFormData = async (formData: FormData, debitsCount: number, creditsCoun
 
         const editTransaction : TransactionEditPostRequest = {
             transactionID : transactionID,
+            transactionDate: txnDate.toISOString(),
             transactionComment : String(formEntries.transactionComment),
             debitCreditSet : dcSet,
         };
@@ -106,25 +109,37 @@ export default function TransactionEditForm(){
     const setCreditsCount = () =>{
         creditsCount++
     }
+    console.log(data)
     // render debits and credits
+    let txnDate: Date = new Date(String(data?.transactionDate))
      return (
-         <div >
+         <div className="flex w-full flex-col md:col-span-4 grow justify-between rounded-xl bg-slate-100 p-4">
+             <div className="text-xl font-bold">
+                 Edit Transaction
+             </div>
              <form onSubmit={handleSubmit}>
                  <div className="flex flex-row flex-wrap">
                      <div className="my-2 mx-2 flex flex-col flex-wrap">
+                         <label className="my-2 text-xl font-bold bg-slate-200">Date:
+                         </label>
+                         <input className="bg-slate-300 text-xl font-normal" type="date" name="transactionDate"
+                                defaultValue={txnDate.toISOString().split('T')[0]}/>
+
+                     </div>
+                     <div className="my-2 mx-2 flex flex-col flex-wrap">
                          <label className="my-2 w-80 text-xl font-bold bg-slate-200">Comment
                          </label>
-                         <input className="w-80 bg-slate-300 font-normal" type="text"
+                         <input className="w-80 text-xl bg-slate-300 font-normal" type="text"
                                 name="transactionComment"
                                 defaultValue={data?.transactionComment}/>
                      </div>
                      <DebitsCreditsColumn name="debit"
                                           transactionID={data?.transactionID}
-                                          dcSet={initialDebits }
-                                        setCount={setDebitsCount}/>
+                                          dcSet={initialDebits}
+                                          setCount={setDebitsCount}/>
                      <DebitsCreditsColumn name="credit"
                                           transactionID={data?.transactionID}
-                                          dcSet={initialCredits }
+                                          dcSet={initialCredits}
                                           setCount={setCreditsCount}/>
                      <div className="flex my-2">
                          <input className=" bg-slate-300" type="hidden" name="transactionID"

@@ -8,7 +8,7 @@ const AccountSelector = ( props:{name:string; id:number|undefined; excludeID:num
     if (error) return <div>Failed to load</div>
 
    return (
-        <select name={props.name} defaultValue={props.id}>
+        <select name={props.name} defaultValue={props.id} className="font-normal">
             { props.includeTop && <option value="0">Top Level</option>}
             {data?.accounts && data.accounts.map((account: Account, index: number) => {
                 if (account.accountID == props.excludeID) {

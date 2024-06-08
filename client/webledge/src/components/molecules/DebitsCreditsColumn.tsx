@@ -1,4 +1,4 @@
-import React from "react";
+import React , { MouseEvent }from "react";
 import {TransactionDebitCreditResponse} from "../../lib/definitions";
 import AccountSelector from "./AccountSelector";
 
@@ -6,7 +6,7 @@ import AccountSelector from "./AccountSelector";
 const DebitsCreditsColumn = ( props:{name:string;
     transactionID: number|undefined;
     dcSet:Array<TransactionDebitCreditResponse>;
-	setCount: ()=>void} ) => {
+    addCount: (change:number)=>void} ) => {
     const [debitsCredits, setDebitsCredits] = React.useState(props.dcSet);
 
     let title = ""
@@ -20,16 +20,25 @@ const DebitsCreditsColumn = ( props:{name:string;
             console.log("It is a CREDIT.");
             break;
     }
+    const removeDebitCredit = React.useCallback((event: MouseEvent<HTMLButtonElement>) => {
+        const index = parseInt(String(event?.currentTarget.dataset['index']), 10);
+        setDebitsCredits((debitsCredits) => {
+            const newDebitsCredits = [...debitsCredits];
+            newDebitsCredits.splice(index, 1);
+            return newDebitsCredits;
+        });
+        props.addCount(-1);
+    }, []);
 
-    const addDebitCredit = React.useCallback(
-        () => {
-                setDebitsCredits((debitsCredits) => ([
-                    ...debitsCredits,
-                    {transactionID: Number(props.transactionID),
-                        accountID: 0,
-                        debitOrCredit: props.name,
-                        transactionDCAmount: 0}]));
-                props.setCount();
+
+    const addDebitCredit = React.useCallback(() => {
+        setDebitsCredits((debitsCredits) => ([
+            ...debitsCredits,
+            {transactionID: Number(props.transactionID),
+                accountID: 0,
+                debitOrCredit: props.name,
+                transactionDCAmount: 0}]));
+        props.addCount(1);
         },
         []
     );
@@ -42,12 +51,15 @@ const DebitsCreditsColumn = ( props:{name:string;
                             index: number) => {
                 return (
                     <div className="mx-0 mb-2 flex flex-row flex-wrap text-right text-xl " key={index}>
-                        <input className="w-16 text-xl bg-slate-300 text-right" type="text"
-                           name={props.name+"Amount" + index}
-                           defaultValue={transaction.transactionDCAmount}/>
                         <AccountSelector name={props.name+"Account" + index} id={transaction.accountID}
                                      includeTop={true}
                                      excludeID={0}/>
+                        <input className="w-16 text-xl bg-slate-300 text-right" type="text"
+                               name={props.name+"Amount" + index}
+                               defaultValue={transaction.transactionDCAmount}/>
+                        <button onClick={removeDebitCredit} data-index={index}>
+                            &times;
+                        </button>
                     </div>
                 );
             })}

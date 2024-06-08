@@ -103,11 +103,11 @@ export default function TransactionEditForm(){
             debitsCount++
         }
     })}
-    const setDebitsCount = () =>{
-        debitsCount++
+    const addDebitsCount = (change:number) =>{
+        debitsCount=debitsCount+change
     }
-    const setCreditsCount = () =>{
-        creditsCount++
+    const addCreditsCount = (change:number) =>{
+        creditsCount=creditsCount+change
     }
     console.log(data)
     // render debits and credits
@@ -136,11 +136,11 @@ export default function TransactionEditForm(){
                      <DebitsCreditsColumn name="debit"
                                           transactionID={data?.transactionID}
                                           dcSet={initialDebits}
-                                          setCount={setDebitsCount}/>
+                                          addCount={addDebitsCount}/>
                      <DebitsCreditsColumn name="credit"
                                           transactionID={data?.transactionID}
                                           dcSet={initialCredits}
-                                          setCount={setCreditsCount}/>
+                                          addCount={addCreditsCount}/>
                      <div className="flex my-2">
                          <input className=" bg-slate-300" type="hidden" name="transactionID"
                                 defaultValue={data?.transactionID}/>

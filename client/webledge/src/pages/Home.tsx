@@ -4,10 +4,10 @@ export default function Home() {
     useEffect(() => {
         document.title = "MimirLedger";
     }, []);
-
     return (
-        < >
-            <h1>MimirLedger</h1>
-        </>
+        <div className="text-xl">
+            <h1 className="text-2xl font-bold">MimirLedger</h1>
+            Double Entry Bookkeeping Ledger
+        </div>
     );
 }

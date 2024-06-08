@@ -1,11 +1,12 @@
 import {useParams, useSearchParams, useNavigate, Link} from "react-router-dom";
 import React, {FormEvent} from "react";
 import {
+    Account,
     TransactionDebitCreditRequest, TransactionLedgerEntry,
     TransactionPostRequest
 } from "../../lib/definitions";
 import AccountSelector from "../molecules/AccountSelector";
-import {useGetTransactionsOnAccountLedger} from "../../lib/data";
+import {useGetAccounts, useGetTransactionsOnAccountLedger} from "../../lib/data";
 
 const postFormData = async (formData: FormData) => {
     try {
@@ -54,6 +55,7 @@ const postFormData = async (formData: FormData) => {
         console.error('Error making POST request:', error);
     }
 }
+
 async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
@@ -64,9 +66,20 @@ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
 
 export default function TransactionAccountLedger() {
     const { accountID } = useParams();
+
+    const { data:acctData, error:acctError, isLoading:acctIsLoading } = useGetAccounts()
     const { data, isLoading, error } = useGetTransactionsOnAccountLedger(accountID);
+
     if (isLoading) return <div className="Loading">Loading...</div>
+    if (acctIsLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>
+    if (acctError) return <div>Failed to load</div>
+
+    let acctMap = new Map<number, string>
+    acctData?.accounts.map((acct: Account, index: number) => {
+        acctMap.set(acct.accountID, acct.accountFullName)
+    })
+    console.log(acctMap)
     let rowColor = "bg-slate-200"
     return (
         <div className="flex w-full flex-col md:col-span-4 grow justify-between rounded-xl bg-slate-100 p-4">
@@ -132,6 +145,19 @@ export default function TransactionAccountLedger() {
                 textColor = "text-red-500"
             }
             let txnDate: Date = new Date(transaction.transactionDate);
+            let otherAccounts= [];
+            let otherAccountStr = ""
+            // if the transaction split has a comma, we have a split transaction
+            if (transaction.split.indexOf(',') != -1) {
+                var segments = transaction.split.split(',');
+                for(let i=0; i<segments.length; i++){
+                    // add to the array
+                    otherAccounts.push(acctMap.get(Number(segments[i])))
+                }
+                otherAccountStr = otherAccounts.join(",")
+            } else {
+                otherAccountStr = String(acctMap.get(Number(transaction.split)))
+            }
             return (
                 <div className={'flex '+rowColor}  key={index}>
                     <Link to={{
@@ -148,7 +174,7 @@ export default function TransactionAccountLedger() {
                             {transaction.transactionComment}
                         </div>
                         <div className="w-80">
-                            {transaction.split}
+                            { otherAccountStr  }
                         </div>
                         <div className={"w-16 text-right "+textColor}>
                             {transaction.transactionDCAmount}

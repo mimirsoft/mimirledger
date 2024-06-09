@@ -4,8 +4,7 @@ import {
     TransactionDebitCreditResponse,
     TransactionEditPostRequest
 } from '../../lib/definitions';
-import React, {FormEvent} from "react";
-import AccountSelector from "../molecules/AccountSelector";
+import React, {FormEvent, MouseEvent} from "react";
 import DebitsCreditsColumn from "../molecules/DebitsCreditsColumn";
 import {useGetTransaction} from "../../lib/data";
 
@@ -84,6 +83,19 @@ export default function TransactionEditForm(){
             console.log("ERROR"+response)
         }
     };
+    async function deleteTransaction(event:  MouseEvent<HTMLButtonElement>) {
+        event.preventDefault()
+        const myURL = new URL('/transactions/' + transactionID, process.env.REACT_APP_MIMIRLEDGER_API_URL);
+        const settings: RequestInit = {
+            method: 'DELETE',
+        };
+        const response = await fetch(myURL, settings);
+        if (response?.status == 200) {
+            navigate("/transactions/account/" + returnAccountID);
+        } else {
+            console.log("ERROR" + response)
+        }
+    };
 
     let initialCredits: Array<TransactionDebitCreditResponse> = []
     let initialDebits: Array<TransactionDebitCreditResponse> = []
@@ -147,7 +159,7 @@ export default function TransactionEditForm(){
                          <button className="bg-slate-300 my-2 p-3 font-bold" type="submit">Update</button>
                      </div>
                     <div className="flex my-2">
-                         <button className="bg-slate-300 my-2 p-3 font-bold text-red-500" type="submit">Delete</button>
+                    <button onClick={deleteTransaction}  className="bg-slate-300 my-2 p-3 font-bold text-red-500" type="submit">Delete</button>
                      </div>
                  </div>
              </form>

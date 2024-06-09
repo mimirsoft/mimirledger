@@ -255,7 +255,73 @@ func TestTransaction_RetrieveTransactionLedgerForAccountID(t *testing.T) {
 	g.Expect(myTxn2).To(gomega.HaveLen(1))
 	g.Expect(myTxn2[0].TransactionComment).To(gomega.Equal("woot"))
 	g.Expect(myTxn2[0].TransactionDCAmount).To(gomega.Equal(uint64(10000)))
-
 	g.Expect(myTxn2[0].TransactionID).To(gomega.Equal(myTxn[0].TransactionID))
+}
 
+func TestTransaction_StoreAndDelete(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDB(g)
+
+	// create an account first
+	a1 := Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err := a1.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a2 := Account{AccountName: "Income", AccountSign: datastore.AccountSignCredit, AccountType: datastore.AccountTypeIncome}
+	err = a2.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a3 := Account{AccountName: "Other Income", AccountSign: datastore.AccountSignCredit, AccountType: datastore.AccountTypeIncome}
+	err = a3.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	txn := Transaction{TransactionCore: TransactionCore{TransactionComment: "woot"},
+		DebitCreditSet: []*TransactionDebitCredit{
+			&TransactionDebitCredit{AccountID: a2.AccountID,
+				DebitOrCredit:       datastore.AccountSignCredit,
+				TransactionDCAmount: 10000},
+			&TransactionDebitCredit{AccountID: a1.AccountID,
+				DebitOrCredit:       datastore.AccountSignDebit,
+				TransactionDCAmount: 10000},
+		},
+	}
+	err = txn.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// check balances
+	updatedA1, err := RetrieveAccountByID(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA1.AccountSubtotal).To(gomega.Equal(int64(10000)))
+	g.Expect(updatedA1.AccountBalance).To(gomega.Equal(int64(10000)))
+	updatedA2, err := RetrieveAccountByID(testDS, a2.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA2.AccountSubtotal).To(gomega.Equal(int64(10000)))
+	g.Expect(updatedA2.AccountBalance).To(gomega.Equal(int64(10000)))
+	updatedA3, err := RetrieveAccountByID(testDS, a3.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA3.AccountSubtotal).To(gomega.Equal(int64(0)))
+	g.Expect(updatedA3.AccountBalance).To(gomega.Equal(int64(0)))
+
+	err = txn.Delete(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myTxn, err := RetrieveTransactionByID(testDS, txn.TransactionID)
+	g.Expect(err).To(gomega.HaveOccurred())
+	g.Expect(errors.Is(err, ErrTransactionNotFound)).To(gomega.BeTrue())
+	g.Expect(myTxn).To(gomega.BeNil())
+
+	// check balances - everything is zero
+	updatedA1, err = RetrieveAccountByID(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA1.AccountSubtotal).To(gomega.Equal(int64(0)))
+	g.Expect(updatedA1.AccountBalance).To(gomega.Equal(int64(0)))
+	updatedA2, err = RetrieveAccountByID(testDS, a2.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA2.AccountSubtotal).To(gomega.Equal(int64(0)))
+	g.Expect(updatedA2.AccountBalance).To(gomega.Equal(int64(0)))
+	updatedA3, err = RetrieveAccountByID(testDS, a3.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedA3.AccountSubtotal).To(gomega.Equal(int64(0)))
+	g.Expect(updatedA3.AccountBalance).To(gomega.Equal(int64(0)))
 }

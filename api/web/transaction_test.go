@@ -1,6 +1,7 @@
 package web
 
 import (
+	"errors"
 	"fmt"
 	"github.com/mimirsoft/mimirledger/api/datastore"
 	"github.com/mimirsoft/mimirledger/api/models"
@@ -151,7 +152,7 @@ func TestTransaction_Invalid(t *testing.T) {
 				},
 			},
 			GomegaWithT: g,
-			Code:        http.StatusBadRequest, RespBody: "myTxn.Store:ds.TransactionDCStore().Store:ERROR: insert or update on table \\\"transaction_debit_credit\\\"",
+			Code:        http.StatusBadRequest, RespBody: "myTxn.Store:c.handleDCSetStore:ds.TransactionDCStore().Store:ERROR: insert or update on table \\\"transaction_debit_credit\\\"",
 		},
 	}).Exec()
 }
@@ -262,6 +263,54 @@ func TestTransaction_PutTransactionUpdate(t *testing.T) {
 	g.Expect(res.DebitCreditSet[1].DebitOrCredit).To(gomega.Equal(datastore.AccountSignDebit))
 	g.Expect(res.DebitCreditSet[1].TransactionDCAmount).To(gomega.Equal(uint64(34000)))
 	g.Expect(res.TransactionDate).To(gomega.BeTemporally("~", oldDate, time.Second))
+}
+
+func TestTransactionsController_DeleteTransaction(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDatastores(TestDataStore)
+
+	// create accounts first
+	a1 := models.Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err := a1.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a2 := models.Account{AccountName: "Income", AccountSign: datastore.AccountSignCredit, AccountType: datastore.AccountTypeIncome}
+	err = a2.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a3 := models.Account{AccountName: "OtherIncome", AccountSign: datastore.AccountSignCredit, AccountType: datastore.AccountTypeIncome}
+	err = a3.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	txn := models.Transaction{TransactionCore: models.TransactionCore{TransactionComment: "woot"},
+		DebitCreditSet: []*models.TransactionDebitCredit{
+			&models.TransactionDebitCredit{AccountID: a2.AccountID,
+				DebitOrCredit:       datastore.AccountSignCredit,
+				TransactionDCAmount: 10000},
+			&models.TransactionDebitCredit{AccountID: a1.AccountID,
+				DebitOrCredit:       datastore.AccountSignDebit,
+				TransactionDCAmount: 10000},
+		},
+	}
+	err = txn.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	var test = RouterTest{Request: Request{
+		Method:     http.MethodDelete,
+		Router:     TestRouter,
+		RequestURL: fmt.Sprintf("/transactions/%d", txn.TransactionID),
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	var res response.Transaction
+	test.ExecWithUnmarshal(&res)
+	g.Expect(res.TransactionComment).To(gomega.Equal("woot"))
+	g.Expect(res.TransactionAmount).To(gomega.Equal(uint64(10000)))
+	// try to retrieve post delete
+	myTxn, err := models.RetrieveTransactionByID(TestDataStore, txn.TransactionID)
+	g.Expect(err).To(gomega.HaveOccurred())
+	g.Expect(errors.Is(err, models.ErrTransactionNotFound)).To(gomega.BeTrue())
+	g.Expect(myTxn).To(gomega.BeNil())
 }
 
 func TestTransaction_GetTransactionsOnAccountEmpty(t *testing.T) {

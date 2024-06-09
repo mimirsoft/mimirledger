@@ -86,6 +86,17 @@ func (store TransactionStore) GetByID(id uint64) (*Transaction, error) {
 	return &tn, nil
 }
 
+// Delete a transaction
+func (store TransactionStore) Delete(trn *Transaction) (err error) {
+	query := `Delete FROM transaction_main 
+		         where transaction_id = $1`
+	_, err = store.Client.Exec(query, trn.TransactionID)
+	if err != nil {
+		return fmt.Errorf("store.Client.Exec:%w", err)
+	}
+	return nil
+}
+
 type TransactionLedger struct {
 	TransactionID            uint64       `db:"transaction_id"`
 	TransactionDate          time.Time    `db:"transaction_date"`

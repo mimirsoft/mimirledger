@@ -100,3 +100,23 @@ func PutTransactionUpdate(contoller *TransactionsController) func(w http.Respons
 		return RespondOK(w, jsonResponse)
 	}
 }
+
+// DELETE /transactions/{transactionID}
+func DeleteTransaction(contoller *TransactionsController) func(w http.ResponseWriter, r *http.Request) error {
+	return func(w http.ResponseWriter, r *http.Request) error {
+		idStr := chi.URLParam(r, "transactionID")
+		transactionID, err := strconv.ParseUint(idStr, 10, 64)
+		if err != nil {
+			return NewRequestError(http.StatusBadRequest, err)
+		}
+		if transactionID == 0 {
+			return NewRequestError(http.StatusBadRequest, ErrInvalidAccountID)
+		}
+		transaction, err := contoller.DeleteTransaction(r.Context(), transactionID)
+		if err != nil {
+			return NewRequestError(http.StatusBadRequest, err)
+		}
+		jsonResponse := response.TransactionToRespTransaction(transaction)
+		return RespondOK(w, jsonResponse)
+	}
+}

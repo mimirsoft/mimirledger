@@ -61,6 +61,20 @@ func (tc *TransactionsController) UpdateTransaction(ctx context.Context, myTxn *
 	if err != nil {
 		return nil, fmt.Errorf("myTxn.Update:%w", err)
 	}
-	// after creating transaction, update balance on all affected accounts
+	return myTxn, nil
+}
+
+// DELETE /transactions/{transactionID}
+func (tc *TransactionsController) DeleteTransaction(ctx context.Context, transactionID uint64) (*models.Transaction,
+	error) {
+	// retrieve the transaction for checking before deletion
+	myTxn, err := models.RetrieveTransactionByID(tc.DataStores, transactionID)
+	if err != nil {
+		return nil, fmt.Errorf("models.RetrieveTransactionByID:%w", err)
+	}
+	err = myTxn.Delete(tc.DataStores)
+	if err != nil {
+		return nil, fmt.Errorf("myTxn.Delete:%w", err)
+	}
 	return myTxn, nil
 }

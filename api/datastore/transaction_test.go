@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"database/sql"
+	"errors"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	"testing"
@@ -78,4 +79,89 @@ func TestTransactionStore_StoreUpdateAndRetrieve(t *testing.T) {
 	g.Expect(myTrans.TransactionAmount).To(gomega.Equal(uint64(4444)))
 	g.Expect(myTrans.TransactionDate).To(gomega.BeTemporally("~", time.Now(), time.Second))
 	g.Expect(myTrans.TransactionReconcileDate).To(gomega.Equal(sql.NullTime{Time: time.Time{}, Valid: false}))
+}
+
+func TestTransactionStore_StoreAndDelete(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+
+	store := createTransactionStore()
+
+	a1 := Transaction{TransactionComment: "woot", TransactionAmount: 1000}
+	err := store.Store(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myTrans, err := store.GetByID(a1.TransactionID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myTrans).NotTo(gomega.BeNil())
+
+	// Delete once
+	err = store.Delete(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// try to get - should return nil, err
+	myTrans, err = store.GetByID(a1.TransactionID)
+	g.Expect(err).To(gomega.HaveOccurred())
+	g.Expect(errors.Is(err, sql.ErrNoRows)).To(gomega.BeTrue())
+	g.Expect(myTrans).To(gomega.BeNil())
+
+	// try to delete again, after already deleted
+	err = store.Delete(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+}
+
+func TestTransactionStore_StoreWithDCAndDelete(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+
+	store := createTransactionStore()
+
+	a1 := Transaction{TransactionComment: "woot", TransactionAmount: 1000}
+	err := store.Store(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	aStore := createAccountStore()
+	myAcct := Account{AccountName: "myBank", AccountFullName: "BankAccounts:myBank",
+		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
+		AccountBalance: 0, AccountDecimals: 2, AccountSubtotal: 0,
+		AccountLeft: 1, AccountRight: 2}
+	err = aStore.Store(&myAcct)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myAcct2 := Account{AccountName: "revenue", AccountFullName: "IncomeToBank",
+		AccountSign: AccountSignCredit, AccountType: AccountTypeIncome,
+		AccountBalance: 0, AccountDecimals: 2, AccountSubtotal: 0,
+		AccountLeft: 3, AccountRight: 4}
+	err = aStore.Store(&myAcct2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	dcStore := createTransactionDCStore()
+	// succeed
+	myDC := TransactionDebitCredit{DebitOrCredit: AccountSignDebit, TransactionDCAmount: 10000,
+		TransactionID: a1.TransactionID, AccountID: myAcct.AccountID}
+	err = dcStore.Store(&myDC)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myDC2 := TransactionDebitCredit{DebitOrCredit: AccountSignCredit, TransactionDCAmount: 20000,
+		TransactionID: a1.TransactionID, AccountID: myAcct2.AccountID}
+	err = dcStore.Store(&myDC2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myTrans, err := store.GetByID(a1.TransactionID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myTrans).NotTo(gomega.BeNil())
+
+	// Delete once
+	err = store.Delete(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// try to get - should return nil, err
+	myTrans, err = store.GetByID(a1.TransactionID)
+	g.Expect(err).To(gomega.HaveOccurred())
+	g.Expect(errors.Is(err, sql.ErrNoRows)).To(gomega.BeTrue())
+	g.Expect(myTrans).To(gomega.BeNil())
+
+	// try to delete again, after already deleted
+	err = store.Delete(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
 }

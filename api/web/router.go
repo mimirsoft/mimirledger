@@ -57,6 +57,7 @@ func NewRouter(ds *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 	r.Get("/transactions/account/{accountID}", NewRootHandler(GetTransactionsOnAccount(transController)).ServeHTTP)
 	r.Get("/transactions/{transactionID}", NewRootHandler(GetTransaction(transController)).ServeHTTP)
 	r.Put("/transactions/{transactionID}", NewRootHandler(PutTransactionUpdate(transController)).ServeHTTP)
+	r.Delete("/transactions/{transactionID}", NewRootHandler(DeleteTransaction(transController)).ServeHTTP)
 
 	r.Get("/accounttypes", NewRootHandler(GetAccountTypes(acctsController)).ServeHTTP)
 	return r

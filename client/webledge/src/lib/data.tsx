@@ -5,6 +5,7 @@ import {
     AccountSet, TransactionAccountType, TransactionAccountTypeSet,
     TransactionLedgerResponse, TransactionResponse
 } from "./definitions";
+import {KeyedMutator} from "swr/_internal";
 
 
 const accountURL = new URL('/accounts', process.env.REACT_APP_MIMIRLEDGER_API_URL);
@@ -16,7 +17,10 @@ export const useGetAccount = (accountID:string |undefined):{data:Account | undef
     return useSWR<Account, string>(process.env.REACT_APP_MIMIRLEDGER_API_URL+'/accounts/'+accountID);
 }
 
-export const useGetTransaction = (transactionID:string |undefined):{data:TransactionResponse | undefined, isLoading:boolean, error: string|undefined} => {
+export const useGetTransaction = (transactionID:string |undefined):{
+    data:TransactionResponse | undefined,
+    isLoading:boolean, error: string|undefined
+    mutate: KeyedMutator<TransactionResponse> } => {
     return useSWR<TransactionResponse, string>(process.env.REACT_APP_MIMIRLEDGER_API_URL+'/transactions/'+transactionID);
 }
 

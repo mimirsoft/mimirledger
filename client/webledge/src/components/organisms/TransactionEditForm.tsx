@@ -62,6 +62,10 @@ const postFormData = async (formData: FormData, debitsCount: number, creditsCoun
 }
 
 export default function TransactionEditForm(){
+    const navigate = useNavigate();
+    const { transactionID } = useParams();
+    const { data, isLoading, error ,
+    mutate} = useGetTransaction(transactionID);
     let [searchParams] = useSearchParams();
     let returnAccountID = searchParams.get("returnAccount");
 
@@ -73,23 +77,19 @@ export default function TransactionEditForm(){
         const formData = new FormData(event.currentTarget)
         const response = await postFormData(formData, debitsCount, creditsCount);
         if (response?.status == 200){
+            await mutate()
             navigate("/transactions/account/"+returnAccountID);
         }
         else {
-            console.log(response)
+            console.log("ERROR"+response)
         }
     };
 
     let initialCredits: Array<TransactionDebitCreditResponse> = []
     let initialDebits: Array<TransactionDebitCreditResponse> = []
 
-    const navigate = useNavigate();
-    const { transactionID } = useParams();
-    const { data, isLoading, error } = useGetTransaction(transactionID);
-
     if (isLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>
-
 
     // sort debitCreditSet into debits and credits
     {data?.debitCreditSet && data.debitCreditSet.map((transaction: TransactionDebitCreditResponse,
@@ -141,10 +141,13 @@ export default function TransactionEditForm(){
                                           transactionID={data?.transactionID}
                                           dcSet={initialCredits}
                                           addCount={addCreditsCount}/>
-                     <div className="flex my-2">
+                     <div className="flex my-2 mr-2">
                          <input className=" bg-slate-300" type="hidden" name="transactionID"
                                 defaultValue={data?.transactionID}/>
                          <button className="bg-slate-300 my-2 p-3 font-bold" type="submit">Update</button>
+                     </div>
+                    <div className="flex my-2">
+                         <button className="bg-slate-300 my-2 p-3 font-bold text-red-500" type="submit">Delete</button>
                      </div>
                  </div>
              </form>

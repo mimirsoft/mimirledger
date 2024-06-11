@@ -97,6 +97,30 @@ func (store TransactionStore) Delete(trn *Transaction) (err error) {
 	return nil
 }
 
+// Set Transaction Reconsciled
+func (store TransactionStore) SetIsReconciled(trn *Transaction) (err error) {
+	query := `UPDATE  transaction_main 
+		    SET is_reconciled = $2
+		    where transaction_id = $1`
+	_, err = store.Client.Exec(query, trn.TransactionID, trn.IsReconciled)
+	if err != nil {
+		return fmt.Errorf("store.Client.Exec:%w", err)
+	}
+	return nil
+}
+
+// Set TransactionReconcileDate
+func (store TransactionStore) SetTransactionReconcileDate(trn *Transaction) (err error) {
+	query := `UPDATE  transaction_main 
+		    SET transaction_reconcile_date = $2
+		    where transaction_id = $1`
+	_, err = store.Client.Exec(query, trn.TransactionID, trn.TransactionReconcileDate)
+	if err != nil {
+		return fmt.Errorf("store.Client.Exec:%w", err)
+	}
+	return nil
+}
+
 type TransactionLedger struct {
 	TransactionID            uint64       `db:"transaction_id"`
 	TransactionDate          time.Time    `db:"transaction_date"`

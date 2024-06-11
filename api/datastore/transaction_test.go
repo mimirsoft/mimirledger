@@ -165,3 +165,57 @@ func TestTransactionStore_StoreWithDCAndDelete(t *testing.T) {
 	err = store.Delete(&a1)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 }
+
+func TestTransactionStore_StoreAndToggleReconciled(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+
+	store := createTransactionStore()
+
+	a1 := Transaction{TransactionComment: "woot", TransactionAmount: 1000}
+	err := store.Store(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myTrans, err := store.GetByID(a1.TransactionID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myTrans).NotTo(gomega.BeNil())
+	g.Expect(myTrans.IsReconciled).To(gomega.BeFalse())
+	g.Expect(myTrans.TransactionReconcileDate).To(gomega.Equal(sql.NullTime{Time: time.Time{}, Valid: false}))
+
+	a1.IsReconciled = true
+	err = store.SetIsReconciled(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myTrans, err = store.GetByID(a1.TransactionID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myTrans).NotTo(gomega.BeNil())
+	g.Expect(myTrans).NotTo(gomega.BeNil())
+	g.Expect(myTrans.IsReconciled).To(gomega.BeTrue())
+	g.Expect(myTrans.TransactionReconcileDate).To(gomega.Equal(sql.NullTime{Time: time.Time{}, Valid: false}))
+
+	a1.TransactionReconcileDate = sql.NullTime{Time: time.Now(), Valid: true}
+	err = store.SetTransactionReconcileDate(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myTrans, err = store.GetByID(a1.TransactionID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myTrans).NotTo(gomega.BeNil())
+	g.Expect(myTrans).NotTo(gomega.BeNil())
+	g.Expect(myTrans.IsReconciled).To(gomega.BeTrue())
+	g.Expect(myTrans.TransactionReconcileDate.Time).To(gomega.BeTemporally("~", time.Now(), time.Second))
+	g.Expect(myTrans.TransactionReconcileDate.Valid).To(gomega.BeTrue())
+
+	// unset both
+	a1.TransactionReconcileDate.Valid = false
+	a1.IsReconciled = false
+	err = store.SetIsReconciled(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	err = store.SetTransactionReconcileDate(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myTrans, err = store.GetByID(a1.TransactionID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myTrans).NotTo(gomega.BeNil())
+	g.Expect(myTrans.IsReconciled).To(gomega.BeFalse())
+	g.Expect(myTrans.TransactionReconcileDate).To(gomega.Equal(sql.NullTime{Time: time.Time{}, Valid: false}))
+}

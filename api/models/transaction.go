@@ -251,6 +251,39 @@ func (c *Transaction) transactionTotal() (uint64, error) { //nolint:gocyclo
 	return debitTotal, nil
 }
 
+var ErrReconciledDateInvalid = errors.New("ReconciledDateInvalid")
+
+// This whole function should be a transaction for safety
+func (c *Transaction) UpdateReconciled(ds *datastore.Datastores) error { //nolint:gocyclo
+	if !c.TransactionReconcileDate.Valid {
+		return ErrReconciledDateInvalid
+	}
+	eTxn := transactionToEntTransaction(c)
+	err := ds.TransactionStore().SetIsReconciled(&eTxn)
+	if err != nil {
+		return fmt.Errorf("ds.TransactionStore().SetIsReconciled:%w [transaction:%+v]", err, eTxn)
+	}
+	err = ds.TransactionStore().SetTransactionReconcileDate(&eTxn)
+	if err != nil {
+		return fmt.Errorf("ds.TransactionStore().SetTransactionReconcileDate:%w [transaction:%+v]", err, eTxn)
+	}
+	// set c.TransactionCore
+	c.TransactionCore = TransactionCore(eTxn)
+	return nil
+}
+
+// This whole function should be a transaction for safety
+func (c *Transaction) UpdateUnreconciled(ds *datastore.Datastores) error { //nolint:gocyclo
+	eTxn := transactionToEntTransaction(c)
+	err := ds.TransactionStore().SetIsReconciled(&eTxn)
+	if err != nil {
+		return fmt.Errorf("ds.TransactionStore().SetIsReconciled:%w [transaction:%+v]", err, eTxn)
+	}
+	// set c.TransactionCore
+	c.TransactionCore = TransactionCore(eTxn)
+	return nil
+}
+
 // RetrieveTransactionByID retrieves a specific transactions
 func RetrieveTransactionByID(ds *datastore.Datastores, transactionID uint64) (*Transaction, error) {
 	ts := ds.TransactionStore()

@@ -120,3 +120,63 @@ func DeleteTransaction(contoller *TransactionsController) func(w http.ResponseWr
 		return RespondOK(w, jsonResponse)
 	}
 }
+
+// PUT /transactions/{transactionID}/reconciled
+func PutTransactionReconciled(contoller *TransactionsController) func(w http.ResponseWriter, r *http.Request) error {
+	return func(w http.ResponseWriter, r *http.Request) error {
+		idStr := chi.URLParam(r, "transactionID")
+		transactionID, err := strconv.ParseUint(idStr, 10, 64)
+		if err != nil {
+			return NewRequestError(http.StatusBadRequest, err)
+		}
+		if transactionID == 0 {
+			return NewRequestError(http.StatusBadRequest, ErrInvalidAccountID)
+		}
+		var reqTransaction request.Transaction
+		if r.Body == nil {
+			return NewRequestError(http.StatusBadRequest, ErrNoRequestBody)
+		}
+		err = json.NewDecoder(r.Body).Decode(&reqTransaction)
+		if err != nil {
+			return fmt.Errorf("json.NewDecoder(r.Body).Decode:%w", err)
+		}
+		mdlTransaction := request.ReqTransactionToTransaction(&reqTransaction)
+		mdlTransaction.TransactionID = transactionID
+		transaction, err := contoller.UpdateReconciled(r.Context(), mdlTransaction)
+		if err != nil {
+			return NewRequestError(http.StatusBadRequest, err)
+		}
+		jsonResponse := response.TransactionToRespTransaction(transaction)
+		return RespondOK(w, jsonResponse)
+	}
+}
+
+// PUT /transactions/{transactionID}/unreconciled
+func PutTransactionUnreconciled(contoller *TransactionsController) func(w http.ResponseWriter, r *http.Request) error {
+	return func(w http.ResponseWriter, r *http.Request) error {
+		idStr := chi.URLParam(r, "transactionID")
+		transactionID, err := strconv.ParseUint(idStr, 10, 64)
+		if err != nil {
+			return NewRequestError(http.StatusBadRequest, err)
+		}
+		if transactionID == 0 {
+			return NewRequestError(http.StatusBadRequest, ErrInvalidAccountID)
+		}
+		var reqTransaction request.Transaction
+		if r.Body == nil {
+			return NewRequestError(http.StatusBadRequest, ErrNoRequestBody)
+		}
+		err = json.NewDecoder(r.Body).Decode(&reqTransaction)
+		if err != nil {
+			return fmt.Errorf("json.NewDecoder(r.Body).Decode:%w", err)
+		}
+		mdlTransaction := request.ReqTransactionToTransaction(&reqTransaction)
+		mdlTransaction.TransactionID = transactionID
+		transaction, err := contoller.UpdateUnreconciled(r.Context(), mdlTransaction)
+		if err != nil {
+			return NewRequestError(http.StatusBadRequest, err)
+		}
+		jsonResponse := response.TransactionToRespTransaction(transaction)
+		return RespondOK(w, jsonResponse)
+	}
+}

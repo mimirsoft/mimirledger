@@ -64,6 +64,37 @@ func (tc *TransactionsController) UpdateTransaction(ctx context.Context, myTxn *
 	return myTxn, nil
 }
 
+// PUT /transactions/{transactionID}/reconciled
+func (tc *TransactionsController) UpdateReconciled(ctx context.Context, myTxn *models.Transaction) (*models.Transaction,
+	error) {
+	readTxn, err := models.RetrieveTransactionByID(tc.DataStores, myTxn.TransactionID)
+	if err != nil {
+		return nil, fmt.Errorf("models.RetrieveTransactionByID:%w", err)
+	}
+	readTxn.IsReconciled = true
+	readTxn.TransactionReconcileDate = myTxn.TransactionReconcileDate
+	err = readTxn.UpdateReconciled(tc.DataStores)
+	if err != nil {
+		return nil, fmt.Errorf("readTxn.UpdateReconciled:%w", err)
+	}
+	return readTxn, nil
+}
+
+// PUT /transactions/{transactionID}/unreconciled
+func (tc *TransactionsController) UpdateUnreconciled(ctx context.Context, myTxn *models.Transaction) (*models.Transaction,
+	error) {
+	readTxn, err := models.RetrieveTransactionByID(tc.DataStores, myTxn.TransactionID)
+	if err != nil {
+		return nil, fmt.Errorf("models.RetrieveTransactionByID:%w", err)
+	}
+	readTxn.IsReconciled = false
+	err = readTxn.UpdateUnreconciled(tc.DataStores)
+	if err != nil {
+		return nil, fmt.Errorf("myTxn.UpdateUnreconciled:%w", err)
+	}
+	return readTxn, nil
+}
+
 // DELETE /transactions/{transactionID}
 func (tc *TransactionsController) DeleteTransaction(ctx context.Context, transactionID uint64) (*models.Transaction,
 	error) {

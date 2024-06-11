@@ -10,7 +10,7 @@ import (
 type Transaction struct {
 	TransactionID            uint64                    `json:"transactionID,omitempty"`
 	TransactionDate          time.Time                 `json:"transactionDate"`
-	TransactionReconcileDate sql.NullTime              `json:"transactionReconcileDate"`
+	TransactionReconcileDate *time.Time                `json:"transactionReconcileDate,omitempty"`
 	TransactionComment       string                    `json:"transactionComment"`
 	TransactionAmount        uint64                    `json:"transactionAmount"`
 	TransactionReference     string                    `json:"transactionReference"` // this could be a check number, batch ,etc
@@ -28,10 +28,14 @@ type TransactionDebitCredit struct {
 }
 
 func ReqTransactionToTransaction(rTrans *Transaction) *models.Transaction {
+	mytime := sql.NullTime{Time: time.Time{}, Valid: false}
+	if rTrans.TransactionReconcileDate != nil {
+		mytime = sql.NullTime{Time: *rTrans.TransactionReconcileDate, Valid: true}
+	}
 	myTransCore := models.TransactionCore{
 		TransactionID:            rTrans.TransactionID,
 		TransactionDate:          rTrans.TransactionDate,
-		TransactionReconcileDate: rTrans.TransactionReconcileDate,
+		TransactionReconcileDate: mytime,
 		TransactionComment:       rTrans.TransactionComment,
 		TransactionAmount:        rTrans.TransactionAmount,
 		TransactionReference:     rTrans.TransactionReference,

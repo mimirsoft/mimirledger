@@ -265,6 +265,89 @@ func TestTransaction_PutTransactionUpdate(t *testing.T) {
 	g.Expect(res.TransactionDate).To(gomega.BeTemporally("~", oldDate, time.Second))
 }
 
+func TestTransaction_PutTransactionUpdateReconciled(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDatastores(TestDataStore)
+
+	// create accounts first
+	a1 := models.Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err := a1.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a2 := models.Account{AccountName: "Income", AccountSign: datastore.AccountSignCredit, AccountType: datastore.AccountTypeIncome}
+	err = a2.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	txn := models.Transaction{TransactionCore: models.TransactionCore{TransactionComment: "woot"},
+		DebitCreditSet: []*models.TransactionDebitCredit{
+			&models.TransactionDebitCredit{AccountID: a2.AccountID,
+				DebitOrCredit:       datastore.AccountSignCredit,
+				TransactionDCAmount: 10000},
+			&models.TransactionDebitCredit{AccountID: a1.AccountID,
+				DebitOrCredit:       datastore.AccountSignDebit,
+				TransactionDCAmount: 10000},
+		},
+	}
+	err = txn.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	myTxn, err := models.RetrieveTransactionByID(TestDataStore, txn.TransactionID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myTxn.TransactionComment).To(gomega.Equal("woot"))
+	g.Expect(myTxn.TransactionAmount).To(gomega.Equal(uint64(10000)))
+	g.Expect(myTxn.IsReconciled).To(gomega.BeFalse())
+
+	oldDate, err := time.Parse("2006-01-02", "2016-07-08")
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	acctReq := map[string]interface{}{
+		"transactionReconcileDate": oldDate.Format(time.RFC3339),
+	}
+	var test = RouterTest{Request: Request{
+		Method:     http.MethodPut,
+		Router:     TestRouter,
+		RequestURL: fmt.Sprintf("/transactions/%d/reconciled", txn.TransactionID),
+		Payload:    acctReq,
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	var res response.Transaction
+	test.ExecWithUnmarshal(&res)
+	g.Expect(res.TransactionComment).To(gomega.Equal("woot"))
+	g.Expect(res.TransactionAmount).To(gomega.Equal(uint64(10000)))
+	g.Expect(res.TransactionReconcileDate.Time).To(gomega.BeTemporally("~", oldDate, time.Second))
+	g.Expect(res.TransactionReconcileDate.Valid).To(gomega.BeTrue())
+	g.Expect(res.IsReconciled).To(gomega.BeTrue())
+
+	myTxn, err = models.RetrieveTransactionByID(TestDataStore, txn.TransactionID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myTxn.IsReconciled).To(gomega.BeTrue())
+	g.Expect(myTxn.TransactionReconcileDate.Time).To(gomega.BeTemporally("~", oldDate, time.Second))
+	g.Expect(myTxn.TransactionReconcileDate.Valid).To(gomega.BeTrue())
+
+	var test2 = RouterTest{Request: Request{
+		Method:     http.MethodPut,
+		Router:     TestRouter,
+		RequestURL: fmt.Sprintf("/transactions/%d/unreconciled", txn.TransactionID),
+		Payload:    acctReq,
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	var res2 response.Transaction
+	test2.ExecWithUnmarshal(&res2)
+	g.Expect(res2.TransactionComment).To(gomega.Equal("woot"))
+	g.Expect(res2.TransactionAmount).To(gomega.Equal(uint64(10000)))
+	// unreconciled endpoint does not change TransactionReconcileDate, only sets IsReconcoled to FALSE
+	g.Expect(res2.TransactionReconcileDate.Time).To(gomega.BeTemporally("~", oldDate, time.Second))
+	g.Expect(res2.TransactionReconcileDate.Valid).To(gomega.BeTrue())
+	g.Expect(res2.IsReconciled).To(gomega.BeFalse())
+
+	myTxn, err = models.RetrieveTransactionByID(TestDataStore, txn.TransactionID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myTxn.IsReconciled).To(gomega.BeFalse())
+	g.Expect(myTxn.TransactionReconcileDate.Time).To(gomega.BeTemporally("~", oldDate, time.Second))
+	g.Expect(myTxn.TransactionReconcileDate.Valid).To(gomega.BeTrue())
+
+}
+
 func TestTransactionsController_DeleteTransaction(t *testing.T) {
 	g := gomega.NewWithT(t)
 	gomega.RegisterFailHandler(ginkgo.Fail)

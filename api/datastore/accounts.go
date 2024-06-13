@@ -2,6 +2,7 @@ package datastore
 
 import (
 	"database/sql"
+	"fmt"
 	"github.com/jmoiron/sqlx"
 	"time"
 )
@@ -172,6 +173,18 @@ func (store AccountStore) UpdateBalance(acct *Account) (err error) {
 	}
 	defer stmt.Close()
 	return stmt.QueryRow(acct).StructScan(acct)
+}
+
+// Set AccountReconcileDate
+func (store AccountStore) SetAccountReconciledDate(acct *Account) (err error) {
+	query := `UPDATE  transaction_accounts 
+		    SET account_reconcile_date = $2
+		    where account_id = $1`
+	_, err = store.Client.Exec(query, acct.AccountID, acct.AccountReconcileDate)
+	if err != nil {
+		return fmt.Errorf("store.Client.Exec:%w", err)
+	}
+	return nil
 }
 
 // GetBalancel  gets the sum of all the subtotals for this accountID and all child accounts

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/mimirsoft/mimirledger/api/datastore"
 	"github.com/mimirsoft/mimirledger/api/models"
+	"time"
 )
 
 // TransactionsController is the controller struct for transactions
@@ -40,9 +41,25 @@ func (tc *TransactionsController) GetTransactionsForAccount(ctx context.Context,
 	}
 	myTxn, err := models.RetrieveTransactionLedgerForAccountID(tc.DataStores, accountID)
 	if err != nil {
-		return nil, nil, fmt.Errorf("models.RetrieveTransactionsForAccountID:%w", err)
+		return nil, nil, fmt.Errorf("models.RetrieveTransactionLedgerForAccountID:%w", err)
 	}
 	return account, myTxn, nil
+}
+
+// GET /transactions/account/{accountID}/unreconciled?date=<date>
+func (tc *TransactionsController) GetUnreconciledTransactionsOnAccount(ctx context.Context, accountID uint64,
+	searchDate time.Time) ([]*models.TransactionReconciliation,
+	error) {
+	account, err := models.RetrieveAccountByID(tc.DataStores, accountID)
+	if err != nil {
+		return nil, fmt.Errorf("models.RetrieveAccountByID:%w", err)
+	}
+	myTxn, err := models.RetrieveUnreconciledTransactionsForDate(tc.DataStores, account.AccountLeft, account.AccountRight,
+		searchDate, account.AccountReconcileDate.Time)
+	if err != nil {
+		return nil, fmt.Errorf("models.RetrieveUnreconciledTransactionsForDate:%w", err)
+	}
+	return myTxn, nil
 }
 
 // GET /transactions/{transactionID}

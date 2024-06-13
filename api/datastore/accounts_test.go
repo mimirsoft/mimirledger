@@ -1,9 +1,11 @@
 package datastore
 
 import (
+	"database/sql"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	"testing"
+	"time"
 )
 
 func createAccountStore() AccountStore {
@@ -460,6 +462,43 @@ func TestAccountStore_GetBalance_FromSubaccounts(t *testing.T) {
 	balance, err = aStore.GetBalance(a1.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(balance).To(gomega.Equal(int64(45000)))
+}
+
+func TestAccountStore_AccountSetReconcileDate(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDB(g)
+
+	aStore := createAccountStore()
+	// create two accounts
+	a1 := Account{AccountName: "myBank", AccountFullName: "myBank",
+		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
+		AccountBalance: 3000, AccountDecimals: 2, AccountSubtotal: 2000,
+		AccountLeft: 1, AccountRight: 6}
+	err := aStore.Store(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myA1, err := aStore.GetAccountByID(a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myA1.AccountReconcileDate).To(gomega.Equal(sql.NullTime{Time: time.Time{}, Valid: false}))
+
+	a1.AccountReconcileDate = sql.NullTime{Time: time.Now(), Valid: true}
+	err = aStore.SetAccountReconciledDate(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myA1, err = aStore.GetAccountByID(a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myA1.AccountReconcileDate.Time).To(gomega.BeTemporally("~", time.Now(), time.Second))
+	g.Expect(myA1.AccountReconcileDate.Valid).To(gomega.BeTrue())
+
+	// unset the AccountReconciled Date
+	a1.AccountReconcileDate.Valid = false
+	err = aStore.SetAccountReconciledDate(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myA1, err = aStore.GetAccountByID(a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myA1.AccountReconcileDate).To(gomega.Equal(sql.NullTime{Time: time.Time{}, Valid: false}))
 }
 
 func setupDB(g *gomega.WithT) {

@@ -80,9 +80,12 @@ export type TransactionLedgerResponse = {
 export type TransactionLedgerEntry = {
     transactionID: number
     transactionDate: string,
+    transactionReconcileDate: string
     transactionComment: string
     split: string
     transactionDCAmount: number
     debitOrCredit: string
+    isSplit: boolean
+    isReconciled: boolean
 };
 

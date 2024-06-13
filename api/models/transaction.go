@@ -360,6 +360,45 @@ func RetrieveTransactionLedgerForAccountID(ds *datastore.Datastores, transaction
 	return transSet, nil
 }
 
+type TransactionReconciliation struct {
+	TransactionID            uint64
+	AccountID                uint64
+	TransactionDate          time.Time
+	TransactionReconcileDate sql.NullTime
+	TransactionComment       string
+	TransactionReference     string
+	IsReconciled             bool
+	IsSplit                  bool
+	TransactionDCAmount      uint64
+	DebitOrCredit            datastore.AccountSign
+	// split is a generated field, a comma separated list of the other d/c
+	Split string
+}
+
+// RetrieveUnreconciledTransactionsForDate retrieves unreconciled transactions for a date for an account
+func RetrieveUnreconciledTransactionsForDate(ds *datastore.Datastores, accountLeft, accountRight uint64,
+	searchLimitDate time.Time, reconciledCutoffDate time.Time) ([]*TransactionReconciliation, error) {
+	ts := ds.TransactionStore()
+	eTransSet, err := ts.GetUnreconciledTransactionsOnAccountForDate(accountLeft, accountRight, searchLimitDate, reconciledCutoffDate)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("TransactionStore().GetTransactionsForAccount:%w", err)
+	}
+	transSet := entTransactionsRecToTransactionsRec(eTransSet)
+	return transSet, nil
+}
+
+func entTransactionsRecToTransactionsRec(eTxn []*datastore.TransactionReconciliation) (tdcSet []*TransactionReconciliation) {
+	tdcSet = make([]*TransactionReconciliation, len(eTxn))
+	for idx := range eTxn {
+		myTDC := TransactionReconciliation(*eTxn[idx])
+		tdcSet[idx] = &myTDC
+	}
+	return
+}
+
 func entTransactionsLedgerToTransactionsLedger(eTxn []*datastore.TransactionLedger) (tdcSet []*TransactionLedger) {
 	tdcSet = make([]*TransactionLedger, len(eTxn))
 	for idx := range eTxn {

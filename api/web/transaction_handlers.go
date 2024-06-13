@@ -2,12 +2,14 @@ package web
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/go-chi/chi/v5"
 	"github.com/mimirsoft/mimirledger/api/web/request"
 	"github.com/mimirsoft/mimirledger/api/web/response"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 // GET /transactions/{transactionID}
@@ -67,6 +69,33 @@ func GetTransactionsOnAccount(contoller *TransactionsController) func(w http.Res
 			return NewRequestError(http.StatusNotFound, err)
 		}
 		jsonResponse := response.ConvertTransactionLedgerToRespTransactionLedger(account, transactions)
+		return RespondOK(w, jsonResponse)
+	}
+}
+
+var ErrInvalidReconcileDate = errors.New("invalid reconcile date")
+
+// GET /transactions/account/{accountID}/unreconciled?date=<date>
+func GetUnreconciledTransactionsOnAccount(contoller *TransactionsController) func(w http.ResponseWriter, r *http.Request) error {
+	return func(w http.ResponseWriter, r *http.Request) error {
+		accountIDStr := chi.URLParam(r, "accountID")
+		accountID, err := strconv.ParseUint(accountIDStr, 10, 64)
+		if err != nil {
+			return NewRequestError(http.StatusBadRequest, err)
+		}
+		if accountID == 0 {
+			return NewRequestError(http.StatusBadRequest, ErrInvalidAccountID)
+		}
+		dateStr := r.URL.Query().Get("date")
+		dateCutoff, err := time.Parse("2006-01-02", dateStr)
+		if err != nil {
+			return NewRequestError(http.StatusBadRequest, ErrInvalidReconcileDate)
+		}
+		transactions, err := contoller.GetUnreconciledTransactionsOnAccount(r.Context(), accountID, dateCutoff)
+		if err != nil {
+			return NewRequestError(http.StatusNotFound, err)
+		}
+		jsonResponse := response.ConvertTransactionRecSetToRespTransactionRecSet(transactions)
 		return RespondOK(w, jsonResponse)
 	}
 }

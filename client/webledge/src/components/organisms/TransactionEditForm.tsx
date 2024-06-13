@@ -24,17 +24,27 @@ const postFormData = async (formData: FormData, debitsCount: number, creditsCoun
         //iterate over all the debit/credit inputs
         // get debits
         for (let step = 0; step < debitsCount; step++) {
-            const tdcAmount = Number(formEntries['debitAmount' +step])
+            let tdcAmount = Number(formEntries['debitAmount' +step])
             const tdcAccount = Number(formEntries['debitAccount' +step])
-            let tdc = {accountID: tdcAccount, transactionDCAmount: tdcAmount, debitOrCredit: "DEBIT" }
+            let tdcSign = "DEBIT"
+            if (tdcAmount < 0){
+                tdcAmount = -tdcAmount
+                tdcSign = "CREDIT"
+            }
+            let tdc = {accountID: tdcAccount, transactionDCAmount: tdcAmount, debitOrCredit:  tdcSign}
             console.log(tdc)
             dcSet.push(tdc)
         }
         // get credits
         for (let step = 0; step < creditsCount; step++) {
-            const tdcAmount = Number(formEntries['creditAmount' +step])
+            let tdcAmount = Number(formEntries['creditAmount' +step])
             const tdcAccount = Number(formEntries['creditAccount' +step])
-            let tdc = {accountID: tdcAccount, transactionDCAmount: tdcAmount, debitOrCredit: "CREDIT" }
+            let tdcSign = "CREDIT"
+            if (tdcAmount < 0){
+                tdcAmount = -tdcAmount
+                tdcSign = "DEBIT"
+            }
+            let tdc = {accountID: tdcAccount, transactionDCAmount: tdcAmount, debitOrCredit: tdcSign}
             console.log(tdc)
             dcSet.push(tdc)
         }

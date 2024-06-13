@@ -121,6 +121,76 @@ func (store TransactionStore) SetTransactionReconcileDate(trn *Transaction) (err
 	return nil
 }
 
+type TransactionReconciliation struct {
+	TransactionID            uint64       `db:"transaction_id"`
+	AccountID                uint64       `db:"account_id"`
+	TransactionDate          time.Time    `db:"transaction_date"`
+	TransactionReconcileDate sql.NullTime `db:"transaction_reconcile_date"`
+	TransactionComment       string       `db:"transaction_comment"`
+	TransactionReference     string       `db:"transaction_reference"` // this could be a check number, batch ,etc
+	IsReconciled             bool         `db:"is_reconciled"`
+	IsSplit                  bool         `db:"is_split"`
+	TransactionDCAmount      uint64       `db:"transaction_dc_amount"`
+	DebitOrCredit            AccountSign  `db:"debit_or_credit"`
+	// split is a generated field, a comma separated list of the other d/c
+	Split string `db:"split"`
+}
+
+func (store TransactionStore) GetUnreconciledTransactionsOnAccountForDate(accountLeft, accountRight uint64,
+	searchLimitDate time.Time, reconciledCutoffDate time.Time) ([]*TransactionReconciliation, error) {
+	query := `SELECT workingtdc.debit_or_credit, 
+               workingtdc.transaction_id, 
+               workingtdc.transaction_dc_amount, 
+               workingtdc.account_id, 
+               tm.transaction_date, 
+               tm.transaction_reference, 
+               tm.transaction_comment, 
+               tm.is_reconciled, 
+               tm.transaction_reconcile_date, 
+               string_agg(odc.account_id::text, ',') AS split
+          FROM transaction_debit_credit AS workingtdc
+     LEFT JOIN transaction_debit_credit AS odc
+            ON workingtdc.transaction_id=odc.transaction_id
+    INNER JOIN transaction_main AS tm
+            ON tm.transaction_id=workingtdc.transaction_id
+         WHERE (workingtdc.account_id IN (SELECT account_id FROM transaction_accounts WHERE account_left BETWEEN $3 AND $4)  
+               AND odc.account_id NOT IN (SELECT account_id FROM transaction_accounts WHERE account_left BETWEEN $3 AND $4) )
+           AND ((tm.is_reconciled IS FALSE 
+                 AND  EXTRACT(EPOCH FROM tm.transaction_date) <= EXTRACT(EPOCH FROM $1::timestamp) )
+               OR
+               (tm.is_reconciled IS TRUE 
+                 AND EXTRACT(EPOCH FROM tm.transaction_reconcile_date) > EXTRACT(EPOCH FROM  $2::timestamp)
+                 AND EXTRACT(EPOCH FROM tm.transaction_reconcile_date) <= EXTRACT(EPOCH FROM  $1::timestamp))
+               )
+			 GROUP BY  workingtdc.transaction_dc_amount, 
+					  workingtdc.debit_or_credit, 
+					  workingtdc.transaction_id, 
+					  workingtdc.account_id, 
+					  tm.transaction_date, 
+					  tm.transaction_reconcile_date, 
+					  tm.transaction_reference, 
+					  tm.transaction_comment, 
+					  tm.is_reconciled
+      ORDER BY is_reconciled DESC, transaction_reconcile_date ASC, transaction_date ASC, transaction_reference ASC`
+	rows, err := store.Client.Queryx(query, searchLimitDate, reconciledCutoffDate, accountLeft, accountRight)
+	if err != nil {
+		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
+	}
+	defer rows.Close()
+	var txnSet []*TransactionReconciliation
+	for rows.Next() {
+		var txn TransactionReconciliation
+		if err = rows.StructScan(&txn); err != nil {
+			return nil, fmt.Errorf("rows.StructScan:%w", err)
+		}
+		txnSet = append(txnSet, &txn)
+	}
+	if len(txnSet) == 0 {
+		return nil, sql.ErrNoRows
+	}
+	return txnSet, nil
+}
+
 type TransactionLedger struct {
 	TransactionID            uint64       `db:"transaction_id"`
 	TransactionDate          time.Time    `db:"transaction_date"`
@@ -141,6 +211,7 @@ func (store TransactionStore) GetTransactionsForAccount(id uint64) ([]*Transacti
     							  tm.transaction_id, 
     							  tm.transaction_reference, 
     							  tm.transaction_date, 
+    							  tm.transaction_reconcile_date, 
     							  tm.transaction_comment, 
     							  tm.is_reconciled, 
     							  string_agg(odc.account_id::text, ',') AS split
@@ -155,6 +226,7 @@ func (store TransactionStore) GetTransactionsForAccount(id uint64) ([]*Transacti
     							  tm.transaction_id, 
     							  tm.transaction_reference, 
     							  tm.transaction_date, 
+    							  tm.transaction_reconcile_date, 
     							  tm.transaction_comment, 
     							  tm.is_reconciled
                          ORDER BY tm.transaction_date, tm.transaction_id`

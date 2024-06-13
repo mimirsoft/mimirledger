@@ -154,6 +154,24 @@ func TestTransaction_Invalid(t *testing.T) {
 			GomegaWithT: g,
 			Code:        http.StatusBadRequest, RespBody: "myTxn.Store:c.handleDCSetStore:ds.TransactionDCStore().Store:ERROR: insert or update on table \\\"transaction_debit_credit\\\"",
 		},
+		{
+			Request: Request{
+				Method:     http.MethodGet,
+				Router:     TestRouter,
+				RequestURL: "/transactions/account/0/unreconciled",
+			},
+			GomegaWithT: g,
+			Code:        http.StatusBadRequest, RespBody: ErrInvalidAccountID.Error(),
+		},
+		{
+			Request: Request{
+				Method:     http.MethodGet,
+				Router:     TestRouter,
+				RequestURL: "/transactions/account/5/unreconciled",
+			},
+			GomegaWithT: g,
+			Code:        http.StatusBadRequest, RespBody: ErrInvalidReconcileDate.Error(),
+		},
 	}).Exec()
 }
 
@@ -314,8 +332,7 @@ func TestTransaction_PutTransactionUpdateReconciled(t *testing.T) {
 	test.ExecWithUnmarshal(&res)
 	g.Expect(res.TransactionComment).To(gomega.Equal("woot"))
 	g.Expect(res.TransactionAmount).To(gomega.Equal(uint64(10000)))
-	g.Expect(res.TransactionReconcileDate.Time).To(gomega.BeTemporally("~", oldDate, time.Second))
-	g.Expect(res.TransactionReconcileDate.Valid).To(gomega.BeTrue())
+	g.Expect(res.TransactionReconcileDate).To(gomega.BeTemporally("~", oldDate, time.Second))
 	g.Expect(res.IsReconciled).To(gomega.BeTrue())
 
 	myTxn, err = models.RetrieveTransactionByID(TestDataStore, txn.TransactionID)
@@ -336,8 +353,7 @@ func TestTransaction_PutTransactionUpdateReconciled(t *testing.T) {
 	g.Expect(res2.TransactionComment).To(gomega.Equal("woot"))
 	g.Expect(res2.TransactionAmount).To(gomega.Equal(uint64(10000)))
 	// unreconciled endpoint does not change TransactionReconcileDate, only sets IsReconcoled to FALSE
-	g.Expect(res2.TransactionReconcileDate.Time).To(gomega.BeTemporally("~", oldDate, time.Second))
-	g.Expect(res2.TransactionReconcileDate.Valid).To(gomega.BeTrue())
+	g.Expect(res2.TransactionReconcileDate).To(gomega.BeTemporally("~", oldDate, time.Second))
 	g.Expect(res2.IsReconciled).To(gomega.BeFalse())
 
 	myTxn, err = models.RetrieveTransactionByID(TestDataStore, txn.TransactionID)
@@ -481,4 +497,46 @@ func TestTransaction_GetTransactionsOnAccountValid(t *testing.T) {
 	g.Expect(res.Transactions[1].TransactionDCAmount).To(gomega.Equal(uint64(30000)))
 	g.Expect(res.Transactions[1].TransactionDate).To(gomega.BeTemporally("~", time.Now(), time.Second))
 
+}
+
+func TestTransactions_GetUnreconciledTransactionsOnAccount(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDatastores(TestDataStore)
+
+	// create accounts first
+	a1 := models.Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err := a1.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a2 := models.Account{AccountName: "Income", AccountSign: datastore.AccountSignCredit, AccountType: datastore.AccountTypeIncome}
+	err = a2.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	txn := models.Transaction{TransactionCore: models.TransactionCore{TransactionComment: "woot"},
+		DebitCreditSet: []*models.TransactionDebitCredit{
+			&models.TransactionDebitCredit{AccountID: a2.AccountID,
+				DebitOrCredit:       datastore.AccountSignCredit,
+				TransactionDCAmount: 10000},
+			&models.TransactionDebitCredit{AccountID: a1.AccountID,
+				DebitOrCredit:       datastore.AccountSignDebit,
+				TransactionDCAmount: 10000},
+		},
+	}
+	err = txn.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	var test = RouterTest{Request: Request{
+		Method:     http.MethodGet,
+		Router:     TestRouter,
+		RequestURL: fmt.Sprintf("/transactions/account/%d/unreconciled?date=2024-06-30", a2.AccountID),
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	var res []*response.TransactionReconciliation
+	test.ExecWithUnmarshal(&res)
+	g.Expect(res).To(gomega.HaveLen(1))
+
+	g.Expect(res[0].TransactionComment).To(gomega.Equal("woot"))
+	g.Expect(res[0].TransactionDCAmount).To(gomega.Equal(uint64(10000)))
+	g.Expect(res[0].TransactionDate).To(gomega.BeTemporally("~", time.Now(), time.Second))
 }

@@ -79,6 +79,10 @@ export default function TransactionAccountLedger() {
     acctData?.accounts.map((acct: Account, index: number) => {
         acctMap.set(acct.accountID, acct.accountFullName)
     })
+    var minDate = new Date('0001-01-01T00:00:00Z');
+    minDate.setDate(minDate.getDate() + 1);
+
+
     console.log(acctMap)
     let rowColor = "bg-slate-200"
     return (
@@ -127,11 +131,17 @@ export default function TransactionAccountLedger() {
                 <div className="w-80">
                     Account
                 </div>
-                <div className="w-16 text-right">
+                <div className="w-16 text-right mr-2">
                     Amount
                 </div>
-                <div className="w-16 text-right">
+                <div className="w-16">
                     Sign
+                </div>
+                <div className="w-20">
+                    Rec?
+                </div>
+                <div className="w-80">
+                    ReconciledDate
                 </div>
             </div>
             {data?.transactions && data.transactions.map((transaction: TransactionLedgerEntry, index: number) => {
@@ -140,11 +150,21 @@ export default function TransactionAccountLedger() {
             } else {
                 rowColor = "bg-slate-200"
             }
+            console.log(transaction)
             let textColor = ""
             if (transaction.debitOrCredit != data.accountSign) {
                 textColor = "text-red-500"
             }
             let txnDate: Date = new Date(transaction.transactionDate);
+            let txnReconciledDate: Date = new Date(transaction.transactionReconcileDate);
+
+            let txnReconciledDateStr :string
+            if (txnReconciledDate < minDate) {
+                txnReconciledDateStr = "";
+            } else {
+                txnReconciledDateStr = txnReconciledDate.toISOString().split('T')[0]
+            }
+
             let otherAccounts= [];
             let otherAccountStr = ""
             // if the transaction split has a comma, we have a split transaction
@@ -158,7 +178,9 @@ export default function TransactionAccountLedger() {
             } else {
                 otherAccountStr = String(acctMap.get(Number(transaction.split)))
             }
-            return (
+            let txnReconciled = transaction.isReconciled ? "Y" : "N";
+
+                return (
                 <div className={'flex '+rowColor}  key={index}>
                     <Link to={{
                         pathname: '/transactions/' + transaction.transactionID,
@@ -174,18 +196,24 @@ export default function TransactionAccountLedger() {
                             {transaction.transactionComment}
                         </div>
                         <div className="w-80">
-                            { otherAccountStr  }
+                            {otherAccountStr}
                         </div>
-                        <div className={"w-16 text-right "+textColor}>
+                        <div className={"w-16 text-right mr-2 " + textColor}>
                             {transaction.transactionDCAmount}
                         </div>
-                        <div className={"w-16 text-right "+textColor}>
+                        <div className={"w-16 " + textColor}>
                             {transaction.debitOrCredit}
+                        </div>
+                        <div className="w-20">
+                            {txnReconciled}
+                        </div>
+                        <div className="w-80">
+                            {txnReconciledDateStr}
                         </div>
                     </Link>
                 </div>
             );
-        })}
+            })}
         </div>
     );
 }

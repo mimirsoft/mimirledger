@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"errors"
 	"github.com/jmoiron/sqlx"
 	"github.com/mimirsoft/mimirledger/api/cfg"
@@ -9,6 +10,7 @@ import (
 	"github.com/onsi/gomega"
 	"os"
 	"testing"
+	"time"
 )
 
 var dbClient *sqlx.DB
@@ -173,6 +175,34 @@ func TestAccount_UpdateBalance(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(acct.AccountSubtotal).To(gomega.Equal(int64(54500)))
 	g.Expect(acct.AccountBalance).To(gomega.Equal(int64(54500)))
+}
+
+func TestAccount_UpdateReconciledDate(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDB(g)
+
+	a1 := Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err := a1.Store(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	acct, err := RetrieveAccountByID(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(acct.AccountSubtotal).To(gomega.Equal(int64(0)))
+	g.Expect(acct.AccountBalance).To(gomega.Equal(int64(0)))
+	g.Expect(acct.AccountReconcileDate).To(gomega.Equal(sql.NullTime{Time: time.Time{}, Valid: false}))
+
+	oldDate1, err := time.Parse("2006-01-02", "2016-07-08")
+	a1.AccountReconcileDate = sql.NullTime{Time: oldDate1, Valid: true}
+
+	err = a1.UpdateReconciledDate(testDS)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	acct, err = RetrieveAccountByID(testDS, a1.AccountID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(acct.AccountSubtotal).To(gomega.Equal(int64(0)))
+	g.Expect(acct.AccountBalance).To(gomega.Equal(int64(0)))
+	g.Expect(acct.AccountReconcileDate).To(gomega.Equal(sql.NullTime{Time: oldDate1, Valid: true}))
 }
 
 func TestAccount_RetrieveByIDInvalid(t *testing.T) {

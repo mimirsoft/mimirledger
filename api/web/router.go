@@ -33,7 +33,7 @@ func NewRouter(ds *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 	}))
 
 	healthController := NewHealthController(ds)
-	acctsController := NewAccountsController(ds)
+	accoutsController := NewAccountsController(ds)
 	transController := NewTransactionsController(ds)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
@@ -49,10 +49,10 @@ func NewRouter(ds *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 			log.Error().Err(err).Msg("w.Write failed")
 		}
 	})
-	r.Get("/accounts", NewRootHandler(GetAccounts(acctsController)).ServeHTTP)
-	r.Post("/accounts", NewRootHandler(PostAccounts(acctsController)).ServeHTTP)
-	r.Get("/accounts/{accountID}", NewRootHandler(GetAccount(acctsController)).ServeHTTP)
-	r.Put("/accounts/{accountID}", NewRootHandler(PutAccountUpdate(acctsController)).ServeHTTP)
+	r.Get("/accounts", NewRootHandler(GetAccounts(accoutsController)).ServeHTTP)
+	r.Post("/accounts", NewRootHandler(PostAccounts(accoutsController)).ServeHTTP)
+	r.Get("/accounts/{accountID}", NewRootHandler(GetAccount(accoutsController)).ServeHTTP)
+	r.Put("/accounts/{accountID}", NewRootHandler(PutAccountUpdate(accoutsController)).ServeHTTP)
 	r.Post("/transactions", NewRootHandler(PostTransactions(transController)).ServeHTTP)
 	r.Get("/transactions/account/{accountID}", NewRootHandler(GetTransactionsOnAccount(transController)).ServeHTTP)
 	r.Get("/transactions/account/{accountID}/unreconciled", NewRootHandler(GetUnreconciledTransactionsOnAccount(transController)).ServeHTTP)
@@ -62,6 +62,6 @@ func NewRouter(ds *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 	r.Put("/transactions/{transactionID}/unreconciled", NewRootHandler(PutTransactionUnreconciled(transController)).ServeHTTP)
 	r.Delete("/transactions/{transactionID}", NewRootHandler(DeleteTransaction(transController)).ServeHTTP)
 
-	r.Get("/accounttypes", NewRootHandler(GetAccountTypes(acctsController)).ServeHTTP)
+	r.Get("/accounttypes", NewRootHandler(GetAccountTypes(accoutsController)).ServeHTTP)
 	return r
 }

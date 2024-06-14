@@ -297,12 +297,20 @@ func TestTransactionStore_GetUnreconciledTransactionsOnAccountForDate(t *testing
 	g.Expect(unreconciledTransaction).To(gomega.HaveLen(0))
 
 	// should return 1 record, as this transaction is reconciled, but the reconciled date is after the cutoffdate
-	reconciledDateCutoff, err := time.Parse("2006-01-02", "2016-07-15")
+	reconciledDateCutoff1, err := time.Parse("2006-01-02", "2016-06-30")
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	reconciledDateCutoff2, err := time.Parse("2006-01-02", "2016-07-15")
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	testSearchLimitDate2, err := time.Parse("2006-01-02", "2016-07-31")
+	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	unreconciledTransaction, err = transStore.GetUnreconciledTransactionsOnAccountForDate(myAcct.AccountLeft, myAcct.AccountRight,
-		testSearchLimitDate2, reconciledDateCutoff)
+		testSearchLimitDate2, reconciledDateCutoff1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(unreconciledTransaction).To(gomega.HaveLen(1))
+
+	unreconciledTransaction, err = transStore.GetUnreconciledTransactionsOnAccountForDate(myAcct.AccountLeft, myAcct.AccountRight,
+		testSearchLimitDate2, reconciledDateCutoff2)
 	g.Expect(err).To(gomega.HaveOccurred())
 	g.Expect(errors.Is(err, sql.ErrNoRows)).To(gomega.BeTrue())
 	g.Expect(unreconciledTransaction).To(gomega.HaveLen(0))

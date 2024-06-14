@@ -3,7 +3,7 @@ FROM golang:1.22-alpine AS base
 RUN apk add --no-cache make build-base
 
 WORKDIR /tmp
-RUN go install github.com/cosmtrek/air@latest && go install github.com/maruel/panicparse@latest
+RUN go install github.com/air-verse/air@latest && go install github.com/maruel/panicparse@latest
 
 ENV GOFLAGS=-buildvcs=false
 ARG APP_ROOT=/app
@@ -16,7 +16,7 @@ RUN mkdir -p ${APP_ROOT}
 ADD . ${APP_ROOT}
 WORKDIR ${APP_ROOT}
 
-FROM golangci/golangci-lint:v1.57 AS lint-base
+FROM golangci/golangci-lint:latest AS lint-base
 
 FROM base
 COPY --from=lint-base /usr/bin/golangci-lint /usr/bin/golangci-lint

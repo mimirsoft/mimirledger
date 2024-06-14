@@ -270,6 +270,17 @@ func (c *Account) updateBalance(ds *datastore.Datastores) error {
 	return nil
 }
 
+// updateBalance retrieves a specificAccount
+func (c *Account) UpdateReconciledDate(ds *datastore.Datastores) error {
+	eAcct := datastore.Account(*c)
+	err := ds.AccountStore().SetAccountReconciledDate(&eAcct)
+	if err != nil {
+		return fmt.Errorf("ds.AccountStore().GetBalance:%w", err)
+	}
+	*c = Account(eAcct)
+	return nil
+}
+
 // UpdateBalanceForAccountID
 func UpdateBalanceForAccountID(ds *datastore.Datastores, accountID uint64) error {
 	myAcct, err := RetrieveAccountByID(ds, accountID)

@@ -1,6 +1,7 @@
 package web
 
 import (
+	"database/sql"
 	"errors"
 	"fmt"
 	"github.com/mimirsoft/mimirledger/api/datastore"
@@ -539,4 +540,112 @@ func TestTransactions_GetUnreconciledTransactionsOnAccount(t *testing.T) {
 	g.Expect(res[0].TransactionComment).To(gomega.Equal("woot"))
 	g.Expect(res[0].TransactionDCAmount).To(gomega.Equal(uint64(10000)))
 	g.Expect(res[0].TransactionDate).To(gomega.BeTemporally("~", time.Now(), time.Second))
+}
+
+func TestTransactions_GetUnreconciledTransactionsOnAccountForDate(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDatastores(TestDataStore)
+
+	// create accounts first
+	a1 := models.Account{AccountName: "MyBank", AccountSign: datastore.AccountSignDebit, AccountType: datastore.AccountTypeAsset}
+	err := a1.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a2 := models.Account{AccountName: "Income", AccountSign: datastore.AccountSignCredit, AccountType: datastore.AccountTypeIncome}
+	err = a2.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	oldDate1, err := time.Parse("2006-01-02", "2016-07-08")
+	txn := models.Transaction{TransactionCore: models.TransactionCore{TransactionComment: "woot",
+		TransactionDate: oldDate1},
+		DebitCreditSet: []*models.TransactionDebitCredit{
+			&models.TransactionDebitCredit{AccountID: a2.AccountID,
+				DebitOrCredit:       datastore.AccountSignCredit,
+				TransactionDCAmount: 10000},
+			&models.TransactionDebitCredit{AccountID: a1.AccountID,
+				DebitOrCredit:       datastore.AccountSignDebit,
+				TransactionDCAmount: 10000},
+		},
+	}
+	err = txn.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// should return nothing, as we cut off the search before the date on the transaction
+	var test = RouterTest{Request: Request{
+		Method:     http.MethodGet,
+		Router:     TestRouter,
+		RequestURL: fmt.Sprintf("/transactions/account/%d/unreconciled?date=2015-07-08", a1.AccountID),
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	var res []*response.TransactionReconciliation
+	test.ExecWithUnmarshal(&res)
+	g.Expect(res).To(gomega.HaveLen(0))
+
+	// should return 1 transaction
+	var testb = RouterTest{Request: Request{
+		Method:     http.MethodGet,
+		Router:     TestRouter,
+		RequestURL: fmt.Sprintf("/transactions/account/%d/unreconciled?date=2024-07-08", a1.AccountID),
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	var resb []*response.TransactionReconciliation
+	testb.ExecWithUnmarshal(&resb)
+	g.Expect(resb).To(gomega.HaveLen(1))
+	g.Expect(resb[0].TransactionComment).To(gomega.Equal("woot"))
+	g.Expect(resb[0].TransactionDCAmount).To(gomega.Equal(uint64(10000)))
+	g.Expect(resb[0].TransactionDate).To(gomega.BeTemporally("~", oldDate1, time.Second))
+
+	// set is_reconciled and the reconciled_date on myTrans1
+	txn.IsReconciled = true
+	reconciledDate, err := time.Parse("2006-01-02", "2016-07-11")
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	txn.TransactionReconcileDate = sql.NullTime{Time: reconciledDate, Valid: true}
+	err = txn.UpdateReconciled(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// should still return nothing, as the reconciled date greater than the search limit date
+	var test2 = RouterTest{Request: Request{
+		Method:     http.MethodGet,
+		Router:     TestRouter,
+		RequestURL: fmt.Sprintf("/transactions/account/%d/unreconciled?date=2015-07-08", a1.AccountID),
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	var res2 []*response.TransactionReconciliation
+	test2.ExecWithUnmarshal(&res2)
+	g.Expect(res).To(gomega.HaveLen(0))
+
+	reconciledDateCutoff, err := time.Parse("2006-01-02", "2016-06-30")
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	a1.AccountReconcileDate = sql.NullTime{Time: reconciledDateCutoff, Valid: true}
+	err = a1.UpdateReconciledDate(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// should return 1 record, as this transaction is reconciled, but the reconciled date is after the cutoffdate (the a1.AccountReconcileDat)
+	var test3 = RouterTest{Request: Request{
+		Method:     http.MethodGet,
+		Router:     TestRouter,
+		RequestURL: fmt.Sprintf("/transactions/account/%d/unreconciled?date=2016-07-31", a1.AccountID),
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	var res3 []*response.TransactionReconciliation
+	test3.ExecWithUnmarshal(&res3)
+	g.Expect(res3).To(gomega.HaveLen(1))
+
+	reconciledDateCutoff2, err := time.Parse("2006-01-02", "2016-07-31")
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	a1.AccountReconcileDate = sql.NullTime{Time: reconciledDateCutoff2, Valid: true}
+	err = a1.UpdateReconciledDate(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// should return 0 records, the transactions ReconcileDate is now past the cuttoff date on the account
+	var test4 = RouterTest{Request: Request{
+		Method:     http.MethodGet,
+		Router:     TestRouter,
+		RequestURL: fmt.Sprintf("/transactions/account/%d/unreconciled?date=2020-07-31", a1.AccountID),
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	var res4 []*response.TransactionReconciliation
+	test4.ExecWithUnmarshal(&res4)
+	g.Expect(res4).To(gomega.HaveLen(0))
 }

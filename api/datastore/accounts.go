@@ -108,6 +108,7 @@ func (store AccountStore) Store(acct *Account) error {
 	if err != nil {
 		return fmt.Errorf("stmt.QueryRow(acct).StructScan(acct):%w", err)
 	}
+
 	return nil
 }
 
@@ -156,6 +157,7 @@ func (store AccountStore) Update(acct *Account) error {
 	if err != nil {
 		return fmt.Errorf("stmt.QueryRow(acct).StructScan(acct):%w", err)
 	}
+
 	return nil
 }
 
@@ -176,6 +178,7 @@ func (store AccountStore) UpdateSubtotal(acct *Account) error {
 	if err != nil {
 		return fmt.Errorf("stmt.QueryRow(acct).StructScan(acct):%w", err)
 	}
+
 	return nil
 }
 
@@ -196,6 +199,7 @@ func (store AccountStore) UpdateBalance(acct *Account) error {
 	if err != nil {
 		return fmt.Errorf("stmt.QueryRow(acct).StructScan(acct):%w", err)
 	}
+
 	return nil
 }
 
@@ -209,6 +213,7 @@ func (store AccountStore) SetAccountReconciledDate(acct *Account) error {
 	if err != nil {
 		return fmt.Errorf("store.Client.Exec:%w", err)
 	}
+
 	return nil
 }
 
@@ -225,6 +230,7 @@ func (store AccountStore) GetBalance(accountID uint64) (int64, error) {
 	if err := row.Scan(&accountBalance); err != nil {
 		return 0, fmt.Errorf("row.Scan(&accountBalance):%w", err)
 	}
+
 	return accountBalance, nil
 }
 
@@ -255,6 +261,7 @@ func (store AccountStore) GetBalances(accountID uint64) ([]Account, error) {
 	if len(accountSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
+
 	return accountSet, nil
 }
 
@@ -282,6 +289,7 @@ func (store AccountStore) GetAccounts() ([]Account, error) {
 	if len(accountSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
+
 	return accountSet, nil
 }
 
@@ -290,12 +298,13 @@ func (store AccountStore) GetAccountByID(id uint64) (*Account, error) {
 	query := `select * from transaction_accounts where account_id = $1`
 	row := store.Client.QueryRowx(query, id)
 
-	var as Account
+	var acct Account
 
-	if err := row.StructScan(&as); err != nil {
+	if err := row.StructScan(&acct); err != nil {
 		return nil, fmt.Errorf("row.StructScan(&as):%w", err)
 	}
-	return &as, nil
+
+	return &acct, nil
 }
 
 // GetDirectChildren gets first level children of an account
@@ -324,6 +333,7 @@ func (store AccountStore) GetDirectChildren(acctID uint64) ([]Account, error) {
 	if len(accountSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
+
 	return accountSet, nil
 }
 
@@ -355,6 +365,7 @@ ORDER BY Parents.account_left`
 	if len(accountSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
+
 	return accountSet, nil
 }
 
@@ -389,6 +400,7 @@ ORDER BY account_left`
 	if len(accountSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
+
 	return accountSet, nil
 }
 
@@ -411,6 +423,7 @@ func (store AccountStore) OpenSpotInTree(afterValue, spread uint64) error {
 	if err != nil {
 		return nil
 	}
+
 	return nil
 }
 
@@ -433,5 +446,6 @@ func (store AccountStore) CloseSpotInTree(afterValue, spread uint64) error {
 	if err != nil {
 		return nil
 	}
+
 	return nil
 }

@@ -19,7 +19,7 @@ type TransactionDebitCredit struct {
 }
 
 // Store inserts a UserNotification into postgres
-func (store TransactionDebitCreditStore) Store(trn *TransactionDebitCredit) (err error) {
+func (store TransactionDebitCreditStore) Store(trn *TransactionDebitCredit) error {
 	query := `    INSERT INTO transaction_debit_credit 
 		           (transaction_id,
 	account_id,
@@ -33,7 +33,7 @@ func (store TransactionDebitCreditStore) Store(trn *TransactionDebitCredit) (err
 
 	stmt, err := store.Client.PrepareNamed(query)
 	if err != nil {
-		return
+		return fmt.Errorf("error preparing transaction debit credit: %w", err)
 	}
 	defer stmt.Close()
 
@@ -41,6 +41,7 @@ func (store TransactionDebitCreditStore) Store(trn *TransactionDebitCredit) (err
 	if err != nil {
 		return fmt.Errorf("stmt.QueryRow(trn).StructScan(trn):%w", err)
 	}
+
 	return nil
 }
 
@@ -67,6 +68,7 @@ func (store TransactionDebitCreditStore) GetDCForTransactionID(id uint64) ([]*Tr
 	if len(txnSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
+
 	return txnSet, nil
 }
 
@@ -94,6 +96,7 @@ func (store TransactionDebitCreditStore) DeleteForTransactionID(id uint64) ([]*T
 	if len(txnSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
+
 	return txnSet, nil
 }
 
@@ -125,5 +128,6 @@ func (store TransactionDebitCreditStore) GetSubtotals(accountID uint64) ([]*Acco
 
 		txnSet = append(txnSet, &txn)
 	}
+
 	return txnSet, nil
 }

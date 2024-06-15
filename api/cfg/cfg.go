@@ -22,6 +22,7 @@ func LoadEnv() error {
 	if err != nil {
 		return fmt.Errorf("godotenv.Load err: %v", err)
 	}
+
 	return nil
 }
 

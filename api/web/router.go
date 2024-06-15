@@ -55,6 +55,7 @@ func NewRouter(dStores *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 	r.Post("/accounts", NewRootHandler(PostAccounts(accoutsController)).ServeHTTP)
 	r.Get("/accounts/{accountID}", NewRootHandler(GetAccount(accoutsController)).ServeHTTP)
 	r.Put("/accounts/{accountID}", NewRootHandler(PutAccountUpdate(accoutsController)).ServeHTTP)
+	r.Get("/accounttypes", NewRootHandler(GetAccountTypes(accoutsController)).ServeHTTP)
 	r.Post("/transactions", NewRootHandler(PostTransactions(transController)).ServeHTTP)
 	r.Get("/transactions/account/{accountID}", NewRootHandler(GetTransactionsOnAccount(transController)).ServeHTTP)
 	r.Get("/transactions/account/{accountID}/unreconciled", NewRootHandler(GetUnreconciledTransactionsOnAccount(transController)).ServeHTTP)
@@ -64,6 +65,5 @@ func NewRouter(dStores *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 	r.Put("/transactions/{transactionID}/unreconciled", NewRootHandler(PutTransactionUnreconciled(transController)).ServeHTTP)
 	r.Delete("/transactions/{transactionID}", NewRootHandler(DeleteTransaction(transController)).ServeHTTP)
 
-	r.Get("/accounttypes", NewRootHandler(GetAccountTypes(accoutsController)).ServeHTTP)
 	return r
 }

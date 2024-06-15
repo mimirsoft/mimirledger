@@ -50,5 +50,6 @@ func LoadConfig() Config {
 	postgresCfg := datastore.LoadPostgresConfigFromEnv()
 
 	myCfg := Config{Postgres: postgresCfg}
+	
 	return myCfg
 }

@@ -36,6 +36,7 @@ func (ac *AccountsController) AccountTypeList(ctx context.Context) (*AccountType
 	for key, value := range datastore.AccountTypeToSign {
 		at = append(at, AccountType{Name: string(key), Sign: string(value)})
 	}
+
 	return &AccountTypeSet{AccountTypes: at}, nil
 }
 
@@ -45,6 +46,7 @@ func (ac *AccountsController) AccountList(ctx context.Context) ([]*models.Accoun
 	if err != nil {
 		return nil, fmt.Errorf("models.RetrieveAccounts:%w", err)
 	}
+
 	return accounts, nil
 }
 
@@ -54,6 +56,7 @@ func (ac *AccountsController) AccountGetByID(ctx context.Context, accountID uint
 	if err != nil {
 		return nil, fmt.Errorf("models.RetrieveAccountByID:%w", err)
 	}
+
 	return account, nil
 }
 
@@ -63,6 +66,7 @@ func (ac *AccountsController) CreateAccount(ctx context.Context, account *models
 	if err != nil {
 		return nil, fmt.Errorf("account.Store:%w", err)
 	}
+
 	return account, nil
 }
 
@@ -72,5 +76,6 @@ func (ac *AccountsController) UpdateAccount(ctx context.Context, account *models
 	if err != nil {
 		return nil, fmt.Errorf("account.Update:%w", err)
 	}
+
 	return account, nil
 }

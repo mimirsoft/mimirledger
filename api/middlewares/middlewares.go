@@ -63,6 +63,7 @@ func Logger(logger zerolog.Logger) func(http.Handler) http.Handler {
 
 			next.ServeHTTP(wrapWriter, req)
 		}
+
 		return http.HandlerFunc(handlerFn)
 	}
 }

@@ -22,7 +22,7 @@ type Transaction struct {
 }
 
 // Store inserts a UserNotification into postgres
-func (store TransactionStore) Store(trn *Transaction) (err error) {
+func (store TransactionStore) Store(trn *Transaction) error {
 	if trn.TransactionDate.IsZero() {
 		trn.TransactionDate = time.Now()
 	}
@@ -46,7 +46,7 @@ func (store TransactionStore) Store(trn *Transaction) (err error) {
 
 	stmt, err := store.Client.PrepareNamed(query)
 	if err != nil {
-		return
+		return fmt.Errorf(" store.Client.PrepareNamed(query):%w", err)
 	}
 	defer stmt.Close()
 
@@ -54,10 +54,11 @@ func (store TransactionStore) Store(trn *Transaction) (err error) {
 	if err != nil {
 		return fmt.Errorf("stmt.QueryRow(trn).StructScan(trn):%w", err)
 	}
+
 	return nil
 }
 
-func (store TransactionStore) Update(trn *Transaction) (err error) {
+func (store TransactionStore) Update(trn *Transaction) error {
 	query := `    UPDATE  transaction_main 
 		        SET  (transaction_date,
 	transaction_reconcile_date,
@@ -78,60 +79,69 @@ func (store TransactionStore) Update(trn *Transaction) (err error) {
 
 	stmt, err := store.Client.PrepareNamed(query)
 	if err != nil {
-		return
+		return fmt.Errorf(" store.Client.PrepareNamed(query):%w", err)
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRow(trn).StructScan(trn)
+	if err != nil {
+		return fmt.Errorf("stmt.QueryRow(trn).StructScan(trn):%w", err)
 	}
 
-	defer stmt.Close()
-	return stmt.QueryRow(trn).StructScan(trn)
+	return nil
 }
 
 func (store TransactionStore) GetByID(id uint64) (*Transaction, error) {
 	query := `select * from transaction_main where transaction_id = $1`
 	row := store.Client.QueryRowx(query, id)
 
-	var tn Transaction
+	var myTransaction Transaction
 
-	if err := row.StructScan(&tn); err != nil {
+	if err := row.StructScan(&myTransaction); err != nil {
 		return nil, fmt.Errorf("row.StructScan(&tn):%w", err)
 	}
-	return &tn, nil
+
+	return &myTransaction, nil
 }
 
 // Delete a transaction
-func (store TransactionStore) Delete(trn *Transaction) (err error) {
+func (store TransactionStore) Delete(trn *Transaction) error {
 	query := `Delete FROM transaction_main 
 		         where transaction_id = $1`
 
-	_, err = store.Client.Exec(query, trn.TransactionID)
+	_, err := store.Client.Exec(query, trn.TransactionID)
 	if err != nil {
 		return fmt.Errorf("store.Client.Exec:%w", err)
 	}
+
 	return nil
 }
 
 // Set Transaction Reconsciled
-func (store TransactionStore) SetIsReconciled(trn *Transaction) (err error) {
+func (store TransactionStore) SetIsReconciled(trn *Transaction) error {
 	query := `UPDATE  transaction_main 
 		    SET is_reconciled = $2
 		    where transaction_id = $1`
 
-	_, err = store.Client.Exec(query, trn.TransactionID, trn.IsReconciled)
+	_, err := store.Client.Exec(query, trn.TransactionID, trn.IsReconciled)
 	if err != nil {
 		return fmt.Errorf("store.Client.Exec:%w", err)
 	}
+
 	return nil
 }
 
 // Set TransactionReconcileDate
-func (store TransactionStore) SetTransactionReconcileDate(trn *Transaction) (err error) {
+func (store TransactionStore) SetTransactionReconcileDate(trn *Transaction) error {
 	query := `UPDATE  transaction_main 
 		    SET transaction_reconcile_date = $2
 		    where transaction_id = $1`
 
-	_, err = store.Client.Exec(query, trn.TransactionID, trn.TransactionReconcileDate)
+	_, err := store.Client.Exec(query, trn.TransactionID, trn.TransactionReconcileDate)
 	if err != nil {
 		return fmt.Errorf("store.Client.Exec:%w", err)
 	}
+
 	return nil
 }
 
@@ -207,6 +217,7 @@ func (store TransactionStore) GetUnreconciledTransactionsOnAccountForDate(accoun
 	if len(txnSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
+
 	return txnSet, nil
 }
 
@@ -271,5 +282,6 @@ func (store TransactionStore) GetTransactionsForAccount(accountID uint64) ([]*Tr
 	if len(txnSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
+
 	return txnSet, nil
 }

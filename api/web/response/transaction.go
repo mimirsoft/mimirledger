@@ -43,6 +43,7 @@ func TransactionToRespTransaction(trans *models.Transaction) *Transaction {
 		IsSplit:                  trans.IsSplit,
 		DebitCreditSet:           myDCSet,
 	}
+
 	return &myTrans
 }
 
@@ -54,6 +55,7 @@ func ConvertDebitCreditsToReDebitCreditSet(dcSet []*models.TransactionDebitCredi
 		myDS := TransactionDebitCredit(*dcSet[idx])
 		mset[idx] = &myDS
 	}
+
 	return mset
 }
 
@@ -63,6 +65,7 @@ func ConvertTransactionsToRespTransactions(txns []*models.Transaction) *Transact
 	for idx := range txns {
 		tas[idx] = TransactionToRespTransaction(txns[idx])
 	}
+
 	return &TransactionSet{Transactions: tas}
 }
 
@@ -94,6 +97,7 @@ func ConvertTransactionLedgerToRespTransactionLedger(act *models.Account, txns [
 	for idx := range txns {
 		tas[idx] = ConvertTransactionLedgerToRespTransactionLeger(txns[idx])
 	}
+
 	return &TransactionLedgerSet{
 		AccountID:       act.AccountID,
 		AccountName:     act.AccountName,
@@ -115,6 +119,7 @@ func ConvertTransactionLedgerToRespTransactionLeger(trans *models.TransactionLed
 		Split:                    trans.Split,
 		DebitOrCredit:            trans.DebitOrCredit,
 	}
+
 	return &respTransLedger
 }
 
@@ -137,6 +142,7 @@ func ConvertTransactionRecSetToRespTransactionRecSet(txns []*models.TransactionR
 	for idx := range txns {
 		tas[idx] = ConvertTransactionReconcileToRespTransactionReconcile(txns[idx])
 	}
+
 	return tas
 }
 func ConvertTransactionReconcileToRespTransactionReconcile(trans *models.TransactionReconciliation) *TransactionReconciliation {
@@ -152,5 +158,6 @@ func ConvertTransactionReconcileToRespTransactionReconcile(trans *models.Transac
 		Split:                    trans.Split,
 		DebitOrCredit:            trans.DebitOrCredit,
 	}
+
 	return &respTransLedger
 }

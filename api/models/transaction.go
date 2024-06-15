@@ -73,6 +73,7 @@ func (c *Transaction) Store(dStores *datastore.Datastores) error {
 	if err != nil {
 		return fmt.Errorf("updateSubtotalsAndBalances:%w", err)
 	}
+
 	return nil
 }
 
@@ -103,6 +104,7 @@ func (c *Transaction) handleDCSetStore(dStores *datastore.Datastores, affectedSu
 		affectedSubTotalAccountIDs[c.DebitCreditSet[idx].AccountID] = true
 		affectedBalanceAccountIDs[c.DebitCreditSet[idx].AccountID] = true
 	}
+
 	return nil
 }
 
@@ -122,6 +124,7 @@ func updateSubtotalsAndBalances(dStores *datastore.Datastores, affectedSubTotalA
 			return fmt.Errorf("UpdateBalanceForAccountID:%w [accountID:%d]", err, idx)
 		}
 	}
+
 	return nil
 }
 
@@ -163,6 +166,7 @@ func (c *Transaction) Update(dStores *datastore.Datastores) error {
 	if err != nil {
 		return fmt.Errorf("updateSubtotalsAndBalances:%w", err)
 	}
+
 	return nil
 }
 func (c *Transaction) handleDeletedDCs(dStores *datastore.Datastores, affectedSubTotalAccountIDs map[uint64]bool,
@@ -186,6 +190,7 @@ func (c *Transaction) handleDeletedDCs(dStores *datastore.Datastores, affectedSu
 		affectedSubTotalAccountIDs[deletedDCs[idx].AccountID] = true
 		affectedBalanceAccountIDs[deletedDCs[idx].AccountID] = true
 	}
+
 	return nil
 }
 
@@ -211,6 +216,7 @@ func (c *Transaction) Delete(dStores *datastore.Datastores) error {
 	if err != nil {
 		return fmt.Errorf("updateSubtotalsAndBalances:%w", err)
 	}
+
 	return nil
 }
 
@@ -250,6 +256,7 @@ func (c *Transaction) validate() (err error) {
 	if debitTotal != creditTotal {
 		return ErrTransactionDebitCreditsNotBalanced
 	}
+
 	return nil
 }
 
@@ -273,6 +280,7 @@ func (c *Transaction) transactionTotal() (uint64, error) {
 	if debitTotal != creditTotal {
 		return 0, ErrTransactionDebitCreditsNotBalanced
 	}
+
 	return debitTotal, nil
 }
 
@@ -297,6 +305,7 @@ func (c *Transaction) UpdateReconciled(dStores *datastore.Datastores) error {
 	}
 	// set c.TransactionCore
 	c.TransactionCore = TransactionCore(eTxn)
+
 	return nil
 }
 
@@ -310,6 +319,7 @@ func (c *Transaction) UpdateUnreconciled(dStores *datastore.Datastores) error {
 	}
 	// set c.TransactionCore
 	c.TransactionCore = TransactionCore(eTxn)
+
 	return nil
 }
 
@@ -322,6 +332,7 @@ func RetrieveTransactionByID(dStores *datastore.Datastores, transactionID uint64
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrTransactionNotFound
 		}
+
 		return nil, fmt.Errorf("TransactionStore().GetByID:%w", err)
 	}
 
@@ -334,6 +345,7 @@ func RetrieveTransactionByID(dStores *datastore.Datastores, transactionID uint64
 	}
 
 	myTrans.DebitCreditSet = entTransactionsDCToTransactionsDC(myDCSet)
+
 	return &myTrans, nil
 }
 
@@ -344,11 +356,13 @@ func entTransactionsToTransactions(eTxn []*datastore.Transaction) []*Transaction
 		myTransCore := TransactionCore(*eTxn[idx])
 		txnSet[idx] = &Transaction{TransactionCore: myTransCore}
 	}
+
 	return txnSet
 }
 
 func transactionToEntTransaction(txn *Transaction) datastore.Transaction {
 	etxn := datastore.Transaction(txn.TransactionCore)
+
 	return etxn
 }
 
@@ -359,11 +373,13 @@ func entTransactionsDCToTransactionsDC(eTxn []*datastore.TransactionDebitCredit)
 		myTDC := TransactionDebitCredit(*eTxn[idx])
 		tdcSet[idx] = &myTDC
 	}
+
 	return tdcSet
 }
 
 func transactionDCToEntTransactionDC(txn *TransactionDebitCredit) datastore.TransactionDebitCredit {
 	eTxn := datastore.TransactionDebitCredit(*txn)
+
 	return eTxn
 }
 
@@ -390,10 +406,12 @@ func RetrieveTransactionLedgerForAccountID(dStores *datastore.Datastores, transa
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
+
 		return nil, fmt.Errorf("TransactionStore().GetTransactionsForAccount:%w", err)
 	}
 
 	transSet := entTransactionsLedgerToTransactionsLedger(eTransSet)
+
 	return transSet, nil
 }
 
@@ -422,10 +440,12 @@ func RetrieveUnreconciledTransactionsForDate(dStores *datastore.Datastores, acco
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
+
 		return nil, fmt.Errorf("TransactionStore().GetTransactionsForAccount:%w", err)
 	}
 
 	transSet := entTransactionsRecToTransactionsRec(eTransSet)
+
 	return transSet, nil
 }
 
@@ -436,6 +456,7 @@ func entTransactionsRecToTransactionsRec(eTxn []*datastore.TransactionReconcilia
 		myTDC := TransactionReconciliation(*eTxn[idx])
 		tdcSet[idx] = &myTDC
 	}
+
 	return tdcSet
 }
 
@@ -446,5 +467,6 @@ func entTransactionsLedgerToTransactionsLedger(eTxn []*datastore.TransactionLedg
 		myTDC := TransactionLedger(*eTxn[idx])
 		tdcSet[idx] = &myTDC
 	}
+
 	return tdcSet
 }

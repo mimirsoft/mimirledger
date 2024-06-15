@@ -49,6 +49,7 @@ func (h RootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			if err = json.NewEncoder(res).Encode(e); err != nil {
 				log.Printf("failed json encode RequestError response %s", err)
 			}
+
 			return
 		default:
 			// since we don't know what the error is, we log the error
@@ -63,6 +64,7 @@ func (h RootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 			if err1 := json.NewEncoder(res).Encode(unknownErr); err1 != nil {
 				log.Error().Err(err1).Msg("failed json encode UnknownError response")
 			}
+
 			return
 		}
 	}
@@ -81,6 +83,7 @@ func HealthCheck(healthController *HealthController) func(w http.ResponseWriter,
 		if err != nil {
 			return NewRequestError(http.StatusServiceUnavailable, err)
 		}
+
 		return RespondOK(res, "ok")
 	}
 }

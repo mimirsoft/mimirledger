@@ -13,12 +13,14 @@ func RespondOK(w http.ResponseWriter, payload interface{}) error {
 	if err := json.NewEncoder(w).Encode(payload); err != nil {
 		return fmt.Errorf("failed json encode response payload: %w", err)
 	}
+
 	return nil
 }
 
 // respond with no content and 204 header
 func RespondNoContent(w http.ResponseWriter) error {
 	w.WriteHeader(http.StatusNoContent)
+
 	return nil
 }
 
@@ -26,5 +28,6 @@ func RespondNoContent(w http.ResponseWriter) error {
 func RespondRedirectStatusFound(w http.ResponseWriter, location string) error {
 	w.Header().Set("Location", location)
 	w.WriteHeader(http.StatusFound)
+
 	return nil
 }

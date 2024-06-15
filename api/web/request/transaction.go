@@ -45,6 +45,7 @@ func ReqTransactionToTransaction(rTrans *Transaction) *models.Transaction {
 	}
 	myDCSet := ConvertReqDebitCreditsToDebitCreditSet(rTrans.DebitCreditSet)
 	myTrans := models.Transaction{TransactionCore: myTransCore, DebitCreditSet: myDCSet}
+
 	return &myTrans
 }
 
@@ -56,5 +57,6 @@ func ConvertReqDebitCreditsToDebitCreditSet(dcSet []*TransactionDebitCredit) []*
 		myDS := models.TransactionDebitCredit(*dcSet[idx])
 		mset[idx] = &myDS
 	}
+
 	return mset
 }

@@ -48,6 +48,7 @@ func (c *Account) Store(dStores *datastore.Datastores) error { //nolint:gocyclo
 			if errors.Is(err, sql.ErrNoRows) {
 				return fmt.Errorf("%w, [parent AccountID:%d]", errParentAccountNotFound, c.AccountParent)
 			}
+
 			return fmt.Errorf("getAccountByID:%w", err)
 		}
 
@@ -99,6 +100,7 @@ func (c *Account) Store(dStores *datastore.Datastores) error { //nolint:gocyclo
 	}
 
 	*c = Account(eAcct)
+
 	return nil
 }
 
@@ -128,6 +130,7 @@ func (c *Account) Update(dStores *datastore.Datastores) (err error) { //nolint:g
 				if errors.Is(err, sql.ErrNoRows) {
 					return fmt.Errorf("%w, [parent AccountID:%d]", errParentAccountNotFound, c.AccountParent)
 				}
+
 				return fmt.Errorf("getAccountByID:%w", err)
 			}
 
@@ -239,6 +242,7 @@ func (c *Account) Update(dStores *datastore.Datastores) (err error) { //nolint:g
 	}
 
 	*c = Account(eAcct)
+
 	return nil
 }
 
@@ -277,6 +281,7 @@ func (c *Account) updateSubtotal(dStores *datastore.Datastores) error {
 	}
 
 	*c = Account(eAcct)
+
 	return nil
 }
 
@@ -297,6 +302,7 @@ func (c *Account) updateBalance(dStores *datastore.Datastores) error {
 	}
 
 	*c = Account(eAcct)
+
 	return nil
 }
 
@@ -310,6 +316,7 @@ func (c *Account) UpdateReconciledDate(dStores *datastore.Datastores) error {
 	}
 
 	*c = Account(eAcct)
+
 	return nil
 }
 
@@ -324,6 +331,7 @@ func UpdateBalanceForAccountID(dStores *datastore.Datastores, accountID uint64) 
 	if err != nil {
 		return fmt.Errorf("myAcct.updateBalance:%w", err)
 	}
+
 	return nil
 }
 
@@ -338,6 +346,7 @@ func UpdateSubtotalForAccountID(dStores *datastore.Datastores, accountID uint64)
 	if err != nil {
 		return fmt.Errorf("myAcct.updateSubtotal:%w", err)
 	}
+
 	return nil
 }
 
@@ -350,10 +359,12 @@ func RetrieveAccounts(dStores *datastore.Datastores) ([]*Account, error) {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
+
 		return nil, fmt.Errorf("AccountStore().GetAccounts:%w", err)
 	}
 
 	accts := entAccountToAccounts(actSet)
+
 	return accts, nil
 }
 
@@ -366,10 +377,12 @@ func RetrieveAccountByID(dStores *datastore.Datastores, accountID uint64) (*Acco
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrAccountNotFound
 		}
+
 		return nil, fmt.Errorf("AccountStore().GetAccountByID:%w", err)
 	}
 
 	acct := Account(*eAcct)
+
 	return &acct, nil
 }
 
@@ -406,6 +419,7 @@ func findSpotInTree(dStores *datastore.Datastores, parentAccountID uint64, name 
 	if afterThisAccount == nil {
 		return 0, nil
 	}
+
 	return afterThisAccount.AccountRight, nil
 }
 func openSpotInTree(ds *datastore.Datastores, afterValue uint64, spread uint64) error {
@@ -415,6 +429,7 @@ func openSpotInTree(ds *datastore.Datastores, afterValue uint64, spread uint64) 
 	if err != nil {
 		return fmt.Errorf("as.OpenSpotInTree:%w", err)
 	}
+
 	return nil
 }
 
@@ -425,6 +440,7 @@ func closeSpotInTree(dStores *datastore.Datastores, afterValue uint64, spread ui
 	if err != nil {
 		return fmt.Errorf("as.OpenSpotInTree:%w", err)
 	}
+
 	return nil
 }
 
@@ -437,10 +453,12 @@ func getAccountByID(dStores *datastore.Datastores, accountID uint64) (*Account, 
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
+
 		return nil, fmt.Errorf("AccountStore().GetAccountByID:%w", err)
 	}
 
 	myAccount := Account(*eAccount)
+
 	return &myAccount, nil
 }
 
@@ -452,10 +470,12 @@ func findDirectChildren(dStores *datastore.Datastores, accountID uint64) ([]*Acc
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
+
 		return nil, fmt.Errorf("AccountStore().GetDirectChildren:%w", err)
 	}
 
 	accounts := entAccountToAccounts(actSet)
+
 	return accounts, nil
 }
 func findAllChildren(dStores *datastore.Datastores, parentID uint64) ([]*Account, error) {
@@ -466,10 +486,12 @@ func findAllChildren(dStores *datastore.Datastores, parentID uint64) ([]*Account
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
+
 		return nil, fmt.Errorf("AccountStore().GetDirectChildren:%w", err)
 	}
 
 	accounts := entAccountToAccounts(actSet)
+
 	return accounts, nil
 }
 
@@ -480,6 +502,7 @@ func entAccountToAccounts(eAccts []datastore.Account) []*Account {
 		act := Account(eAccts[idx])
 		accountSet[idx] = &act
 	}
+
 	return accountSet
 }
 func retrieveAccountFullName(dStores *datastore.Datastores, accountID uint64) (string, error) {
@@ -491,6 +514,7 @@ func retrieveAccountFullName(dStores *datastore.Datastores, accountID uint64) (s
 		if errors.Is(err, sql.ErrNoRows) {
 			return accountFullName, nil
 		}
+
 		return "", fmt.Errorf("AccountStore().GetParents:%w", err)
 	}
 
@@ -499,6 +523,7 @@ func retrieveAccountFullName(dStores *datastore.Datastores, accountID uint64) (s
 	}
 
 	accountFullName = strings.TrimSuffix(accountFullName, ":")
+
 	return accountFullName, nil
 }
 
@@ -510,6 +535,7 @@ func getParentsAccountIDs(dStores *datastore.Datastores, accountID uint64) ([]ui
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
 		}
+
 		return nil, fmt.Errorf("AccountStore().GetParents:%w", err)
 	}
 	var parentIDs []uint64
@@ -517,5 +543,6 @@ func getParentsAccountIDs(dStores *datastore.Datastores, accountID uint64) ([]ui
 	for idx := range actSet {
 		parentIDs = append(parentIDs, actSet[idx].AccountID)
 	}
+
 	return parentIDs, nil
 }

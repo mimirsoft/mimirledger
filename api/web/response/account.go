@@ -40,6 +40,7 @@ func ConvertAccountsToRespAccountSet(accts []*models.Account) *AccountSet {
 	for idx := range accts {
 		ras[idx] = AccountToRespAccount(accts[idx])
 	}
+
 	return &AccountSet{Accounts: ras}
 }
 

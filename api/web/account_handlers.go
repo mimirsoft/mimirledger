@@ -18,6 +18,7 @@ func GetAccountTypes(acctController *AccountsController) func(res http.ResponseW
 		if err != nil {
 			return NewRequestError(http.StatusServiceUnavailable, err)
 		}
+
 		return RespondOK(res, accountsTypes)
 	}
 }
@@ -31,6 +32,7 @@ func GetAccounts(acctController *AccountsController) func(res http.ResponseWrite
 		}
 
 		jsonResponse := response.ConvertAccountsToRespAccountSet(accounts)
+
 		return RespondOK(res, jsonResponse)
 	}
 }
@@ -57,6 +59,7 @@ func GetAccount(acctController *AccountsController) func(res http.ResponseWriter
 		}
 
 		jsonResponse := response.AccountToRespAccount(account)
+
 		return RespondOK(res, jsonResponse)
 	}
 }
@@ -85,6 +88,7 @@ func PostAccounts(acctController *AccountsController) func(res http.ResponseWrit
 		}
 
 		jsonResponse := response.AccountToRespAccount(account)
+
 		return RespondOK(res, jsonResponse)
 	}
 }
@@ -123,6 +127,7 @@ func PutAccountUpdate(acctController *AccountsController) func(res http.Response
 		}
 
 		jsonResponse := response.AccountToRespAccount(account)
+
 		return RespondOK(res, jsonResponse)
 	}
 }

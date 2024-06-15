@@ -32,6 +32,7 @@ func GetTransaction(contoller *TransactionsController) func(res http.ResponseWri
 		}
 
 		jsonResponse := response.TransactionToRespTransaction(transaction)
+
 		return RespondOK(res, jsonResponse)
 	}
 }
@@ -58,6 +59,7 @@ func PostTransactions(contoller *TransactionsController) func(res http.ResponseW
 		}
 
 		jsonResponse := response.TransactionToRespTransaction(transaction)
+
 		return RespondOK(res, jsonResponse)
 	}
 }
@@ -82,6 +84,7 @@ func GetTransactionsOnAccount(contoller *TransactionsController) func(res http.R
 		}
 
 		jsonResponse := response.ConvertTransactionLedgerToRespTransactionLedger(account, transactions)
+
 		return RespondOK(res, jsonResponse)
 	}
 }
@@ -115,6 +118,7 @@ func GetUnreconciledTransactionsOnAccount(contoller *TransactionsController) fun
 		}
 
 		jsonResponse := response.ConvertTransactionRecSetToRespTransactionRecSet(transactions)
+
 		return RespondOK(res, jsonResponse)
 	}
 }
@@ -153,6 +157,7 @@ func PutTransactionUpdate(contoller *TransactionsController) func(res http.Respo
 		}
 
 		jsonResponse := response.TransactionToRespTransaction(transaction)
+
 		return RespondOK(res, jsonResponse)
 	}
 }
@@ -177,6 +182,7 @@ func DeleteTransaction(contoller *TransactionsController) func(res http.Response
 		}
 
 		jsonResponse := response.TransactionToRespTransaction(transaction)
+
 		return RespondOK(res, jsonResponse)
 	}
 }
@@ -215,6 +221,7 @@ func PutTransactionReconciled(contoller *TransactionsController) func(res http.R
 		}
 
 		jsonResponse := response.TransactionToRespTransaction(transaction)
+
 		return RespondOK(res, jsonResponse)
 	}
 }
@@ -253,6 +260,7 @@ func PutTransactionUnreconciled(contoller *TransactionsController) func(res http
 		}
 
 		jsonResponse := response.TransactionToRespTransaction(transaction)
+
 		return RespondOK(res, jsonResponse)
 	}
 }

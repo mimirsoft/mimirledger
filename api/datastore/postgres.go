@@ -78,10 +78,15 @@ func NewClient(config *PostgresConfig) (*sqlx.DB, error) {
 			sslMode,
 		),
 	)
+	if err != nil {
+		return nil, fmt.Errorf("unable to connect to postgres: %w", err)
+	}
+
 	if config.MaxConnLifetime > 0 {
 		conn.SetConnMaxLifetime(time.Second * time.Duration(config.MaxConnLifetime))
 	}
-	return conn, err
+
+	return conn, nil
 }
 
 func LoadPostgresConfigFromEnv() PostgresConfig {
@@ -116,5 +121,6 @@ func LoadPostgresConfigFromEnv() PostgresConfig {
 	if pgDisableSSL := os.Getenv("PG_DISABLE_SSL"); pgDisableSSL != "" {
 		c.DisableSSL, _ = strconv.ParseBool(pgDisableSSL)
 	}
+
 	return c
 }

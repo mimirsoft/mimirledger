@@ -153,7 +153,7 @@ func TestTransaction_Invalid(t *testing.T) {
 				},
 			},
 			GomegaWithT: g,
-			Code:        http.StatusBadRequest, RespBody: "myTxn.Store:c.handleDCSetStore:ds.TransactionDCStore().Store:ERROR: insert or update on table \\\"transaction_debit_credit\\\"",
+			Code:        http.StatusBadRequest, RespBody: "myTxn.Store:c.handleDCSetStore:ds.TransactionDCStore().Store:stmt.QueryRow(trn).StructScan(trn):ERROR: insert or update on table \\\"transaction_debit_credit\\\"",
 		},
 		{
 			Request: Request{

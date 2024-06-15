@@ -61,15 +61,15 @@ type PostgresConfig struct {
 	DisableSSL                       bool
 }
 
-func NewClient(config *PostgresConfig) (conn *sqlx.DB, err error) {
+func NewClient(config *PostgresConfig) (*sqlx.DB, error) {
 	sslMode := defaultSSLMode
 	if config.DisableSSL {
 		sslMode = defaultSSLMode
 	}
 
-	conn, err = sqlx.Open(
+	conn, err := sqlx.Open(
 		"pgx",
-		fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",
+		fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s", //nolint:nosprintfhostport
 			config.Username,
 			config.Password,
 			config.Host,
@@ -81,7 +81,7 @@ func NewClient(config *PostgresConfig) (conn *sqlx.DB, err error) {
 	if config.MaxConnLifetime > 0 {
 		conn.SetConnMaxLifetime(time.Second * time.Duration(config.MaxConnLifetime))
 	}
-	return
+	return conn, err
 }
 
 func LoadPostgresConfigFromEnv() PostgresConfig {

@@ -64,7 +64,7 @@ type Account struct {
 }
 
 // Store inserts an Account into postgres
-func (store AccountStore) Store(acct *Account) (err error) {
+func (store AccountStore) Store(acct *Account) error {
 	query := `    INSERT INTO transaction_accounts 
 		           (account_parent,
 	account_name,
@@ -100,15 +100,19 @@ func (store AccountStore) Store(acct *Account) (err error) {
 
 	stmt, err := store.Client.PrepareNamed(query)
 	if err != nil {
-		return
+		return fmt.Errorf(" store.Client.PrepareNamed(query):%w", err)
 	}
-
 	defer stmt.Close()
-	return stmt.QueryRow(acct).StructScan(acct)
+
+	err = stmt.QueryRow(acct).StructScan(acct)
+	if err != nil {
+		return fmt.Errorf("stmt.QueryRow(acct).StructScan(acct):%w", err)
+	}
+	return nil
 }
 
 // Update  updates Accounts into postgres
-func (store AccountStore) Update(acct *Account) (err error) {
+func (store AccountStore) Update(acct *Account) error {
 	query := `    UPDATE  transaction_accounts 
 		    SET       (account_parent,
 	account_name,
@@ -144,15 +148,19 @@ func (store AccountStore) Update(acct *Account) (err error) {
 
 	stmt, err := store.Client.PrepareNamed(query)
 	if err != nil {
-		return
+		return fmt.Errorf(" store.Client.PrepareNamed(query):%w", err)
 	}
-
 	defer stmt.Close()
-	return stmt.QueryRow(acct).StructScan(acct)
+
+	err = stmt.QueryRow(acct).StructScan(acct)
+	if err != nil {
+		return fmt.Errorf("stmt.QueryRow(acct).StructScan(acct):%w", err)
+	}
+	return nil
 }
 
 // UpdateSubtotal  updates the account_subtotal into postgres
-func (store AccountStore) UpdateSubtotal(acct *Account) (err error) {
+func (store AccountStore) UpdateSubtotal(acct *Account) error {
 	query := `    UPDATE  transaction_accounts 
 		    SET  account_subtotal = :account_subtotal
 		    WHERE account_id = :account_id
@@ -160,15 +168,19 @@ func (store AccountStore) UpdateSubtotal(acct *Account) (err error) {
 
 	stmt, err := store.Client.PrepareNamed(query)
 	if err != nil {
-		return
+		return fmt.Errorf(" store.Client.PrepareNamed:%w", err)
 	}
-
 	defer stmt.Close()
-	return stmt.QueryRow(acct).StructScan(acct)
+
+	err = stmt.QueryRow(acct).StructScan(acct)
+	if err != nil {
+		return fmt.Errorf("stmt.QueryRow(acct).StructScan(acct):%w", err)
+	}
+	return nil
 }
 
 // account_balance  updates the account_balance into postgres
-func (store AccountStore) UpdateBalance(acct *Account) (err error) {
+func (store AccountStore) UpdateBalance(acct *Account) error {
 	query := `    UPDATE  transaction_accounts 
 		    SET  account_balance = :account_balance
 		    WHERE account_id = :account_id
@@ -176,20 +188,24 @@ func (store AccountStore) UpdateBalance(acct *Account) (err error) {
 
 	stmt, err := store.Client.PrepareNamed(query)
 	if err != nil {
-		return
+		return fmt.Errorf(" store.Client.PrepareNamed:%w", err)
 	}
-
 	defer stmt.Close()
-	return stmt.QueryRow(acct).StructScan(acct)
+
+	err = stmt.QueryRow(acct).StructScan(acct)
+	if err != nil {
+		return fmt.Errorf("stmt.QueryRow(acct).StructScan(acct):%w", err)
+	}
+	return nil
 }
 
 // Set AccountReconcileDate
-func (store AccountStore) SetAccountReconciledDate(acct *Account) (err error) {
+func (store AccountStore) SetAccountReconciledDate(acct *Account) error {
 	query := `UPDATE  transaction_accounts 
 		    SET account_reconcile_date = $2
 		    where account_id = $1`
 
-	_, err = store.Client.Exec(query, acct.AccountID, acct.AccountReconcileDate)
+	_, err := store.Client.Exec(query, acct.AccountID, acct.AccountReconcileDate)
 	if err != nil {
 		return fmt.Errorf("store.Client.Exec:%w", err)
 	}
@@ -213,7 +229,7 @@ func (store AccountStore) GetBalance(accountID uint64) (int64, error) {
 }
 
 // GetBalances  gets the sum of all the subtotals for this accountID and all child accounts
-func (store AccountStore) GetBalances(accountID uint64) (as []Account, err error) {
+func (store AccountStore) GetBalances(accountID uint64) ([]Account, error) {
 	query := `    SELECT subaccount.*
                             FROM transaction_accounts AS p_account, transaction_accounts AS subaccount
                             WHERE subaccount.account_left BETWEEN p_account.account_left AND p_account.account_right
@@ -221,49 +237,52 @@ func (store AccountStore) GetBalances(accountID uint64) (as []Account, err error
 
 	rows, err := store.Client.Queryx(query, accountID)
 	if err != nil {
-		return
+		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}
 	defer rows.Close()
+
+	var accountSet []Account
 
 	for rows.Next() {
 		var acct Account
 		if err = rows.StructScan(&acct); err != nil {
-			return
+			return nil, fmt.Errorf("rows.StructScan:%w", err)
 		}
 
-		as = append(as, acct)
+		accountSet = append(accountSet, acct)
 	}
 
-	if len(as) == 0 {
+	if len(accountSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
-	return
+	return accountSet, nil
 }
 
 // Gets All Accounts
-func (store AccountStore) GetAccounts() (as []Account, err error) {
+func (store AccountStore) GetAccounts() ([]Account, error) {
 	query := `select * from transaction_accounts order by account_left`
 
 	rows, err := store.Client.Queryx(query)
 	if err != nil {
-		return
+		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}
-
 	defer rows.Close()
+
+	var accountSet []Account
 
 	for rows.Next() {
 		var acct Account
 		if err = rows.StructScan(&acct); err != nil {
-			return
+			return nil, fmt.Errorf("rows.StructScan:%w", err)
 		}
 
-		as = append(as, acct)
+		accountSet = append(accountSet, acct)
 	}
 
-	if len(as) == 0 {
+	if len(accountSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
-	return
+	return accountSet, nil
 }
 
 // Gets one account by account ID
@@ -280,65 +299,67 @@ func (store AccountStore) GetAccountByID(id uint64) (*Account, error) {
 }
 
 // GetDirectChildren gets first level children of an account
-func (store AccountStore) GetDirectChildren(id uint64) (as []Account, err error) {
+func (store AccountStore) GetDirectChildren(acctID uint64) ([]Account, error) {
 	query := `select * from transaction_accounts WHERE account_parent = $1
 	   ORDER BY account_name `
 
-	rows, err := store.Client.Queryx(query, id)
+	rows, err := store.Client.Queryx(query, acctID)
 	if err != nil {
 		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}
-
 	defer rows.Close()
+
+	var accountSet []Account
 
 	for rows.Next() {
 		var acct Account
 
 		if err = rows.StructScan(&acct); err != nil {
-			return
+			return nil, fmt.Errorf("rows.StructScan:%w", err)
 		}
 
-		as = append(as, acct)
+		accountSet = append(accountSet, acct)
 	}
 
-	if len(as) == 0 {
+	if len(accountSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
-	return
+	return accountSet, nil
 }
 
 // GetDirectChildren gets first level children of an account
-func (store AccountStore) GetParents(id uint64) (as []Account, err error) {
+func (store AccountStore) GetParents(acctID uint64) ([]Account, error) {
 	query := `select Parents.* 
          FROM transaction_accounts AS Parents, transaction_accounts AS BaseAccount
 WHERE (BaseAccount.account_left BETWEEN Parents.account_left AND Parents.account_right)
 AND (BaseAccount.account_id =$1)
 ORDER BY Parents.account_left`
 
-	rows, err := store.Client.Queryx(query, id)
+	rows, err := store.Client.Queryx(query, acctID)
 	if err != nil {
 		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}
-
 	defer rows.Close()
+
+	var accountSet []Account
 
 	for rows.Next() {
 		var acct Account
 		if err = rows.StructScan(&acct); err != nil {
-			return
+			return nil, fmt.Errorf("rows.StructScan:%w", err)
 		}
 
-		as = append(as, acct)
+		accountSet = append(accountSet, acct)
 	}
 
-	if len(as) == 0 {
+	if len(accountSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
-	return
+	return accountSet, nil
 }
 
 // Gets All Children of a given account, regardless of dept
-func (store AccountStore) GetAllChildren(id uint64) (as []Account, err error) {
+func (store AccountStore) GetAllChildren(acctID uint64) ([]Account, error) {
 	query := `SELECT 
 children.*
 FROM transaction_accounts AS parents,
@@ -348,26 +369,27 @@ AND children.account_left <> parents.account_left
 AND parents.account_id=$1
 ORDER BY account_left`
 
-	rows, err := store.Client.Queryx(query, id)
+	rows, err := store.Client.Queryx(query, acctID)
 	if err != nil {
-		return
+		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}
-
 	defer rows.Close()
+
+	var accountSet []Account
 
 	for rows.Next() {
 		var acct Account
 		if err = rows.StructScan(&acct); err != nil {
-			return
+			return nil, fmt.Errorf("rows.StructScan:%w", err)
 		}
 
-		as = append(as, acct)
+		accountSet = append(accountSet, acct)
 	}
 
-	if len(as) == 0 {
+	if len(accountSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
-	return
+	return accountSet, nil
 }
 
 // OpenSpotInTree opens a spot in our nested set

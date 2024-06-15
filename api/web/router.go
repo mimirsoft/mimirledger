@@ -12,8 +12,8 @@ import (
 	"net/http"
 )
 
-func NewRouter(ds *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
-	r := chi.NewRouter()
+func NewRouter(dStores *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
+	r := chi.NewRouter() //nolint:varnamelen
 	r.Use(middlewares.RequestId)
 
 	if logger != nil {
@@ -34,9 +34,9 @@ func NewRouter(ds *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 
-	healthController := NewHealthController(ds)
-	accoutsController := NewAccountsController(ds)
-	transController := NewTransactionsController(ds)
+	healthController := NewHealthController(dStores)
+	accoutsController := NewAccountsController(dStores)
+	transController := NewTransactionsController(dStores)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		_, err := w.Write([]byte("ok2"))

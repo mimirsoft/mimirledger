@@ -23,10 +23,10 @@ type Transaction struct {
 	DebitCreditSet           []*TransactionDebitCredit `json:"debitCreditSet"`
 }
 type TransactionDebitCredit struct {
-	TransactionDCID     uint64                `json:"transactionDCID"`
+	TransactionDCID     uint64                `json:"transactionDCID"` //nolint:tagliatelle
 	TransactionID       uint64                `json:"transactionID"`
 	AccountID           uint64                `json:"accountID"`
-	TransactionDCAmount uint64                `json:"transactionDCAmount"`
+	TransactionDCAmount uint64                `json:"transactionDCAmount"` //nolint:tagliatelle
 	DebitOrCredit       datastore.AccountSign `json:"debitOrCredit"`
 }
 
@@ -83,7 +83,7 @@ type TransactionLedger struct {
 	TransactionReference     string                `json:"transactionReference"` // this could be a check number, batch ,etc
 	IsReconciled             bool                  `json:"isReconciled"`
 	IsSplit                  bool                  `json:"isSplit"`
-	TransactionDCAmount      uint64                `json:"transactionDCAmount"`
+	TransactionDCAmount      uint64                `json:"transactionDCAmount"` //nolint:tagliatelle
 	DebitOrCredit            datastore.AccountSign `json:"debitOrCredit"`
 	Split                    string                `json:"split"` // this could be a check number, batch ,etc
 }
@@ -126,7 +126,7 @@ type TransactionReconciliation struct {
 	TransactionReference     string                `json:"transactionReference"` // this could be a check number, batch ,etc
 	IsReconciled             bool                  `json:"isReconciled"`
 	IsSplit                  bool                  `json:"isSplit"`
-	TransactionDCAmount      uint64                `json:"transactionDCAmount"`
+	TransactionDCAmount      uint64                `json:"transactionDCAmount"` //nolint:tagliatelle
 	DebitOrCredit            datastore.AccountSign `json:"debitOrCredit"`
 	Split                    string                `json:"split"` // this could be a check number, batch ,etc
 }

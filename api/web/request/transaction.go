@@ -20,10 +20,10 @@ type Transaction struct {
 }
 
 type TransactionDebitCredit struct {
-	TransactionDCID     uint64                `json:"transactionDCID,omitempty"`
+	TransactionDCID     uint64                `json:"transactionDCID,omitempty"` //nolint:tagliatelle
 	TransactionID       uint64                `json:"transactionID"`
 	AccountID           uint64                `json:"accountID"`
-	TransactionDCAmount uint64                `json:"transactionDCAmount"`
+	TransactionDCAmount uint64                `json:"transactionDCAmount"` //nolint:tagliatelle
 	DebitOrCredit       datastore.AccountSign `json:"debitOrCredit"`
 }
 

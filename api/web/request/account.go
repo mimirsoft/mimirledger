@@ -12,7 +12,7 @@ type Account struct {
 	AccountID            uint64                `json:"accountID,omitempty"`
 	AccountParent        uint64                `json:"accountParent"`
 	AccountName          string                `json:"accountName"`
-	AccountFullName      string                `json:"accountFullname"`
+	AccountFullName      string                `json:"accountFullName"`
 	AccountMemo          string                `json:"accountMemo"`
 	AccountCurrent       bool                  `json:"accountCurrent"`
 	AccountDecimals      uint64                `json:"accountDecimals"`

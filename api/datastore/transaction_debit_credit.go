@@ -39,7 +39,7 @@ func (store TransactionDebitCreditStore) Store(trn *TransactionDebitCredit) (err
 
 	err = stmt.QueryRow(trn).StructScan(trn)
 	if err != nil {
-		return fmt.Errorf(" stmt.QueryRow(trn).StructScan(trn):%w", err)
+		return fmt.Errorf("stmt.QueryRow(trn).StructScan(trn):%w", err)
 	}
 	return nil
 }
@@ -113,6 +113,7 @@ func (store TransactionDebitCreditStore) GetSubtotals(accountID uint64) ([]*Acco
 	if err != nil {
 		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}
+	defer rows.Close()
 
 	var txnSet []*AccountSubtotal
 

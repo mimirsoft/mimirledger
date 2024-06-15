@@ -24,7 +24,7 @@ type Account struct {
 	AccountBalance       int64          `json:"accountBalance"`
 	AccountSubtotal      int64          `json:"accountSubtotal"`
 	AccountDecimals      uint64         `json:"accountDecimals"`
-	AccountReconcileDate sql.NullTime   `json:"accountReconcile_date"`
+	AccountReconcileDate sql.NullTime   `json:"accountReconcileDate"`
 	AccountFlagged       bool           `json:"accountFlagged"`
 	AccountLocked        bool           `json:"accountLocked"`
 	AccountOpenDate      time.Time      `json:"accountOpenDate"`

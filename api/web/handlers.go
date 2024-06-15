@@ -7,13 +7,13 @@ import (
 )
 
 type UnknownError struct {
-	StatusCode int    `json:"status_code,omitempty"`
-	Err        string `json:"error,omitempty"`
+	StatusCode int    `json:"statusCode,omitempty"`
+	Err        string `json:"err,omitempty"`
 }
 
 type RequestError struct {
-	StatusCode int    `json:"status_code,omitempty"`
-	Err        string `json:"error,omitempty"`
+	StatusCode int    `json:"statusCode,omitempty"`
+	Err        string `json:"err,omitempty"`
 }
 
 func (r *RequestError) Error() string {
@@ -29,39 +29,39 @@ func NewRequestError(status int, recErr error) *RequestError {
 // it allows the logging and error handling to be in one place
 // The Handler struct that takes a function matching our useful signature.
 type RootHandler struct {
-	H func(w http.ResponseWriter, r *http.Request) error
+	H func(res http.ResponseWriter, req *http.Request) error
 }
 
 // ServeHTTP allows our Handler type to satisfy http.Handler.
 // The root handler allows unified logging and error handling for the application
-func (h RootHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	l := zerolog.Ctx(r.Context())
-	err := h.H(w, r)
+func (h RootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
+	log := zerolog.Ctx(req.Context())
+	err := h.H(res, req)
 
 	if err != nil {
 		switch e := err.(type) {
 		case *RequestError:
 			// since this was a structured RequestError, we do not log and just
 			// return the response.  Logging middleware will handle the log
-			w.WriteHeader(e.StatusCode)
-			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			res.WriteHeader(e.StatusCode)
+			res.Header().Set("Content-Type", "application/json; charset=utf-8")
 
-			if err = json.NewEncoder(w).Encode(e); err != nil {
-				l.Printf("failed json encode RequestError response %s", err)
+			if err = json.NewEncoder(res).Encode(e); err != nil {
+				log.Printf("failed json encode RequestError response %s", err)
 			}
 			return
 		default:
 			// since we don't know what the error is, we log the error
 			// then we return a generic StatusInternalServerError with a JSON payload
-			l.Error().Err(err).Msgf("HTTP %d", http.StatusInternalServerError)
+			log.Error().Err(err).Msgf("HTTP %d", http.StatusInternalServerError)
 			unknownErr := UnknownError{StatusCode: http.StatusInternalServerError, Err: err.Error()}
 			// Any error types we don't specifically look out for default
 			// to serving a HTTP 500
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			res.WriteHeader(http.StatusInternalServerError)
+			res.Header().Set("Content-Type", "application/json; charset=utf-8")
 
-			if err1 := json.NewEncoder(w).Encode(unknownErr); err1 != nil {
-				l.Error().Err(err1).Msg("failed json encode UnknownError response")
+			if err1 := json.NewEncoder(res).Encode(unknownErr); err1 != nil {
+				log.Error().Err(err1).Msg("failed json encode UnknownError response")
 			}
 			return
 		}
@@ -76,11 +76,11 @@ func NewRootHandler(handler func(w http.ResponseWriter, r *http.Request) error) 
 // GET /api/health
 // HEAD /api/health
 func HealthCheck(healthController *HealthController) func(w http.ResponseWriter, r *http.Request) error {
-	return func(w http.ResponseWriter, r *http.Request) error {
-		err := healthController.HealthCheck(r.Context())
+	return func(res http.ResponseWriter, req *http.Request) error {
+		err := healthController.HealthCheck(req.Context())
 		if err != nil {
 			return NewRequestError(http.StatusServiceUnavailable, err)
 		}
-		return RespondOK(w, "ok")
+		return RespondOK(res, "ok")
 	}
 }

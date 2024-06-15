@@ -52,7 +52,7 @@ func (store TransactionStore) Store(trn *Transaction) (err error) {
 
 	err = stmt.QueryRow(trn).StructScan(trn)
 	if err != nil {
-		return fmt.Errorf(" stmt.QueryRow(trn).StructScan(trn):%w", err)
+		return fmt.Errorf("stmt.QueryRow(trn).StructScan(trn):%w", err)
 	}
 	return nil
 }
@@ -224,7 +224,7 @@ type TransactionLedger struct {
 	Split string `db:"split"`
 }
 
-func (store TransactionStore) GetTransactionsForAccount(id uint64) ([]*TransactionLedger, error) {
+func (store TransactionStore) GetTransactionsForAccount(accountID uint64) ([]*TransactionLedger, error) {
 	query := `SELECT workingDC.transaction_dc_amount, 
     							  workingDC.debit_or_credit, 
     							  tm.transaction_id, 
@@ -250,7 +250,7 @@ func (store TransactionStore) GetTransactionsForAccount(id uint64) ([]*Transacti
     							  tm.is_reconciled
                          ORDER BY tm.transaction_date, tm.transaction_id`
 
-	rows, err := store.Client.Queryx(query, id)
+	rows, err := store.Client.Queryx(query, accountID)
 	if err != nil {
 		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}

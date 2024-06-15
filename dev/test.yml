@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   test_mimirledger:
     image: dev_mimirledger

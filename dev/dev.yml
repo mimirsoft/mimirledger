@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   mimirledger-base:
     container_name: dev_mimirledger_1

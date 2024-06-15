@@ -20,49 +20,49 @@ func GetReqID(ctx context.Context) string {
 }
 
 func RequestId(next http.Handler) http.Handler {
-	fn := func(rw http.ResponseWriter, r *http.Request) {
-		rid := r.Header.Get("X-Request-ID")
+	handlerFn := func(res http.ResponseWriter, req *http.Request) {
+		rid := req.Header.Get("X-Request-ID")
 		if rid == "" {
 			rid = uuid.NewV4().String()
 		}
 
-		ctx := context.WithValue(r.Context(), ridKey, rid)
+		ctx := context.WithValue(req.Context(), ridKey, rid)
 
-		rw.Header().Add("X-Request-ID", rid)
-		next.ServeHTTP(rw, r.WithContext(ctx))
+		res.Header().Add("X-Request-ID", rid)
+		next.ServeHTTP(res, req.WithContext(ctx))
 	}
 
-	return http.HandlerFunc(fn)
+	return http.HandlerFunc(handlerFn)
 }
 func Logger(logger zerolog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		fn := func(rw http.ResponseWriter, r *http.Request) {
+		handlerFn := func(res http.ResponseWriter, req *http.Request) {
 			start := time.Now()
-			ww := middleware.NewWrapResponseWriter(rw, r.ProtoMajor)
+			wrapWriter := middleware.NewWrapResponseWriter(res, req.ProtoMajor)
 
 			var bodyBuf bytes.Buffer
 
-			ww.Tee(&bodyBuf)
+			wrapWriter.Tee(&bodyBuf)
 			defer func() {
-				if ww.Status() != http.StatusOK {
+				if wrapWriter.Status() != http.StatusOK {
 					logger.Info().
-						Str("request-id", GetReqID(r.Context())).
-						Int("status", ww.Status()).
-						Int("bytes", ww.BytesWritten()).
-						Str("method", r.Method).
-						Str("path", r.URL.Path).
-						Str("query", r.URL.RawQuery).
-						Str("ip", r.RemoteAddr).
-						Str("trace.id", trace.SpanFromContext(r.Context()).SpanContext().TraceID().String()).
-						Str("user-agent", r.UserAgent()).
+						Str("request-id", GetReqID(req.Context())).
+						Int("status", wrapWriter.Status()).
+						Int("bytes", wrapWriter.BytesWritten()).
+						Str("method", req.Method).
+						Str("path", req.URL.Path).
+						Str("query", req.URL.RawQuery).
+						Str("ip", req.RemoteAddr).
+						Str("trace.id", trace.SpanFromContext(req.Context()).SpanContext().TraceID().String()).
+						Str("user-agent", req.UserAgent()).
 						Dur("latency", time.Since(start)).
 						Str("resp_body", bodyBuf.String()).
 						Msg("request completed")
 				}
 			}()
 
-			next.ServeHTTP(ww, r)
+			next.ServeHTTP(wrapWriter, req)
 		}
-		return http.HandlerFunc(fn)
+		return http.HandlerFunc(handlerFn)
 	}
 }

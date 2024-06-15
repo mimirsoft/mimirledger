@@ -9,6 +9,7 @@ import (
 // get an object, marshal and return it as JSON
 func RespondOK(w http.ResponseWriter, payload interface{}) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
 	if err := json.NewEncoder(w).Encode(payload); err != nil {
 		return fmt.Errorf("failed json encode response payload: %w", err)
 	}

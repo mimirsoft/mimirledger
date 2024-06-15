@@ -30,22 +30,25 @@ func (store TransactionDebitCreditStore) Store(trn *TransactionDebitCredit) (err
 	:transaction_dc_amount,
 	:debit_or_credit)
 		 RETURNING *`
+
 	stmt, err := store.Client.PrepareNamed(query)
 	if err != nil {
 		return
 	}
 	defer stmt.Close()
+
 	return stmt.QueryRow(trn).StructScan(trn)
 }
 
 func (store TransactionDebitCreditStore) GetDCForTransactionID(id uint64) ([]*TransactionDebitCredit, error) {
 	query := `select * from transaction_debit_credit where transaction_id = $1`
+
 	rows, err := store.Client.Queryx(query, id)
 	if err != nil {
 		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}
 	defer rows.Close()
-	
+
 	var txnSet []*TransactionDebitCredit
 
 	for rows.Next() {
@@ -53,8 +56,10 @@ func (store TransactionDebitCreditStore) GetDCForTransactionID(id uint64) ([]*Tr
 		if err = rows.StructScan(&txn); err != nil {
 			return nil, fmt.Errorf("rows.StructScan:%w", err)
 		}
+
 		txnSet = append(txnSet, &txn)
 	}
+
 	if len(txnSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
@@ -64,6 +69,7 @@ func (store TransactionDebitCreditStore) GetDCForTransactionID(id uint64) ([]*Tr
 func (store TransactionDebitCreditStore) DeleteForTransactionID(id uint64) ([]*TransactionDebitCredit, error) {
 	query := `DELETE from transaction_debit_credit where transaction_id = $1
 	RETURNING *`
+
 	rows, err := store.Client.Queryx(query, id)
 	if err != nil {
 		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
@@ -77,8 +83,10 @@ func (store TransactionDebitCreditStore) DeleteForTransactionID(id uint64) ([]*T
 		if err = rows.StructScan(&txn); err != nil {
 			return nil, fmt.Errorf("rows.StructScan:%w", err)
 		}
+
 		txnSet = append(txnSet, &txn)
 	}
+
 	if len(txnSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
@@ -96,6 +104,7 @@ func (store TransactionDebitCreditStore) GetSubtotals(accountID uint64) ([]*Acco
 	from transaction_debit_credit 
 	where account_id = $1
 	GROUP BY  debit_or_credit`
+
 	rows, err := store.Client.Queryx(query, accountID)
 	if err != nil {
 		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
@@ -108,6 +117,7 @@ func (store TransactionDebitCreditStore) GetSubtotals(accountID uint64) ([]*Acco
 		if err = rows.StructScan(&txn); err != nil {
 			return nil, fmt.Errorf("rows.StructScan:%w", err)
 		}
+
 		txnSet = append(txnSet, &txn)
 	}
 	return txnSet, nil

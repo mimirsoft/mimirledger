@@ -50,8 +50,10 @@ func (c *Transaction) Store(ds *datastore.Datastores) error { //nolint:gocyclo
 	if err != nil {
 		return fmt.Errorf("c.transactionTotal():%w [transaction:%+v]", err, c)
 	}
+
 	c.TransactionAmount = total
 	eTxn := transactionToEntTransaction(c)
+
 	err = ds.TransactionStore().Store(&eTxn)
 	if err != nil {
 		return fmt.Errorf("ds.TransactionStore().Store:%w [transaction:%+v]", err, eTxn)
@@ -61,10 +63,12 @@ func (c *Transaction) Store(ds *datastore.Datastores) error { //nolint:gocyclo
 	// store the debit/credits
 	affectedSubTotalAccountIDs := make(map[uint64]bool)
 	affectedBalanceAccountIDs := make(map[uint64]bool)
+
 	err = c.handleDCSetStore(ds, affectedSubTotalAccountIDs, affectedBalanceAccountIDs)
 	if err != nil {
 		return fmt.Errorf("c.handleDCSetStore:%w", err)
 	}
+
 	err = updateSubtotalsAndBalances(ds, affectedSubTotalAccountIDs, affectedBalanceAccountIDs)
 	if err != nil {
 		return fmt.Errorf("updateSubtotalsAndBalances:%w", err)
@@ -84,12 +88,15 @@ func (c *Transaction) handleDCSetStore(ds *datastore.Datastores, affectedSubTota
 		for jdx := range parentIds {
 			affectedBalanceAccountIDs[parentIds[jdx]] = true
 		}
+
 		c.DebitCreditSet[idx].TransactionID = c.TransactionID
 		entDC := transactionDCToEntTransactionDC(c.DebitCreditSet[idx])
+
 		err = ds.TransactionDebitCreditStore().Store(&entDC)
 		if err != nil {
 			return fmt.Errorf("ds.TransactionDCStore().Store:%w [transaction:%+v]", err, c)
 		}
+
 		myTransDC := TransactionDebitCredit(entDC)
 		c.DebitCreditSet[idx] = &myTransDC
 		// if it is a debit / credit, update both Balance and Subtotal
@@ -129,8 +136,10 @@ func (c *Transaction) Update(ds *datastore.Datastores) error {
 	if err != nil {
 		return fmt.Errorf("c.transactionTotal():%w [transaction:%+v]", err, c)
 	}
+
 	c.TransactionAmount = total
 	eTxn := transactionToEntTransaction(c)
+
 	err = ds.TransactionStore().Update(&eTxn)
 	if err != nil {
 		return fmt.Errorf("ds.TransactionStore().Update:%w [transaction:%+v]", err, eTxn)
@@ -173,6 +182,7 @@ func (c *Transaction) handleDeletedDCs(ds *datastore.Datastores, affectedSubTota
 		for jdx := range parentIds {
 			affectedBalanceAccountIDs[parentIds[jdx]] = true
 		}
+
 		affectedSubTotalAccountIDs[deletedDCs[idx].AccountID] = true
 		affectedBalanceAccountIDs[deletedDCs[idx].AccountID] = true
 	}
@@ -208,6 +218,7 @@ func (c *Transaction) validate() (err error) {
 	if c.TransactionComment == "" {
 		return ErrTransactionNoComment
 	}
+
 	if len(c.DebitCreditSet) == 0 {
 		return ErrTransactionNoDebitsCredits
 	}
@@ -231,6 +242,7 @@ func (c *Transaction) validate() (err error) {
 			return ErrTransactionDebitCreditsIsNeither
 		}
 	}
+
 	if debitTotal == 0 || creditTotal == 0 {
 		return ErrTransactionDebitCreditsZero
 	}
@@ -257,6 +269,7 @@ func (c *Transaction) transactionTotal() (uint64, error) {
 			return 0, ErrTransactionDebitCreditsIsNeither
 		}
 	}
+
 	if debitTotal != creditTotal {
 		return 0, ErrTransactionDebitCreditsNotBalanced
 	}
@@ -270,11 +283,14 @@ func (c *Transaction) UpdateReconciled(ds *datastore.Datastores) error {
 	if !c.TransactionReconcileDate.Valid {
 		return ErrReconciledDateInvalid
 	}
+
 	eTxn := transactionToEntTransaction(c)
+
 	err := ds.TransactionStore().SetIsReconciled(&eTxn)
 	if err != nil {
 		return fmt.Errorf("ds.TransactionStore().SetIsReconciled:%w [transaction:%+v]", err, eTxn)
 	}
+
 	err = ds.TransactionStore().SetTransactionReconcileDate(&eTxn)
 	if err != nil {
 		return fmt.Errorf("ds.TransactionStore().SetTransactionReconcileDate:%w [transaction:%+v]", err, eTxn)
@@ -287,6 +303,7 @@ func (c *Transaction) UpdateReconciled(ds *datastore.Datastores) error {
 // This whole function should be a transaction for safety
 func (c *Transaction) UpdateUnreconciled(ds *datastore.Datastores) error {
 	eTxn := transactionToEntTransaction(c)
+
 	err := ds.TransactionStore().SetIsReconciled(&eTxn)
 	if err != nil {
 		return fmt.Errorf("ds.TransactionStore().SetIsReconciled:%w [transaction:%+v]", err, eTxn)
@@ -299,6 +316,7 @@ func (c *Transaction) UpdateUnreconciled(ds *datastore.Datastores) error {
 // RetrieveTransactionByID retrieves a specific transactions
 func RetrieveTransactionByID(ds *datastore.Datastores, transactionID uint64) (*Transaction, error) {
 	ts := ds.TransactionStore()
+
 	eTxn, err := ts.GetByID(transactionID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -306,12 +324,15 @@ func RetrieveTransactionByID(ds *datastore.Datastores, transactionID uint64) (*T
 		}
 		return nil, fmt.Errorf("TransactionStore().GetByID:%w", err)
 	}
+
 	myTransCore := TransactionCore(*eTxn)
 	myTrans := Transaction{TransactionCore: myTransCore}
+
 	myDCSet, err := ds.TransactionDebitCreditStore().GetDCForTransactionID(transactionID)
 	if err != nil {
 		return nil, fmt.Errorf("TransactionDebitCreditStore().GetDCForTransactionID:%w", err)
 	}
+
 	myTrans.DebitCreditSet = entTransactionsDCToTransactionsDC(myDCSet)
 	return &myTrans, nil
 }
@@ -363,6 +384,7 @@ type TransactionLedger struct {
 // RetrieveTransactionLedgerForAccountID retrieves all transactions ledger records in an account
 func RetrieveTransactionLedgerForAccountID(ds *datastore.Datastores, transactionID uint64) ([]*TransactionLedger, error) {
 	ts := ds.TransactionStore()
+
 	eTransSet, err := ts.GetTransactionsForAccount(transactionID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -370,6 +392,7 @@ func RetrieveTransactionLedgerForAccountID(ds *datastore.Datastores, transaction
 		}
 		return nil, fmt.Errorf("TransactionStore().GetTransactionsForAccount:%w", err)
 	}
+
 	transSet := entTransactionsLedgerToTransactionsLedger(eTransSet)
 	return transSet, nil
 }
@@ -393,6 +416,7 @@ type TransactionReconciliation struct {
 func RetrieveUnreconciledTransactionsForDate(ds *datastore.Datastores, accountLeft, accountRight uint64,
 	searchLimitDate time.Time, reconciledCutoffDate time.Time) ([]*TransactionReconciliation, error) {
 	ts := ds.TransactionStore()
+
 	eTransSet, err := ts.GetUnreconciledTransactionsOnAccountForDate(accountLeft, accountRight, searchLimitDate, reconciledCutoffDate)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -400,6 +424,7 @@ func RetrieveUnreconciledTransactionsForDate(ds *datastore.Datastores, accountLe
 		}
 		return nil, fmt.Errorf("TransactionStore().GetTransactionsForAccount:%w", err)
 	}
+
 	transSet := entTransactionsRecToTransactionsRec(eTransSet)
 	return transSet, nil
 }

@@ -45,6 +45,7 @@ func (h RootHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			// return the response.  Logging middleware will handle the log
 			w.WriteHeader(e.StatusCode)
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
 			if err = json.NewEncoder(w).Encode(e); err != nil {
 				l.Printf("failed json encode RequestError response %s", err)
 			}
@@ -58,6 +59,7 @@ func (h RootHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			// to serving a HTTP 500
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
 			if err1 := json.NewEncoder(w).Encode(unknownErr); err1 != nil {
 				l.Error().Err(err1).Msg("failed json encode UnknownError response")
 			}

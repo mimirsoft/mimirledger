@@ -15,6 +15,7 @@ import (
 func NewRouter(ds *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middlewares.RequestId)
+
 	if logger != nil {
 		r.Use(middlewares.Logger(*logger))
 	}

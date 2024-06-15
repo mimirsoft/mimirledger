@@ -32,6 +32,7 @@ func ReqTransactionToTransaction(rTrans *Transaction) *models.Transaction {
 	if rTrans.TransactionReconcileDate != nil {
 		mytime = sql.NullTime{Time: *rTrans.TransactionReconcileDate, Valid: true}
 	}
+
 	myTransCore := models.TransactionCore{
 		TransactionID:            rTrans.TransactionID,
 		TransactionDate:          rTrans.TransactionDate,

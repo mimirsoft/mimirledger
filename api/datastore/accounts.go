@@ -97,10 +97,12 @@ func (store AccountStore) Store(acct *Account) (err error) {
 	:account_sign,
 	:account_type)
 		 RETURNING *`
+
 	stmt, err := store.Client.PrepareNamed(query)
 	if err != nil {
 		return
 	}
+
 	defer stmt.Close()
 	return stmt.QueryRow(acct).StructScan(acct)
 }
@@ -139,10 +141,12 @@ func (store AccountStore) Update(acct *Account) (err error) {
 	:account_type)
 		    WHERE account_id = :account_id
 		 RETURNING *`
+
 	stmt, err := store.Client.PrepareNamed(query)
 	if err != nil {
 		return
 	}
+
 	defer stmt.Close()
 	return stmt.QueryRow(acct).StructScan(acct)
 }
@@ -153,10 +157,12 @@ func (store AccountStore) UpdateSubtotal(acct *Account) (err error) {
 		    SET  account_subtotal = :account_subtotal
 		    WHERE account_id = :account_id
 		 RETURNING *`
+
 	stmt, err := store.Client.PrepareNamed(query)
 	if err != nil {
 		return
 	}
+
 	defer stmt.Close()
 	return stmt.QueryRow(acct).StructScan(acct)
 }
@@ -167,10 +173,12 @@ func (store AccountStore) UpdateBalance(acct *Account) (err error) {
 		    SET  account_balance = :account_balance
 		    WHERE account_id = :account_id
 		 RETURNING *`
+
 	stmt, err := store.Client.PrepareNamed(query)
 	if err != nil {
 		return
 	}
+
 	defer stmt.Close()
 	return stmt.QueryRow(acct).StructScan(acct)
 }
@@ -180,6 +188,7 @@ func (store AccountStore) SetAccountReconciledDate(acct *Account) (err error) {
 	query := `UPDATE  transaction_accounts 
 		    SET account_reconcile_date = $2
 		    where account_id = $1`
+
 	_, err = store.Client.Exec(query, acct.AccountID, acct.AccountReconcileDate)
 	if err != nil {
 		return fmt.Errorf("store.Client.Exec:%w", err)
@@ -221,6 +230,7 @@ func (store AccountStore) GetBalances(accountID uint64) (as []Account, err error
 		if err = rows.StructScan(&acct); err != nil {
 			return
 		}
+
 		as = append(as, acct)
 	}
 
@@ -233,10 +243,12 @@ func (store AccountStore) GetBalances(accountID uint64) (as []Account, err error
 // Gets All Accounts
 func (store AccountStore) GetAccounts() (as []Account, err error) {
 	query := `select * from transaction_accounts order by account_left`
+
 	rows, err := store.Client.Queryx(query)
 	if err != nil {
 		return
 	}
+
 	defer rows.Close()
 
 	for rows.Next() {
@@ -244,8 +256,10 @@ func (store AccountStore) GetAccounts() (as []Account, err error) {
 		if err = rows.StructScan(&acct); err != nil {
 			return
 		}
+
 		as = append(as, acct)
 	}
+
 	if len(as) == 0 {
 		return nil, sql.ErrNoRows
 	}
@@ -269,17 +283,21 @@ func (store AccountStore) GetAccountByID(id uint64) (*Account, error) {
 func (store AccountStore) GetDirectChildren(id uint64) (as []Account, err error) {
 	query := `select * from transaction_accounts WHERE account_parent = $1
 	   ORDER BY account_name `
+
 	rows, err := store.Client.Queryx(query, id)
 	if err != nil {
 		return
 	}
+
 	defer rows.Close()
 
 	for rows.Next() {
 		var acct Account
+
 		if err = rows.StructScan(&acct); err != nil {
 			return
 		}
+
 		as = append(as, acct)
 	}
 
@@ -296,10 +314,12 @@ func (store AccountStore) GetParents(id uint64) (as []Account, err error) {
 WHERE (BaseAccount.account_left BETWEEN Parents.account_left AND Parents.account_right)
 AND (BaseAccount.account_id =$1)
 ORDER BY Parents.account_left`
+
 	rows, err := store.Client.Queryx(query, id)
 	if err != nil {
 		return
 	}
+
 	defer rows.Close()
 
 	for rows.Next() {
@@ -307,8 +327,10 @@ ORDER BY Parents.account_left`
 		if err = rows.StructScan(&acct); err != nil {
 			return
 		}
+
 		as = append(as, acct)
 	}
+
 	if len(as) == 0 {
 		return nil, sql.ErrNoRows
 	}
@@ -325,10 +347,12 @@ WHERE children.account_left BETWEEN parents.account_left AND parents.account_rig
 AND children.account_left <> parents.account_left
 AND parents.account_id=$1
 ORDER BY account_left`
+
 	rows, err := store.Client.Queryx(query, id)
 	if err != nil {
 		return
 	}
+
 	defer rows.Close()
 
 	for rows.Next() {
@@ -336,6 +360,7 @@ ORDER BY account_left`
 		if err = rows.StructScan(&acct); err != nil {
 			return
 		}
+
 		as = append(as, acct)
 	}
 
@@ -351,6 +376,7 @@ func (store AccountStore) OpenSpotInTree(afterValue, spread uint64) error {
 	SET account_right=account_right+$2
 	WHERE account_right > $1`
 	_, err := store.Client.Exec(query, afterValue, spread)
+
 	if err != nil {
 		return err
 	}
@@ -358,6 +384,7 @@ func (store AccountStore) OpenSpotInTree(afterValue, spread uint64) error {
 	query = `UPDATE transaction_accounts
 	SET account_left=account_left+$2
 	WHERE account_left > $1`
+
 	_, err = store.Client.Exec(query, afterValue, spread)
 	if err != nil {
 		return nil
@@ -370,6 +397,7 @@ func (store AccountStore) CloseSpotInTree(afterValue, spread uint64) error {
 	query := `UPDATE transaction_accounts
 	SET account_right=account_right-$2
 	WHERE account_right > $1`
+
 	_, err := store.Client.Exec(query, afterValue, spread)
 	if err != nil {
 		return err
@@ -378,6 +406,7 @@ func (store AccountStore) CloseSpotInTree(afterValue, spread uint64) error {
 	query = `UPDATE transaction_accounts
 	SET account_left=account_left-$2
 	WHERE account_left > $1`
+
 	_, err = store.Client.Exec(query, afterValue, spread)
 	if err != nil {
 		return nil

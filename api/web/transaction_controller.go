@@ -39,6 +39,7 @@ func (tc *TransactionsController) GetTransactionsForAccount(ctx context.Context,
 	if err != nil {
 		return nil, nil, fmt.Errorf("models.RetrieveTransactionsForAccountID:%w", err)
 	}
+
 	myTxn, err := models.RetrieveTransactionLedgerForAccountID(tc.DataStores, accountID)
 	if err != nil {
 		return nil, nil, fmt.Errorf("models.RetrieveTransactionLedgerForAccountID:%w", err)
@@ -54,6 +55,7 @@ func (tc *TransactionsController) GetUnreconciledTransactionsOnAccount(ctx conte
 	if err != nil {
 		return nil, fmt.Errorf("models.RetrieveAccountByID:%w", err)
 	}
+
 	myTxn, err := models.RetrieveUnreconciledTransactionsForDate(tc.DataStores, account.AccountLeft, account.AccountRight,
 		searchDate, account.AccountReconcileDate.Time)
 	if err != nil {
@@ -88,8 +90,10 @@ func (tc *TransactionsController) UpdateReconciled(ctx context.Context, myTxn *m
 	if err != nil {
 		return nil, fmt.Errorf("models.RetrieveTransactionByID:%w", err)
 	}
+
 	readTxn.IsReconciled = true
 	readTxn.TransactionReconcileDate = myTxn.TransactionReconcileDate
+
 	err = readTxn.UpdateReconciled(tc.DataStores)
 	if err != nil {
 		return nil, fmt.Errorf("readTxn.UpdateReconciled:%w", err)
@@ -104,7 +108,9 @@ func (tc *TransactionsController) UpdateUnreconciled(ctx context.Context, myTxn 
 	if err != nil {
 		return nil, fmt.Errorf("models.RetrieveTransactionByID:%w", err)
 	}
+
 	readTxn.IsReconciled = false
+
 	err = readTxn.UpdateUnreconciled(tc.DataStores)
 	if err != nil {
 		return nil, fmt.Errorf("myTxn.UpdateUnreconciled:%w", err)
@@ -120,6 +126,7 @@ func (tc *TransactionsController) DeleteTransaction(ctx context.Context, transac
 	if err != nil {
 		return nil, fmt.Errorf("models.RetrieveTransactionByID:%w", err)
 	}
+
 	err = myTxn.Delete(tc.DataStores)
 	if err != nil {
 		return nil, fmt.Errorf("myTxn.Delete:%w", err)

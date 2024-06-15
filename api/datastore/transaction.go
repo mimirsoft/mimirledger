@@ -43,11 +43,13 @@ func (store TransactionStore) Store(trn *Transaction) (err error) {
 	:is_reconciled,
 	:is_split)
 		 RETURNING *`
+
 	stmt, err := store.Client.PrepareNamed(query)
 	if err != nil {
 		return
 	}
 	defer stmt.Close()
+
 	return stmt.QueryRow(trn).StructScan(trn)
 }
 
@@ -69,10 +71,12 @@ func (store TransactionStore) Update(trn *Transaction) (err error) {
 	:is_split)
 		     WHERE transaction_id = :transaction_id
 		 RETURNING *`
+
 	stmt, err := store.Client.PrepareNamed(query)
 	if err != nil {
 		return
 	}
+
 	defer stmt.Close()
 	return stmt.QueryRow(trn).StructScan(trn)
 }
@@ -93,6 +97,7 @@ func (store TransactionStore) GetByID(id uint64) (*Transaction, error) {
 func (store TransactionStore) Delete(trn *Transaction) (err error) {
 	query := `Delete FROM transaction_main 
 		         where transaction_id = $1`
+
 	_, err = store.Client.Exec(query, trn.TransactionID)
 	if err != nil {
 		return fmt.Errorf("store.Client.Exec:%w", err)
@@ -105,6 +110,7 @@ func (store TransactionStore) SetIsReconciled(trn *Transaction) (err error) {
 	query := `UPDATE  transaction_main 
 		    SET is_reconciled = $2
 		    where transaction_id = $1`
+
 	_, err = store.Client.Exec(query, trn.TransactionID, trn.IsReconciled)
 	if err != nil {
 		return fmt.Errorf("store.Client.Exec:%w", err)
@@ -117,6 +123,7 @@ func (store TransactionStore) SetTransactionReconcileDate(trn *Transaction) (err
 	query := `UPDATE  transaction_main 
 		    SET transaction_reconcile_date = $2
 		    where transaction_id = $1`
+
 	_, err = store.Client.Exec(query, trn.TransactionID, trn.TransactionReconcileDate)
 	if err != nil {
 		return fmt.Errorf("store.Client.Exec:%w", err)
@@ -175,6 +182,7 @@ func (store TransactionStore) GetUnreconciledTransactionsOnAccountForDate(accoun
 					  tm.transaction_comment, 
 					  tm.is_reconciled
       ORDER BY is_reconciled DESC, transaction_reconcile_date ASC, transaction_date ASC, transaction_reference ASC`
+
 	rows, err := store.Client.Queryx(query, searchLimitDate, reconciledCutoffDate, accountLeft, accountRight)
 	if err != nil {
 		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
@@ -188,8 +196,10 @@ func (store TransactionStore) GetUnreconciledTransactionsOnAccountForDate(accoun
 		if err = rows.StructScan(&txn); err != nil {
 			return nil, fmt.Errorf("rows.StructScan:%w", err)
 		}
+
 		txnSet = append(txnSet, &txn)
 	}
+
 	if len(txnSet) == 0 {
 		return nil, sql.ErrNoRows
 	}
@@ -235,10 +245,12 @@ func (store TransactionStore) GetTransactionsForAccount(id uint64) ([]*Transacti
     							  tm.transaction_comment, 
     							  tm.is_reconciled
                          ORDER BY tm.transaction_date, tm.transaction_id`
+
 	rows, err := store.Client.Queryx(query, id)
 	if err != nil {
 		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}
+
 	defer rows.Close()
 
 	var txnSet []*TransactionLedger
@@ -248,8 +260,10 @@ func (store TransactionStore) GetTransactionsForAccount(id uint64) ([]*Transacti
 		if err = rows.StructScan(&txn); err != nil {
 			return nil, fmt.Errorf("rows.StructScan:%w", err)
 		}
+
 		txnSet = append(txnSet, &txn)
 	}
+
 	if len(txnSet) == 0 {
 		return nil, sql.ErrNoRows
 	}

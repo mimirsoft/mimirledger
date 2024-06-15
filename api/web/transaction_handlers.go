@@ -36,6 +36,7 @@ func GetTransaction(contoller *TransactionsController) func(w http.ResponseWrite
 func PostTransactions(contoller *TransactionsController) func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		var reqTransaction request.Transaction
+
 		if r.Body == nil {
 			return NewRequestError(http.StatusBadRequest, ErrNoRequestBody)
 		}
@@ -111,7 +112,9 @@ func PutTransactionUpdate(contoller *TransactionsController) func(w http.Respons
 		if transactionID == 0 {
 			return NewRequestError(http.StatusBadRequest, ErrInvalidAccountID)
 		}
+
 		var reqTransaction request.Transaction
+
 		if r.Body == nil {
 			return NewRequestError(http.StatusBadRequest, ErrNoRequestBody)
 		}
@@ -161,7 +164,9 @@ func PutTransactionReconciled(contoller *TransactionsController) func(w http.Res
 		if transactionID == 0 {
 			return NewRequestError(http.StatusBadRequest, ErrInvalidAccountID)
 		}
+
 		var reqTransaction request.Transaction
+
 		if r.Body == nil {
 			return NewRequestError(http.StatusBadRequest, ErrNoRequestBody)
 		}
@@ -191,7 +196,9 @@ func PutTransactionUnreconciled(contoller *TransactionsController) func(w http.R
 		if transactionID == 0 {
 			return NewRequestError(http.StatusBadRequest, ErrInvalidAccountID)
 		}
+
 		var reqTransaction request.Transaction
+
 		if r.Body == nil {
 			return NewRequestError(http.StatusBadRequest, ErrNoRequestBody)
 		}

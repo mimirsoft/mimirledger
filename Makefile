@@ -1,13 +1,13 @@
 SERVICE_NAME := mimirledger
-DOCKER_COMPOSE := docker-compose -f dev/dev.yml
+DOCKER_COMPOSE := docker compose -f dev/dev.yml
 DOCKER_COMPOSE_START := ${DOCKER_COMPOSE} up -d ${SERVICE_NAME}
 DB_SERVICE_NAME := postgres
-DB_DOCKER_COMPOSE := docker-compose -f db/db.yml
+DB_DOCKER_COMPOSE := docker compose -f db/db.yml
 DB_DOCKER_COMPOSE_START := ${DB_DOCKER_COMPOSE} up -d ${DB_SERVICE_NAME}
 WEB_SERVICE_NAME := web
-WEB_DOCKER_COMPOSE := docker-compose -f client/client.yml
+WEB_DOCKER_COMPOSE := docker compose -f client/client.yml
 WEB_DOCKER_COMPOSE_START := ${WEB_DOCKER_COMPOSE} up -d ${WEB_SERVICE_NAME}
-DOCKER_COMPOSE_TEST := docker-compose -f dev/test.yml
+DOCKER_COMPOSE_TEST := docker compose -f dev/test.yml
 LOG_TAIL_LENGTH=50
 
 

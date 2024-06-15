@@ -62,6 +62,7 @@ var ErrNoRequestBody = errors.New("missing request body")
 func PostAccounts(acctController *AccountsController) func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		var acct request.Account
+
 		if r.Body == nil {
 			return NewRequestError(http.StatusBadRequest, ErrNoRequestBody)
 		}
@@ -90,7 +91,9 @@ func PutAccountUpdate(acctController *AccountsController) func(w http.ResponseWr
 		if accountID == 0 {
 			return NewRequestError(http.StatusBadRequest, ErrInvalidAccountID)
 		}
+
 		var acct request.Account
+
 		if r.Body == nil {
 			return NewRequestError(http.StatusBadRequest, ErrNoRequestBody)
 		}

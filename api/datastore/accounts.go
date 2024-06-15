@@ -194,7 +194,9 @@ func (store AccountStore) GetBalance(accountID uint64) (int64, error) {
                             WHERE subaccount.account_left BETWEEN p_account.account_left AND p_account.account_right
                             AND p_account.account_id =$1 `
 	row := store.Client.QueryRowx(query, accountID)
+
 	var accountBalance int64
+
 	if err := row.Scan(&accountBalance); err != nil {
 		return 0, err
 	}
@@ -207,6 +209,7 @@ func (store AccountStore) GetBalances(accountID uint64) (as []Account, err error
                             FROM transaction_accounts AS p_account, transaction_accounts AS subaccount
                             WHERE subaccount.account_left BETWEEN p_account.account_left AND p_account.account_right
                             AND p_account.account_id =$1 `
+
 	rows, err := store.Client.Queryx(query, accountID)
 	if err != nil {
 		return
@@ -220,6 +223,7 @@ func (store AccountStore) GetBalances(accountID uint64) (as []Account, err error
 		}
 		as = append(as, acct)
 	}
+
 	if len(as) == 0 {
 		return nil, sql.ErrNoRows
 	}
@@ -252,7 +256,9 @@ func (store AccountStore) GetAccounts() (as []Account, err error) {
 func (store AccountStore) GetAccountByID(id uint64) (*Account, error) {
 	query := `select * from transaction_accounts where account_id = $1`
 	row := store.Client.QueryRowx(query, id)
+
 	var as Account
+
 	if err := row.StructScan(&as); err != nil {
 		return nil, err
 	}
@@ -276,6 +282,7 @@ func (store AccountStore) GetDirectChildren(id uint64) (as []Account, err error)
 		}
 		as = append(as, acct)
 	}
+
 	if len(as) == 0 {
 		return nil, sql.ErrNoRows
 	}
@@ -331,6 +338,7 @@ ORDER BY account_left`
 		}
 		as = append(as, acct)
 	}
+
 	if len(as) == 0 {
 		return nil, sql.ErrNoRows
 	}
@@ -346,6 +354,7 @@ func (store AccountStore) OpenSpotInTree(afterValue, spread uint64) error {
 	if err != nil {
 		return err
 	}
+
 	query = `UPDATE transaction_accounts
 	SET account_left=account_left+$2
 	WHERE account_left > $1`
@@ -365,6 +374,7 @@ func (store AccountStore) CloseSpotInTree(afterValue, spread uint64) error {
 	if err != nil {
 		return err
 	}
+
 	query = `UPDATE transaction_accounts
 	SET account_left=account_left-$2
 	WHERE account_left > $1`

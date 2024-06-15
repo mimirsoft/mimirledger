@@ -50,6 +50,7 @@ func ReqTransactionToTransaction(rTrans *Transaction) *models.Transaction {
 // ConvertReqDebitCreditsToDebitCreditSet converts []TransactionDebitCreditt []*models.TransactionDebitCredit
 func ConvertReqDebitCreditsToDebitCreditSet(dcSet []*TransactionDebitCredit) []*models.TransactionDebitCredit {
 	var mset = make([]*models.TransactionDebitCredit, len(dcSet))
+
 	for idx := range dcSet {
 		myDS := models.TransactionDebitCredit(*dcSet[idx])
 		mset[idx] = &myDS

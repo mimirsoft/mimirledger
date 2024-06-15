@@ -45,7 +45,9 @@ func (store TransactionDebitCreditStore) GetDCForTransactionID(id uint64) ([]*Tr
 		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}
 	defer rows.Close()
+	
 	var txnSet []*TransactionDebitCredit
+
 	for rows.Next() {
 		var txn TransactionDebitCredit
 		if err = rows.StructScan(&txn); err != nil {
@@ -67,7 +69,9 @@ func (store TransactionDebitCreditStore) DeleteForTransactionID(id uint64) ([]*T
 		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}
 	defer rows.Close()
+
 	var txnSet []*TransactionDebitCredit
+
 	for rows.Next() {
 		var txn TransactionDebitCredit
 		if err = rows.StructScan(&txn); err != nil {
@@ -96,7 +100,9 @@ func (store TransactionDebitCreditStore) GetSubtotals(accountID uint64) ([]*Acco
 	if err != nil {
 		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}
+
 	var txnSet []*AccountSubtotal
+
 	for rows.Next() {
 		var txn AccountSubtotal
 		if err = rows.StructScan(&txn); err != nil {

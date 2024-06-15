@@ -26,6 +26,7 @@ func (store TransactionStore) Store(trn *Transaction) (err error) {
 	if trn.TransactionDate.IsZero() {
 		trn.TransactionDate = time.Now()
 	}
+
 	query := `INSERT INTO transaction_main 
 		           (transaction_date,
 	transaction_reconcile_date,
@@ -79,7 +80,9 @@ func (store TransactionStore) Update(trn *Transaction) (err error) {
 func (store TransactionStore) GetByID(id uint64) (*Transaction, error) {
 	query := `select * from transaction_main where transaction_id = $1`
 	row := store.Client.QueryRowx(query, id)
+
 	var tn Transaction
+
 	if err := row.StructScan(&tn); err != nil {
 		return nil, err
 	}
@@ -177,7 +180,9 @@ func (store TransactionStore) GetUnreconciledTransactionsOnAccountForDate(accoun
 		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}
 	defer rows.Close()
+
 	var txnSet []*TransactionReconciliation
+
 	for rows.Next() {
 		var txn TransactionReconciliation
 		if err = rows.StructScan(&txn); err != nil {
@@ -235,7 +240,9 @@ func (store TransactionStore) GetTransactionsForAccount(id uint64) ([]*Transacti
 		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}
 	defer rows.Close()
+
 	var txnSet []*TransactionLedger
+
 	for rows.Next() {
 		var txn TransactionLedger
 		if err = rows.StructScan(&txn); err != nil {

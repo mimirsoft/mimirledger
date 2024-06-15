@@ -66,6 +66,7 @@ func NewClient(config *PostgresConfig) (conn *sqlx.DB, err error) {
 	if config.DisableSSL {
 		sslMode = defaultSSLMode
 	}
+
 	conn, err = sqlx.Open(
 		"pgx",
 		fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s",

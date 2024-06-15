@@ -18,6 +18,7 @@ func NewRouter(ds *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 	if logger != nil {
 		r.Use(middlewares.Logger(*logger))
 	}
+
 	r.Use(middleware.Recoverer)
 	// Basic CORS
 	// for more ideas, see: https://developer.github.com/v3/#cross-origin-resource-sharing

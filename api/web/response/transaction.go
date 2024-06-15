@@ -49,6 +49,7 @@ func TransactionToRespTransaction(trans *models.Transaction) *Transaction {
 // ConvertReqDebitCreditsToDebitCreditSet converts []*models.TransactionDebitCredit to TransactionDebitCredit
 func ConvertDebitCreditsToReDebitCreditSet(dcSet []*models.TransactionDebitCredit) []*TransactionDebitCredit {
 	var mset = make([]*TransactionDebitCredit, len(dcSet))
+
 	for idx := range dcSet {
 		myDS := TransactionDebitCredit(*dcSet[idx])
 		mset[idx] = &myDS

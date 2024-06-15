@@ -13,8 +13,8 @@ import (
 func main() {
 	loggerOutput := zerolog.ConsoleWriter{Out: os.Stderr}
 	logger := zerolog.New(loggerOutput)
-
 	appConfig := LoadConfig()
+
 	logger.Info().Msg("####Starting MimirLedger API Server###")
 	myClient, err := datastore.NewClient(&appConfig.Postgres)
 	if err != nil {

@@ -25,7 +25,9 @@ func RequestId(next http.Handler) http.Handler {
 		if rid == "" {
 			rid = uuid.NewV4().String()
 		}
+
 		ctx := context.WithValue(r.Context(), ridKey, rid)
+
 		rw.Header().Add("X-Request-ID", rid)
 		next.ServeHTTP(rw, r.WithContext(ctx))
 	}
@@ -35,10 +37,12 @@ func RequestId(next http.Handler) http.Handler {
 func Logger(logger zerolog.Logger) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(rw http.ResponseWriter, r *http.Request) {
-			ww := middleware.NewWrapResponseWriter(rw, r.ProtoMajor)
-			var bodyBuf bytes.Buffer
-			ww.Tee(&bodyBuf)
 			start := time.Now()
+			ww := middleware.NewWrapResponseWriter(rw, r.ProtoMajor)
+
+			var bodyBuf bytes.Buffer
+
+			ww.Tee(&bodyBuf)
 			defer func() {
 				if ww.Status() != http.StatusOK {
 					logger.Info().

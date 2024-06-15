@@ -207,7 +207,7 @@ func (store AccountStore) GetBalance(accountID uint64) (int64, error) {
 	var accountBalance int64
 
 	if err := row.Scan(&accountBalance); err != nil {
-		return 0, err
+		return 0, fmt.Errorf("row.Scan(&accountBalance):%w", err)
 	}
 	return accountBalance, nil
 }
@@ -274,7 +274,7 @@ func (store AccountStore) GetAccountByID(id uint64) (*Account, error) {
 	var as Account
 
 	if err := row.StructScan(&as); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("row.StructScan(&as):%w", err)
 	}
 	return &as, nil
 }
@@ -286,7 +286,7 @@ func (store AccountStore) GetDirectChildren(id uint64) (as []Account, err error)
 
 	rows, err := store.Client.Queryx(query, id)
 	if err != nil {
-		return
+		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}
 
 	defer rows.Close()
@@ -317,7 +317,7 @@ ORDER BY Parents.account_left`
 
 	rows, err := store.Client.Queryx(query, id)
 	if err != nil {
-		return
+		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}
 
 	defer rows.Close()
@@ -375,10 +375,10 @@ func (store AccountStore) OpenSpotInTree(afterValue, spread uint64) error {
 	query := `UPDATE transaction_accounts
 	SET account_right=account_right+$2
 	WHERE account_right > $1`
-	_, err := store.Client.Exec(query, afterValue, spread)
 
+	_, err := store.Client.Exec(query, afterValue, spread)
 	if err != nil {
-		return err
+		return fmt.Errorf("store.Client.Exec:%w", err)
 	}
 
 	query = `UPDATE transaction_accounts
@@ -400,7 +400,7 @@ func (store AccountStore) CloseSpotInTree(afterValue, spread uint64) error {
 
 	_, err := store.Client.Exec(query, afterValue, spread)
 	if err != nil {
-		return err
+		return fmt.Errorf("store.Client.Exec:%w", err)
 	}
 
 	query = `UPDATE transaction_accounts

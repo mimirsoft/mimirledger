@@ -50,7 +50,11 @@ func (store TransactionStore) Store(trn *Transaction) (err error) {
 	}
 	defer stmt.Close()
 
-	return stmt.QueryRow(trn).StructScan(trn)
+	err = stmt.QueryRow(trn).StructScan(trn)
+	if err != nil {
+		return fmt.Errorf(" stmt.QueryRow(trn).StructScan(trn):%w", err)
+	}
+	return nil
 }
 
 func (store TransactionStore) Update(trn *Transaction) (err error) {
@@ -88,7 +92,7 @@ func (store TransactionStore) GetByID(id uint64) (*Transaction, error) {
 	var tn Transaction
 
 	if err := row.StructScan(&tn); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("row.StructScan(&tn):%w", err)
 	}
 	return &tn, nil
 }

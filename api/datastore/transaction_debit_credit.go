@@ -37,7 +37,11 @@ func (store TransactionDebitCreditStore) Store(trn *TransactionDebitCredit) (err
 	}
 	defer stmt.Close()
 
-	return stmt.QueryRow(trn).StructScan(trn)
+	err = stmt.QueryRow(trn).StructScan(trn)
+	if err != nil {
+		return fmt.Errorf(" stmt.QueryRow(trn).StructScan(trn):%w", err)
+	}
+	return nil
 }
 
 func (store TransactionDebitCreditStore) GetDCForTransactionID(id uint64) ([]*TransactionDebitCredit, error) {

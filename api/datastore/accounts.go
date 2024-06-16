@@ -13,9 +13,9 @@ type AccountStore struct {
 }
 
 const (
-	// AccountSignDebit is the AccountSign status for DEBIT Accounts
+	// AccountSignDebit is the AccountSign status for DEBIT Accounts.
 	AccountSignDebit = AccountSign("DEBIT")
-	// AccountSignCredit is the AccountSign status for CREDIT Accounts
+	// AccountSignCredit is the AccountSign status for CREDIT Accounts.
 	AccountSignCredit = AccountSign("CREDIT")
 
 	AccountTypeAsset     = AccountType("ASSET")
@@ -36,10 +36,10 @@ var AccountTypeToSign = map[AccountType]AccountSign{ //nolint:gochecknoglobals
 	AccountTypeGain:      AccountSignCredit,
 	AccountTypeLoss:      AccountSignDebit}
 
-// AccountSign is an enum for account signs "DEBIT" or "CREDIT"
+// AccountSign is an enum for account signs "DEBIT" or "CREDIT".
 type AccountSign string
 
-// AccountType is an enum for account type
+// AccountType is an enum for account type.
 type AccountType string
 
 type Account struct {
@@ -64,7 +64,7 @@ type Account struct {
 	AccountType          AccountType    `db:"account_type"`
 }
 
-// Store inserts an Account into postgres
+// Store inserts an Account into postgres.
 func (store AccountStore) Store(acct *Account) error {
 	query := `    INSERT INTO transaction_accounts 
 		           (account_parent,
@@ -113,7 +113,7 @@ func (store AccountStore) Store(acct *Account) error {
 	return nil
 }
 
-// Update  updates Accounts into postgres
+// Update  updates Accounts into postgres.
 func (store AccountStore) Update(acct *Account) error {
 	query := `    UPDATE  transaction_accounts 
 		    SET       (account_parent,
@@ -162,7 +162,7 @@ func (store AccountStore) Update(acct *Account) error {
 	return nil
 }
 
-// UpdateSubtotal  updates the account_subtotal into postgres
+// UpdateSubtotal  updates the account_subtotal into postgres.
 func (store AccountStore) UpdateSubtotal(acct *Account) error {
 	query := `    UPDATE  transaction_accounts 
 		    SET  account_subtotal = :account_subtotal
@@ -183,7 +183,7 @@ func (store AccountStore) UpdateSubtotal(acct *Account) error {
 	return nil
 }
 
-// account_balance  updates the account_balance into postgres
+// account_balance  updates the account_balance into postgres.
 func (store AccountStore) UpdateBalance(acct *Account) error {
 	query := `    UPDATE  transaction_accounts 
 		    SET  account_balance = :account_balance
@@ -204,7 +204,7 @@ func (store AccountStore) UpdateBalance(acct *Account) error {
 	return nil
 }
 
-// Set AccountReconcileDate
+// Set AccountReconcileDate.
 func (store AccountStore) SetAccountReconciledDate(acct *Account) error {
 	query := `UPDATE  transaction_accounts 
 		    SET account_reconcile_date = $2
@@ -218,7 +218,7 @@ func (store AccountStore) SetAccountReconciledDate(acct *Account) error {
 	return nil
 }
 
-// GetBalancel  gets the sum of all the subtotals for this accountID and all child accounts
+// GetBalancel  gets the sum of all the subtotals for this accountID and all child accounts.
 func (store AccountStore) GetBalance(accountID uint64) (int64, error) {
 	query := `    SELECT SUM(subaccount.account_subtotal) AS balance
                             FROM transaction_accounts AS p_account, transaction_accounts AS subaccount
@@ -235,7 +235,7 @@ func (store AccountStore) GetBalance(accountID uint64) (int64, error) {
 	return accountBalance, nil
 }
 
-// GetBalances  gets the sum of all the subtotals for this accountID and all child accounts
+// GetBalances  gets the sum of all the subtotals for this accountID and all child accounts.
 func (store AccountStore) GetBalances(accountID uint64) ([]Account, error) {
 	query := `    SELECT subaccount.*
                             FROM transaction_accounts AS p_account, transaction_accounts AS subaccount
@@ -266,7 +266,7 @@ func (store AccountStore) GetBalances(accountID uint64) ([]Account, error) {
 	return accountSet, nil
 }
 
-// Gets All Accounts
+// Gets All Accounts.
 func (store AccountStore) GetAccounts() ([]Account, error) {
 	query := `select * from transaction_accounts order by account_left`
 
@@ -294,7 +294,7 @@ func (store AccountStore) GetAccounts() ([]Account, error) {
 	return accountSet, nil
 }
 
-// Gets one account by account ID
+// Gets one account by account ID.
 func (store AccountStore) GetAccountByID(id uint64) (*Account, error) {
 	query := `select * from transaction_accounts where account_id = $1`
 	row := store.Client.QueryRowx(query, id)
@@ -308,7 +308,7 @@ func (store AccountStore) GetAccountByID(id uint64) (*Account, error) {
 	return &acct, nil
 }
 
-// GetDirectChildren gets first level children of an account
+// GetDirectChildren gets first level children of an account.
 func (store AccountStore) GetDirectChildren(acctID uint64) ([]Account, error) {
 	query := `select * from transaction_accounts WHERE account_parent = $1
 	   ORDER BY account_name `
@@ -338,7 +338,7 @@ func (store AccountStore) GetDirectChildren(acctID uint64) ([]Account, error) {
 	return accountSet, nil
 }
 
-// GetDirectChildren gets first level children of an account
+// GetDirectChildren gets first level children of an account.
 func (store AccountStore) GetParents(acctID uint64) ([]Account, error) {
 	query := `select Parents.* 
          FROM transaction_accounts AS Parents, transaction_accounts AS BaseAccount
@@ -370,7 +370,7 @@ ORDER BY Parents.account_left`
 	return accountSet, nil
 }
 
-// Gets All Children of a given account, regardless of dept
+// Gets All Children of a given account, regardless of dept.
 func (store AccountStore) GetAllChildren(acctID uint64) ([]Account, error) {
 	query := `SELECT 
 children.*
@@ -405,7 +405,7 @@ ORDER BY account_left`
 	return accountSet, nil
 }
 
-// OpenSpotInTree opens a spot in our nested set
+// OpenSpotInTree opens a spot in our nested set.
 func (store AccountStore) OpenSpotInTree(afterValue, spread uint64) error {
 	query := `UPDATE transaction_accounts
 	SET account_right=account_right+$2
@@ -428,7 +428,7 @@ func (store AccountStore) OpenSpotInTree(afterValue, spread uint64) error {
 	return nil
 }
 
-// CloseSpotInTree closes a gap in our account tree
+// CloseSpotInTree closes a gap in our account tree.
 func (store AccountStore) CloseSpotInTree(afterValue, spread uint64) error {
 	query := `UPDATE transaction_accounts
 	SET account_right=account_right-$2

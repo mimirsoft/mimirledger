@@ -1,9 +1,10 @@
 package response
 
 import (
+	"time"
+
 	"github.com/mimirsoft/mimirledger/api/datastore"
 	"github.com/mimirsoft/mimirledger/api/models"
-	"time"
 )
 
 // TransactionSet is for use in transaction controller responses
@@ -140,7 +141,8 @@ type TransactionReconciliation struct {
 	Split                string                `json:"split"`
 }
 
-// ConvertTransactionRecSetToRespTransactionRecSet converts []models.TransactionReconciliation to []*TransactionReconciliation
+// ConvertTransactionRecSetToRespTransactionRecSet converts
+// []models.TransactionReconciliation to []*TransactionReconciliation
 func ConvertTransactionRecSetToRespTransactionRecSet(
 	txns []*models.TransactionReconciliation) []*TransactionReconciliation {
 	var tas = make([]*TransactionReconciliation, len(txns))

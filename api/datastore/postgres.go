@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"time"
 
-	_ "github.com/jackc/pgx/v5/stdlib" // Standard library bindings for pgx
+	_ "github.com/jackc/pgx/v5/stdlib" // Standard library bindings for pgx.
 	"github.com/jmoiron/sqlx"
 )
 
@@ -21,17 +21,17 @@ type Datastores struct {
 	transactionDCStore TransactionDebitCreditStore
 }
 
-// AccountStore is the way to access the AccountStore
+// AccountStore is the way to access the AccountStore.
 func (ds *Datastores) AccountStore() AccountStore {
 	return ds.accountStore
 }
 
-// TransactionStore is the way to access the TransactionStore
+// TransactionStore is the way to access the TransactionStore.
 func (ds *Datastores) TransactionStore() TransactionStore {
 	return ds.transactionStore
 }
 
-// TransactionDebitCreditStore is the way to access the TransactionDebitCreditStore
+// TransactionDebitCreditStore is the way to access the TransactionDebitCreditStore.
 func (ds *Datastores) TransactionDebitCreditStore() TransactionDebitCreditStore {
 	return ds.transactionDCStore
 }

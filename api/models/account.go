@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"github.com/mimirsoft/mimirledger/api/datastore"
 	"strings"
 	"time"
+
+	"github.com/mimirsoft/mimirledger/api/datastore"
 )
 
 type Account struct {
@@ -31,7 +32,6 @@ type Account struct {
 	AccountType          datastore.AccountType
 }
 
-var errParentAccountNotFound = errors.New("cannot find parent account with ID")
 var errAccountNameEmptyString = errors.New("account name cannot be empty")
 var errAccountTypeInvalid = errors.New("accountType is not valid, cannot determine AccountSign")
 var ErrAccountNotFound = errors.New("account not found")
@@ -39,7 +39,7 @@ var ErrAccountNotFound = errors.New("account not found")
 const spreadForOneAccount = uint64(2)
 
 func (c *Account) Store(dStores *datastore.Datastores) error { //nolint:gocyclo
-	//check if this is top level.  if it is not, the type must be the parent type
+	// check if this is top level.  if it is not, the type must be the parent type
 	if c.AccountName == "" {
 		return errAccountNameEmptyString
 	}
@@ -65,7 +65,7 @@ func (c *Account) Store(dStores *datastore.Datastores) error { //nolint:gocyclo
 
 	c.AccountSign = accountSign
 
-	//Find the new spot in the tree.
+	// Find the new spot in the tree.
 	afterValue, err := findSpotInTree(dStores, c.AccountParent, c.AccountName)
 	if err != nil {
 		return fmt.Errorf("findSpotInTree:%w", err)
@@ -75,7 +75,7 @@ func (c *Account) Store(dStores *datastore.Datastores) error { //nolint:gocyclo
 	if err != nil {
 		return fmt.Errorf("openSpotInTree:%w", err)
 	}
-	// a single account with not children has a right and left that are sequential numbers
+	// a single account with not children has a right and left that are sequential numbers.
 	c.AccountLeft = afterValue + 1
 	c.AccountRight = afterValue + 2 //nolint:mnd
 	eAcct := datastore.Account(*c)
@@ -120,7 +120,7 @@ func (c *Account) Update(dStores *datastore.Datastores) (err error) { //nolint:g
 		if err != nil {
 			return fmt.Errorf("getParentsAccountIDs:%w", err)
 		}
-		//check if this is top level.  if it is not, the type must be the parent type
+		// check if this is top level.  if it is not, the type must be the parent type
 		var parentAccount *Account
 		if c.AccountParent != 0 {
 			parentAccount, err = RetrieveAccountByID(dStores, c.AccountParent)
@@ -147,7 +147,7 @@ func (c *Account) Update(dStores *datastore.Datastores) (err error) { //nolint:g
 	}
 
 	c.AccountSign = accountSign
-	//Find all children
+	// Find all children
 	children, err := findAllChildren(dStores, c.AccountID)
 	if err != nil {
 		return fmt.Errorf("findAllChildren: %w [ AccountID:%d]", err, c.AccountID)
@@ -160,7 +160,7 @@ func (c *Account) Update(dStores *datastore.Datastores) (err error) { //nolint:g
 	if err != nil {
 		return fmt.Errorf("closeSpotInTree:%w", err)
 	}
-	//Find the new spot in the tree. after value is the value which this account's AccountLeft should be
+	// Find the new spot in the tree. after value is the value which this account's AccountLeft should be
 	afterValue, err := findSpotInTree(dStores, c.AccountParent, c.AccountName)
 	if err != nil {
 		return fmt.Errorf("findSpotInTree:%w", err)
@@ -179,7 +179,7 @@ func (c *Account) Update(dStores *datastore.Datastores) (err error) { //nolint:g
 	if err != nil {
 		return fmt.Errorf("ds.AccountStore().Update:%w", err)
 	}
-	//Update all the children
+	// Update all the children
 	shift := c.AccountLeft - oldAccountLeft
 
 	for idx := range children {

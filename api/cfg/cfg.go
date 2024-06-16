@@ -12,7 +12,6 @@ const (
 )
 
 func LoadEnv() error {
-
 	appEnv := os.Getenv("APP_ENV")
 	appRoot := os.Getenv("APP_ROOT")
 

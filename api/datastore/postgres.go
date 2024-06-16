@@ -2,12 +2,12 @@ package datastore
 
 import (
 	"fmt"
-	"github.com/jmoiron/sqlx"
 	"os"
 	"strconv"
 	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib" // Standard library bindings for pgx
+	"github.com/jmoiron/sqlx"
 )
 
 const (

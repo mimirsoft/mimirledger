@@ -8,15 +8,16 @@ import (
 )
 
 type Transaction struct {
-	TransactionID            uint64                    `json:"transactionID,omitempty"`
-	TransactionDate          time.Time                 `json:"transactionDate"`
-	TransactionReconcileDate *time.Time                `json:"transactionReconcileDate,omitempty"`
-	TransactionComment       string                    `json:"transactionComment"`
-	TransactionAmount        uint64                    `json:"transactionAmount"`
-	TransactionReference     string                    `json:"transactionReference"` // this could be a check number, batch ,etc
-	IsReconciled             bool                      `json:"isReconciled"`
-	IsSplit                  bool                      `json:"isSplit"`
-	DebitCreditSet           []*TransactionDebitCredit `json:"debitCreditSet"`
+	TransactionID            uint64     `json:"transactionID,omitempty"`
+	TransactionDate          time.Time  `json:"transactionDate"`
+	TransactionReconcileDate *time.Time `json:"transactionReconcileDate,omitempty"`
+	TransactionComment       string     `json:"transactionComment"`
+	TransactionAmount        uint64     `json:"transactionAmount"`
+	// TransactionReference could be a check number, batch ,etc
+	TransactionReference string                    `json:"transactionReference"`
+	IsReconciled         bool                      `json:"isReconciled"`
+	IsSplit              bool                      `json:"isSplit"`
+	DebitCreditSet       []*TransactionDebitCredit `json:"debitCreditSet"`
 }
 
 type TransactionDebitCredit struct {

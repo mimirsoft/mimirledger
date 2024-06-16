@@ -8,7 +8,10 @@ import (
 	"github.com/rs/zerolog/log"
 	"net/http"
 	"os"
+	"time"
 )
+
+const readHeaderTimeout = time.Second * 3
 
 func main() {
 	loggerOutput := zerolog.ConsoleWriter{Out: os.Stderr} //nolint:exhaustruct
@@ -30,11 +33,16 @@ func main() {
 	ds := datastore.NewDatastores(myClient)
 	r := web.NewRouter(ds, &logger)
 
-	err = http.ListenAndServe(":3010", r)
-	if err != nil {
-		log.Error().Err(err).Msg("http.ListenAndServe")
+	server := &http.Server{ //nolint:exhaustruct
+		Addr:              ":3010",
+		ReadHeaderTimeout: readHeaderTimeout,
+		Handler:           r,
 	}
 
+	err = server.ListenAndServe()
+	if err != nil {
+		log.Error().Err(err).Msg("server..ListenAndServe")
+	}
 }
 
 type Config struct {

@@ -31,8 +31,8 @@ type AccountTypeSet struct {
 }
 
 // GET /accounttypes
-func (ac *AccountsController) AccountTypeList(ctx context.Context) (*AccountTypeSet, error) {
-	var at []AccountType
+func (ac *AccountsController) AccountTypeList(_ context.Context) (*AccountTypeSet, error) {
+	at := make([]AccountType, 0, len(datastore.AccountTypeToSign))
 	for key, value := range datastore.AccountTypeToSign {
 		at = append(at, AccountType{Name: string(key), Sign: string(value)})
 	}
@@ -41,7 +41,7 @@ func (ac *AccountsController) AccountTypeList(ctx context.Context) (*AccountType
 }
 
 // GET /accounts
-func (ac *AccountsController) AccountList(ctx context.Context) ([]*models.Account, error) {
+func (ac *AccountsController) AccountList(_ context.Context) ([]*models.Account, error) {
 	accounts, err := models.RetrieveAccounts(ac.DataStores)
 	if err != nil {
 		return nil, fmt.Errorf("models.RetrieveAccounts:%w", err)
@@ -51,7 +51,7 @@ func (ac *AccountsController) AccountList(ctx context.Context) ([]*models.Accoun
 }
 
 // GET /accounts/{accountID}
-func (ac *AccountsController) AccountGetByID(ctx context.Context, accountID uint64) (*models.Account, error) {
+func (ac *AccountsController) AccountGetByID(_ context.Context, accountID uint64) (*models.Account, error) {
 	account, err := models.RetrieveAccountByID(ac.DataStores, accountID)
 	if err != nil {
 		return nil, fmt.Errorf("models.RetrieveAccountByID:%w", err)
@@ -61,7 +61,7 @@ func (ac *AccountsController) AccountGetByID(ctx context.Context, accountID uint
 }
 
 // POST /accounts
-func (ac *AccountsController) CreateAccount(ctx context.Context, account *models.Account) (*models.Account, error) {
+func (ac *AccountsController) CreateAccount(_ context.Context, account *models.Account) (*models.Account, error) {
 	err := account.Store(ac.DataStores)
 	if err != nil {
 		return nil, fmt.Errorf("account.Store:%w", err)
@@ -71,7 +71,7 @@ func (ac *AccountsController) CreateAccount(ctx context.Context, account *models
 }
 
 // POST /accounts/{accountID}
-func (ac *AccountsController) UpdateAccount(ctx context.Context, account *models.Account) (*models.Account, error) {
+func (ac *AccountsController) UpdateAccount(_ context.Context, account *models.Account) (*models.Account, error) {
 	err := account.Update(ac.DataStores)
 	if err != nil {
 		return nil, fmt.Errorf("account.Update:%w", err)

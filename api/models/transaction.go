@@ -81,13 +81,13 @@ func (c *Transaction) handleDCSetStore(dStores *datastore.Datastores, affectedSu
 	affectedBalanceAccountIDs map[uint64]bool) error {
 	for idx := range c.DebitCreditSet {
 		// get all the parents of this AccountID
-		parentIds, err := getParentsAccountIDs(dStores, c.DebitCreditSet[idx].AccountID)
+		parentIDs, err := getParentsAccountIDs(dStores, c.DebitCreditSet[idx].AccountID)
 		if err != nil {
 			return fmt.Errorf("getParentsAccountIDs:%w", err)
 		}
 
-		for jdx := range parentIds {
-			affectedBalanceAccountIDs[parentIds[jdx]] = true
+		for jdx := range parentIDs {
+			affectedBalanceAccountIDs[parentIDs[jdx]] = true
 		}
 
 		c.DebitCreditSet[idx].TransactionID = c.TransactionID
@@ -115,7 +115,6 @@ func updateSubtotalsAndBalances(dStores *datastore.Datastores, affectedSubTotalA
 		if err != nil {
 			return fmt.Errorf("UpdateSubtotalForAccountID:%w [accountID:%d]", err, idx)
 		}
-
 	}
 
 	for idx := range affectedBalanceAccountIDs {
@@ -178,13 +177,13 @@ func (c *Transaction) handleDeletedDCs(dStores *datastore.Datastores, affectedSu
 
 	for idx := range deletedDCs {
 		// parents of the accounts used in the DC records that were deleted
-		parentIds, err := getParentsAccountIDs(dStores, deletedDCs[idx].AccountID)
+		parentIDs, err := getParentsAccountIDs(dStores, deletedDCs[idx].AccountID)
 		if err != nil {
 			return fmt.Errorf("getParentsAccountIDs:%w", err)
 		}
 
-		for jdx := range parentIds {
-			affectedBalanceAccountIDs[parentIds[jdx]] = true
+		for jdx := range parentIDs {
+			affectedBalanceAccountIDs[parentIDs[jdx]] = true
 		}
 
 		affectedSubTotalAccountIDs[deletedDCs[idx].AccountID] = true
@@ -220,7 +219,7 @@ func (c *Transaction) Delete(dStores *datastore.Datastores) error {
 	return nil
 }
 
-func (c *Transaction) validate() (err error) {
+func (c *Transaction) validate() error { //nolint:cyclop
 	if c.TransactionComment == "" {
 		return ErrTransactionNoComment
 	}
@@ -387,7 +386,8 @@ type TransactionLedger struct {
 }
 
 // RetrieveTransactionLedgerForAccountID retrieves all transactions ledger records in an account
-func RetrieveTransactionLedgerForAccountID(dStores *datastore.Datastores, transactionID uint64) ([]*TransactionLedger, error) {
+func RetrieveTransactionLedgerForAccountID(dStores *datastore.Datastores,
+	transactionID uint64) ([]*TransactionLedger, error) {
 	ts := dStores.TransactionStore()
 
 	eTransSet, err := ts.GetTransactionsForAccount(transactionID)
@@ -424,7 +424,8 @@ func RetrieveUnreconciledTransactionsForDate(dStores *datastore.Datastores, acco
 	searchLimitDate time.Time, reconciledCutoffDate time.Time) ([]*TransactionReconciliation, error) {
 	ts := dStores.TransactionStore()
 
-	eTransSet, err := ts.GetUnreconciledTransactionsOnAccountForDate(accountLeft, accountRight, searchLimitDate, reconciledCutoffDate)
+	eTransSet, err := ts.GetUnreconciledTransactionsOnAccountForDate(accountLeft, accountRight,
+		searchLimitDate, reconciledCutoffDate)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil

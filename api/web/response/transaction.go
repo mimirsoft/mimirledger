@@ -12,15 +12,16 @@ type TransactionSet struct {
 }
 
 type Transaction struct {
-	TransactionID            uint64                    `json:"transactionID,omitempty"`
-	TransactionDate          time.Time                 `json:"transactionDate"`
-	TransactionReconcileDate time.Time                 `json:"transactionReconcileDate"`
-	TransactionComment       string                    `json:"transactionComment"`
-	TransactionAmount        uint64                    `json:"transactionAmount"`
-	TransactionReference     string                    `json:"transactionReference"` // this could be a check number, batch ,etc
-	IsReconciled             bool                      `json:"isReconciled"`
-	IsSplit                  bool                      `json:"isSplit"`
-	DebitCreditSet           []*TransactionDebitCredit `json:"debitCreditSet"`
+	TransactionID            uint64    `json:"transactionID,omitempty"`
+	TransactionDate          time.Time `json:"transactionDate"`
+	TransactionReconcileDate time.Time `json:"transactionReconcileDate"`
+	TransactionComment       string    `json:"transactionComment"`
+	TransactionAmount        uint64    `json:"transactionAmount"`
+	// TransactionReference could be a check number, batch ,etc
+	TransactionReference string                    `json:"transactionReference"`
+	IsReconciled         bool                      `json:"isReconciled"`
+	IsSplit              bool                      `json:"isSplit"`
+	DebitCreditSet       []*TransactionDebitCredit `json:"debitCreditSet"`
 }
 type TransactionDebitCredit struct {
 	TransactionDCID     uint64                `json:"transactionDCID"` //nolint:tagliatelle
@@ -79,20 +80,22 @@ type TransactionLedgerSet struct {
 }
 
 type TransactionLedger struct {
-	TransactionID            uint64                `json:"transactionID"`
-	TransactionDate          time.Time             `json:"transactionDate"`
-	TransactionReconcileDate time.Time             `json:"transactionReconcileDate"`
-	TransactionComment       string                `json:"transactionComment"`
-	TransactionReference     string                `json:"transactionReference"` // this could be a check number, batch ,etc
-	IsReconciled             bool                  `json:"isReconciled"`
-	IsSplit                  bool                  `json:"isSplit"`
-	TransactionDCAmount      uint64                `json:"transactionDCAmount"` //nolint:tagliatelle
-	DebitOrCredit            datastore.AccountSign `json:"debitOrCredit"`
-	Split                    string                `json:"split"` // this could be a check number, batch ,etc
+	TransactionID            uint64    `json:"transactionID"`
+	TransactionDate          time.Time `json:"transactionDate"`
+	TransactionReconcileDate time.Time `json:"transactionReconcileDate"`
+	TransactionComment       string    `json:"transactionComment"`
+	TransactionReference     string    `json:"transactionReference"`
+	// TransactionReference could be a check number, batch ,etc
+	IsReconciled        bool                  `json:"isReconciled"`
+	IsSplit             bool                  `json:"isSplit"`
+	TransactionDCAmount uint64                `json:"transactionDCAmount"` //nolint:tagliatelle
+	DebitOrCredit       datastore.AccountSign `json:"debitOrCredit"`
+	Split               string                `json:"split"` // this could be a check number, batch ,etc
 }
 
 // ConvertTransactionLedgerToRespTransactionLedger converts []models.TransactionLedger to TransactionLedger
-func ConvertTransactionLedgerToRespTransactionLedger(act *models.Account, txns []*models.TransactionLedger) *TransactionLedgerSet {
+func ConvertTransactionLedgerToRespTransactionLedger(act *models.Account,
+	txns []*models.TransactionLedger) *TransactionLedgerSet {
 	var tas = make([]*TransactionLedger, len(txns))
 	for idx := range txns {
 		tas[idx] = ConvertTransactionLedgerToRespTransactionLeger(txns[idx])
@@ -124,20 +127,22 @@ func ConvertTransactionLedgerToRespTransactionLeger(trans *models.TransactionLed
 }
 
 type TransactionReconciliation struct {
-	TransactionID            uint64                `json:"transactionID"`
-	TransactionDate          time.Time             `json:"transactionDate"`
-	TransactionReconcileDate time.Time             `json:"transactionReconcileDate"`
-	TransactionComment       string                `json:"transactionComment"`
-	TransactionReference     string                `json:"transactionReference"` // this could be a check number, batch ,etc
-	IsReconciled             bool                  `json:"isReconciled"`
-	IsSplit                  bool                  `json:"isSplit"`
-	TransactionDCAmount      uint64                `json:"transactionDCAmount"` //nolint:tagliatelle
-	DebitOrCredit            datastore.AccountSign `json:"debitOrCredit"`
-	Split                    string                `json:"split"` // this could be a check number, batch ,etc
+	TransactionID            uint64    `json:"transactionID"`
+	TransactionDate          time.Time `json:"transactionDate"`
+	TransactionReconcileDate time.Time `json:"transactionReconcileDate"`
+	TransactionComment       string    `json:"transactionComment"`
+	// TransactionReference could be a check number, batch ,etc
+	TransactionReference string                `json:"transactionReference"`
+	IsReconciled         bool                  `json:"isReconciled"`
+	IsSplit              bool                  `json:"isSplit"`
+	TransactionDCAmount  uint64                `json:"transactionDCAmount"` //nolint:tagliatelle
+	DebitOrCredit        datastore.AccountSign `json:"debitOrCredit"`
+	Split                string                `json:"split"`
 }
 
 // ConvertTransactionRecSetToRespTransactionRecSet converts []models.TransactionReconciliation to []*TransactionReconciliation
-func ConvertTransactionRecSetToRespTransactionRecSet(txns []*models.TransactionReconciliation) []*TransactionReconciliation {
+func ConvertTransactionRecSetToRespTransactionRecSet(
+	txns []*models.TransactionReconciliation) []*TransactionReconciliation {
 	var tas = make([]*TransactionReconciliation, len(txns))
 	for idx := range txns {
 		tas[idx] = ConvertTransactionReconcileToRespTransactionReconcile(txns[idx])
@@ -145,7 +150,8 @@ func ConvertTransactionRecSetToRespTransactionRecSet(txns []*models.TransactionR
 
 	return tas
 }
-func ConvertTransactionReconcileToRespTransactionReconcile(trans *models.TransactionReconciliation) *TransactionReconciliation {
+func ConvertTransactionReconcileToRespTransactionReconcile(
+	trans *models.TransactionReconciliation) *TransactionReconciliation {
 	respTransLedger := TransactionReconciliation{
 		TransactionID:            trans.TransactionID,
 		TransactionDate:          trans.TransactionDate,

@@ -12,7 +12,7 @@ type HealthController struct {
 
 // GET /api/health
 // HEAD /api/health
-func (healthController *HealthController) HealthCheck(ctx context.Context) (err error) {
+func (healthController *HealthController) HealthCheck(_ context.Context) error {
 	return nil
 }
 

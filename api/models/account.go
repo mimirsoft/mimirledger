@@ -60,7 +60,7 @@ func (c *Account) Store(dStores *datastore.Datastores) error { //nolint:gocyclo
 	)
 
 	if accountSign, ok = datastore.AccountTypeToSign[c.AccountType]; !ok {
-		return fmt.Errorf("%w c.AccountType:%s:", errAccountTypeInvalid, c.AccountType)
+		return fmt.Errorf("c.AccountType:%s: %w", c.AccountType, errAccountTypeInvalid)
 	}
 
 	c.AccountSign = accountSign
@@ -143,7 +143,7 @@ func (c *Account) Update(dStores *datastore.Datastores) (err error) { //nolint:g
 	)
 	// fill in sign from AccountType
 	if accountSign, ok = datastore.AccountTypeToSign[c.AccountType]; !ok {
-		return fmt.Errorf("%w c.AccountType:%s:", errAccountTypeInvalid, c.AccountType)
+		return fmt.Errorf("c.AccountType:%s: %w", c.AccountType, errAccountTypeInvalid)
 	}
 
 	c.AccountSign = accountSign
@@ -154,7 +154,7 @@ func (c *Account) Update(dStores *datastore.Datastores) (err error) { //nolint:g
 	}
 	// if this account has no children, spread is 2
 	// we calculate it this way so that any error in accountRight is fix
-	spread := uint64(uint64(len(children))*spreadForOneAccount) + spreadForOneAccount
+	spread := (uint64(len(children)) * spreadForOneAccount) + spreadForOneAccount
 	// close old spot in tree
 	err = closeSpotInTree(dStores, acctB4Update.AccountRight, spread)
 	if err != nil {
@@ -248,8 +248,11 @@ func (c *Account) updateSubtotal(dStores *datastore.Datastores) error {
 	if err != nil {
 		return fmt.Errorf("tcdStore.GetSubtotals:%w", err)
 	}
-	var debitSubtotal int64 = 0
-	var creditSubtotal int64 = 0
+
+	var (
+		debitSubtotal  int64
+		creditSubtotal int64
+	)
 
 	for idx := range subtotals {
 		switch accountSign := subtotals[idx].DebitOrCredit; accountSign {
@@ -514,7 +517,8 @@ func getParentsAccountIDs(dStores *datastore.Datastores, accountID uint64) ([]ui
 
 		return nil, fmt.Errorf("AccountStore().GetParents:%w", err)
 	}
-	var parentIDs []uint64
+
+	parentIDs := make([]uint64, 0, len(actSet))
 
 	for idx := range actSet {
 		parentIDs = append(parentIDs, actSet[idx].AccountID)

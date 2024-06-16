@@ -24,7 +24,7 @@ func GetReqID(ctx context.Context) string {
 	return a
 }
 
-func RequestId(next http.Handler) http.Handler {
+func RequestID(next http.Handler) http.Handler {
 	handlerFn := func(res http.ResponseWriter, req *http.Request) {
 		rid := req.Header.Get("X-Request-ID")
 		if rid == "" {
@@ -48,23 +48,24 @@ func Logger(logger zerolog.Logger) func(http.Handler) http.Handler {
 			var bodyBuf bytes.Buffer
 
 			wrapWriter.Tee(&bodyBuf)
-			defer func() {
+
+			defer func(ctx context.Context) {
 				if wrapWriter.Status() != http.StatusOK {
 					logger.Info().
-						Str("request-id", GetReqID(req.Context())).
+						Str("request-id", GetReqID(ctx)).
 						Int("status", wrapWriter.Status()).
 						Int("bytes", wrapWriter.BytesWritten()).
 						Str("method", req.Method).
 						Str("path", req.URL.Path).
 						Str("query", req.URL.RawQuery).
 						Str("ip", req.RemoteAddr).
-						Str("trace.id", trace.SpanFromContext(req.Context()).SpanContext().TraceID().String()).
+						Str("trace.id", trace.SpanFromContext(ctx).SpanContext().TraceID().String()).
 						Str("user-agent", req.UserAgent()).
 						Dur("latency", time.Since(start)).
 						Str("resp_body", bodyBuf.String()).
 						Msg("request completed")
 				}
-			}()
+			}(req.Context())
 
 			next.ServeHTTP(wrapWriter, req)
 		}

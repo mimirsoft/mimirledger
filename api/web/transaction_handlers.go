@@ -65,7 +65,8 @@ func PostTransactions(contoller *TransactionsController) func(res http.ResponseW
 }
 
 // GET /transactions/account/{accountID}
-func GetTransactionsOnAccount(contoller *TransactionsController) func(res http.ResponseWriter, req *http.Request) error {
+func GetTransactionsOnAccount(contoller *TransactionsController) func(res http.ResponseWriter,
+	req *http.Request) error {
 	return func(res http.ResponseWriter, req *http.Request) error {
 		accountIDStr := chi.URLParam(req, "accountID")
 
@@ -92,7 +93,8 @@ func GetTransactionsOnAccount(contoller *TransactionsController) func(res http.R
 var ErrInvalidReconcileDate = errors.New("invalid reconcile date")
 
 // GET /transactions/account/{accountID}/unreconciled?date=<date>
-func GetUnreconciledTransactionsOnAccount(contoller *TransactionsController) func(res http.ResponseWriter, req *http.Request) error {
+func GetUnreconciledTransactionsOnAccount(contoller *TransactionsController) func(res http.ResponseWriter,
+	req *http.Request) error {
 	return func(res http.ResponseWriter, req *http.Request) error {
 		accountIDStr := chi.URLParam(req, "accountID")
 

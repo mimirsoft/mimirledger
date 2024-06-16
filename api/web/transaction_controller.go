@@ -21,7 +21,7 @@ func NewTransactionsController(ds *datastore.Datastores) *TransactionsController
 }
 
 // POST /transactions
-func (tc *TransactionsController) CreateTransaction(ctx context.Context, myTxn *models.Transaction) (*models.Transaction,
+func (tc *TransactionsController) CreateTransaction(_ context.Context, myTxn *models.Transaction) (*models.Transaction,
 	error) {
 	err := myTxn.Store(tc.DataStores)
 	if err != nil {
@@ -32,7 +32,7 @@ func (tc *TransactionsController) CreateTransaction(ctx context.Context, myTxn *
 }
 
 // GET /transactions/account/{accountID}
-func (tc *TransactionsController) GetTransactionsForAccount(ctx context.Context, accountID uint64) (*models.Account,
+func (tc *TransactionsController) GetTransactionsForAccount(_ context.Context, accountID uint64) (*models.Account,
 	[]*models.TransactionLedger,
 	error) {
 	account, err := models.RetrieveAccountByID(tc.DataStores, accountID)
@@ -49,7 +49,7 @@ func (tc *TransactionsController) GetTransactionsForAccount(ctx context.Context,
 }
 
 // GET /transactions/account/{accountID}/unreconciled?date=<date>
-func (tc *TransactionsController) GetUnreconciledTransactionsOnAccount(ctx context.Context, accountID uint64,
+func (tc *TransactionsController) GetUnreconciledTransactionsOnAccount(_ context.Context, accountID uint64,
 	searchDate time.Time) ([]*models.TransactionReconciliation,
 	error) {
 	account, err := models.RetrieveAccountByID(tc.DataStores, accountID)
@@ -67,7 +67,8 @@ func (tc *TransactionsController) GetUnreconciledTransactionsOnAccount(ctx conte
 }
 
 // GET /transactions/{transactionID}
-func (tc *TransactionsController) GetTransactionByID(ctx context.Context, transactionID uint64) (*models.Transaction, error) {
+func (tc *TransactionsController) GetTransactionByID(_ context.Context,
+	transactionID uint64) (*models.Transaction, error) {
 	myTxn, err := models.RetrieveTransactionByID(tc.DataStores, transactionID)
 	if err != nil {
 		return nil, fmt.Errorf("models.RetrieveTransactionByID:%w", err)
@@ -77,7 +78,7 @@ func (tc *TransactionsController) GetTransactionByID(ctx context.Context, transa
 }
 
 // PUT /transactions/{transactionID}
-func (tc *TransactionsController) UpdateTransaction(ctx context.Context, myTxn *models.Transaction) (*models.Transaction,
+func (tc *TransactionsController) UpdateTransaction(_ context.Context, myTxn *models.Transaction) (*models.Transaction,
 	error) {
 	err := myTxn.Update(tc.DataStores)
 	if err != nil {
@@ -88,7 +89,7 @@ func (tc *TransactionsController) UpdateTransaction(ctx context.Context, myTxn *
 }
 
 // PUT /transactions/{transactionID}/reconciled
-func (tc *TransactionsController) UpdateReconciled(ctx context.Context, myTxn *models.Transaction) (*models.Transaction,
+func (tc *TransactionsController) UpdateReconciled(_ context.Context, myTxn *models.Transaction) (*models.Transaction,
 	error) {
 	readTxn, err := models.RetrieveTransactionByID(tc.DataStores, myTxn.TransactionID)
 	if err != nil {
@@ -107,7 +108,7 @@ func (tc *TransactionsController) UpdateReconciled(ctx context.Context, myTxn *m
 }
 
 // PUT /transactions/{transactionID}/unreconciled
-func (tc *TransactionsController) UpdateUnreconciled(ctx context.Context, myTxn *models.Transaction) (*models.Transaction,
+func (tc *TransactionsController) UpdateUnreconciled(_ context.Context, myTxn *models.Transaction) (*models.Transaction,
 	error) {
 	readTxn, err := models.RetrieveTransactionByID(tc.DataStores, myTxn.TransactionID)
 	if err != nil {
@@ -125,7 +126,7 @@ func (tc *TransactionsController) UpdateUnreconciled(ctx context.Context, myTxn 
 }
 
 // DELETE /transactions/{transactionID}
-func (tc *TransactionsController) DeleteTransaction(ctx context.Context, transactionID uint64) (*models.Transaction,
+func (tc *TransactionsController) DeleteTransaction(_ context.Context, transactionID uint64) (*models.Transaction,
 	error) {
 	// retrieve the transaction for checking before deletion
 	myTxn, err := models.RetrieveTransactionByID(tc.DataStores, transactionID)

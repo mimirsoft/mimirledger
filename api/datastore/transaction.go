@@ -3,8 +3,9 @@ package datastore
 import (
 	"database/sql"
 	"fmt"
-	"github.com/jmoiron/sqlx"
 	"time"
+
+	"github.com/jmoiron/sqlx"
 )
 
 type TransactionStore struct {
@@ -177,8 +178,10 @@ func (store TransactionStore) GetUnreconciledTransactionsOnAccountForDate(accoun
             ON workingtdc.transaction_id=odc.transaction_id
     INNER JOIN transaction_main AS tm
             ON tm.transaction_id=workingtdc.transaction_id
-         WHERE (workingtdc.account_id IN (SELECT account_id FROM transaction_accounts WHERE account_left BETWEEN $3 AND $4)  
-               AND odc.account_id NOT IN (SELECT account_id FROM transaction_accounts WHERE account_left BETWEEN $3 AND $4) )
+         WHERE (workingtdc.account_id 
+			IN (SELECT account_id FROM transaction_accounts WHERE account_left BETWEEN $3 AND $4)  
+		   AND odc.account_id 
+		NOT IN (SELECT account_id FROM transaction_accounts WHERE account_left BETWEEN $3 AND $4) )
            AND ((tm.is_reconciled IS FALSE 
                  AND  EXTRACT(EPOCH FROM tm.transaction_date) <= EXTRACT(EPOCH FROM $1::timestamp) )
                OR

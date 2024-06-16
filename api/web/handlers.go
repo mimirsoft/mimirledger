@@ -67,7 +67,6 @@ func (h RootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 		}
 
 		return
-
 	}
 }
 

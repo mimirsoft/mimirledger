@@ -26,7 +26,7 @@ const (
 	AccountTypeLoss      = AccountType("LOSS")
 )
 
-var AccountTypeToSign = map[AccountType]AccountSign{
+var AccountTypeToSign = map[AccountType]AccountSign{ //nolint:gochecknoglobals
 	AccountTypeAsset:     AccountSignDebit,
 	AccountTypeLiability: AccountSignCredit,
 	AccountTypeEquity:    AccountSignCredit,
@@ -421,7 +421,7 @@ func (store AccountStore) OpenSpotInTree(afterValue, spread uint64) error {
 
 	_, err = store.Client.Exec(query, afterValue, spread)
 	if err != nil {
-		return nil
+		return fmt.Errorf("store.Client.Exec:%w", err)
 	}
 
 	return nil
@@ -444,7 +444,7 @@ func (store AccountStore) CloseSpotInTree(afterValue, spread uint64) error {
 
 	_, err = store.Client.Exec(query, afterValue, spread)
 	if err != nil {
-		return nil
+		return fmt.Errorf("store.Client.Exec:%w", err)
 	}
 
 	return nil

@@ -55,7 +55,7 @@ func TestAccount_Store(t *testing.T) {
 	err := a1.Store(testDS)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	myAcct, err := getAccountByID(testDS, a1.AccountID)
+	myAcct, err := RetrieveAccountByID(testDS, a1.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(myAcct).NotTo(gomega.BeNil())
 	g.Expect(myAcct.AccountID).To(gomega.Equal(a1.AccountID))
@@ -64,7 +64,7 @@ func TestAccount_Store(t *testing.T) {
 	err = a2.Store(testDS)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	myAcct, err = getAccountByID(testDS, a2.AccountID)
+	myAcct, err = RetrieveAccountByID(testDS, a2.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(myAcct).NotTo(gomega.BeNil())
 	g.Expect(myAcct.AccountID).To(gomega.Equal(a2.AccountID))
@@ -271,7 +271,7 @@ func TestAccount_StoreParentAndChildren(t *testing.T) {
 	g.Expect(a2.AccountName).To(gomega.Equal("MyBank_subacct"))
 	g.Expect(a2.AccountFullName).To(gomega.Equal("MyBank:MyBank_subacct"))
 
-	myAcct, err := getAccountByID(testDS, a1.AccountID)
+	myAcct, err := RetrieveAccountByID(testDS, a1.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(myAcct).NotTo(gomega.BeNil())
 	g.Expect(myAcct.AccountID).To(gomega.Equal(a1.AccountID))
@@ -340,7 +340,7 @@ func TestAccount_CloseSpotInTree(t *testing.T) {
 	g.Expect(a2.AccountName).To(gomega.Equal("MyBank_subacct"))
 	g.Expect(a2.AccountFullName).To(gomega.Equal("MyBank:MyBank_subacct"))
 
-	myAcct, err := getAccountByID(testDS, a1.AccountID)
+	myAcct, err := RetrieveAccountByID(testDS, a1.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(myAcct).NotTo(gomega.BeNil())
 	g.Expect(myAcct.AccountID).To(gomega.Equal(a1.AccountID))
@@ -392,7 +392,7 @@ func TestAccount_CloseSpotInTree(t *testing.T) {
 	g.Expect(allChildrenA2).To(gomega.HaveLen(1))
 	g.Expect(allChildrenA2[0].AccountID).To(gomega.Equal(a3.AccountID))
 
-	updateAcct2, err := getAccountByID(testDS, a2.AccountID)
+	updateAcct2, err := RetrieveAccountByID(testDS, a2.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(updateAcct2.AccountLeft).To(gomega.Equal(uint64(2)))
 	g.Expect(updateAcct2.AccountRight).To(gomega.Equal(uint64(5)))
@@ -404,13 +404,13 @@ func TestAccount_CloseSpotInTree(t *testing.T) {
 	err = closeSpotInTree(testDS, a2.AccountRight, spread)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	myAcct, err = getAccountByID(testDS, a1.AccountID)
+	myAcct, err = RetrieveAccountByID(testDS, a1.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(myAcct).NotTo(gomega.BeNil())
 	g.Expect(myAcct.AccountLeft).To(gomega.Equal(uint64(1)))
 	g.Expect(myAcct.AccountRight).To(gomega.Equal(uint64(2)))
 
-	myAcct4, err := getAccountByID(testDS, a4.AccountID)
+	myAcct4, err := RetrieveAccountByID(testDS, a4.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(myAcct4).NotTo(gomega.BeNil())
 	g.Expect(myAcct4.AccountLeft).To(gomega.Equal(uint64(3)))
@@ -424,7 +424,7 @@ func TestAccount_CloseSpotInTree(t *testing.T) {
 	err = openSpotInTree(testDS, afterValue, spread)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	myAcct4, err = getAccountByID(testDS, a4.AccountID)
+	myAcct4, err = RetrieveAccountByID(testDS, a4.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(myAcct4).NotTo(gomega.BeNil())
 	g.Expect(myAcct4.AccountLeft).To(gomega.Equal(uint64(3)))
@@ -470,13 +470,13 @@ func TestAccount_StoreParentAndChildrenMoved(t *testing.T) {
 	err = a2.Update(testDS)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	myAcct, err := getAccountByID(testDS, a1.AccountID)
+	myAcct, err := RetrieveAccountByID(testDS, a1.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(myAcct).NotTo(gomega.BeNil())
 	g.Expect(myAcct.AccountLeft).To(gomega.Equal(uint64(1)))
 	g.Expect(myAcct.AccountRight).To(gomega.Equal(uint64(2)))
 
-	myAcct, err = getAccountByID(testDS, a2.AccountID)
+	myAcct, err = RetrieveAccountByID(testDS, a2.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(myAcct).NotTo(gomega.BeNil())
 	g.Expect(myAcct.AccountParent).To(gomega.Equal(a4.AccountID))
@@ -485,7 +485,7 @@ func TestAccount_StoreParentAndChildrenMoved(t *testing.T) {
 	g.Expect(myAcct.AccountName).To(gomega.Equal("MyBank_subacct"))
 	g.Expect(myAcct.AccountFullName).To(gomega.Equal("OtherBank:MyBank_subacct"))
 
-	myAcct, err = getAccountByID(testDS, a3.AccountID)
+	myAcct, err = RetrieveAccountByID(testDS, a3.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(myAcct).NotTo(gomega.BeNil())
 	g.Expect(myAcct.AccountParent).To(gomega.Equal(a2.AccountID))
@@ -494,7 +494,7 @@ func TestAccount_StoreParentAndChildrenMoved(t *testing.T) {
 	g.Expect(myAcct.AccountName).To(gomega.Equal("MyBank_sub_subacct"))
 	g.Expect(myAcct.AccountFullName).To(gomega.Equal("OtherBank:MyBank_subacct:MyBank_sub_subacct"))
 
-	myAcct, err = getAccountByID(testDS, a4.AccountID)
+	myAcct, err = RetrieveAccountByID(testDS, a4.AccountID)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(myAcct).NotTo(gomega.BeNil())
 	g.Expect(myAcct.AccountName).To(gomega.Equal("OtherBank"))

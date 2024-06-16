@@ -90,37 +90,37 @@ func NewClient(config *PostgresConfig) (*sqlx.DB, error) {
 }
 
 func LoadPostgresConfigFromEnv() PostgresConfig {
-	c := PostgresConfig{}
+	pgConfig := PostgresConfig{} //nolint:exhaustruct
 	// Postgres
 	if pgDBHost := os.Getenv("PG_DB_HOST"); pgDBHost != "" {
-		c.Host = pgDBHost
+		pgConfig.Host = pgDBHost
 	}
 
 	if pgDBPort := os.Getenv("PG_DB_PORT"); pgDBPort != "" {
 		portInt, _ := strconv.Atoi(pgDBPort)
-		c.Port = portInt
+		pgConfig.Port = portInt
 	}
 
 	if pgDBUser := os.Getenv("PG_DB_USER"); pgDBUser != "" {
-		c.Username = pgDBUser
+		pgConfig.Username = pgDBUser
 	}
 
 	if pgDBPassword := os.Getenv("PG_DB_PASSWORD"); pgDBPassword != "" {
-		c.Password = pgDBPassword
+		pgConfig.Password = pgDBPassword
 	}
 
 	if pgDBName := os.Getenv("PG_DB_NAME"); pgDBName != "" {
-		c.DBName = pgDBName
+		pgConfig.DBName = pgDBName
 	}
 
 	if pgMaxConnLifetimeSecs := os.Getenv("PG_MAX_CONN_LIFETIME"); pgMaxConnLifetimeSecs != "" {
 		ltInt, _ := strconv.Atoi(pgMaxConnLifetimeSecs)
-		c.MaxConnLifetime = ltInt
+		pgConfig.MaxConnLifetime = ltInt
 	}
 
 	if pgDisableSSL := os.Getenv("PG_DISABLE_SSL"); pgDisableSSL != "" {
-		c.DisableSSL, _ = strconv.ParseBool(pgDisableSSL)
+		pgConfig.DisableSSL, _ = strconv.ParseBool(pgDisableSSL)
 	}
 
-	return c
+	return pgConfig
 }

@@ -11,7 +11,7 @@ import (
 )
 
 func main() {
-	loggerOutput := zerolog.ConsoleWriter{Out: os.Stderr}
+	loggerOutput := zerolog.ConsoleWriter{Out: os.Stderr} //nolint:exhaustruct
 	logger := zerolog.New(loggerOutput)
 	appConfig := LoadConfig()
 
@@ -50,6 +50,6 @@ func LoadConfig() Config {
 	postgresCfg := datastore.LoadPostgresConfigFromEnv()
 
 	myCfg := Config{Postgres: postgresCfg}
-	
+
 	return myCfg
 }

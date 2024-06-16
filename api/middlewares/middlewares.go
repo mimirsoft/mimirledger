@@ -16,7 +16,12 @@ type ctxKey int
 const ridKey ctxKey = ctxKey(0)
 
 func GetReqID(ctx context.Context) string {
-	return ctx.Value(ridKey).(string)
+	a, ok := ctx.Value(ridKey).(string)
+	if !ok {
+		panic("requestID not found in context - failed type assertion")
+	}
+
+	return a
 }
 
 func RequestId(next http.Handler) http.Handler {

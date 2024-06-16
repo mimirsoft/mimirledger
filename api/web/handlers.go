@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/rs/zerolog"
 	"net/http"
 )
@@ -39,34 +40,34 @@ func (h RootHandler) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	err := h.H(res, req)
 
 	if err != nil {
-		switch e := err.(type) {
-		case *RequestError:
+		var myRequestError *RequestError
+		if errors.As(err, &myRequestError) {
 			// since this was a structured RequestError, we do not log and just
 			// return the response.  Logging middleware will handle the log
-			res.WriteHeader(e.StatusCode)
+			res.WriteHeader(myRequestError.StatusCode)
 			res.Header().Set("Content-Type", "application/json; charset=utf-8")
 
-			if err = json.NewEncoder(res).Encode(e); err != nil {
+			if err = json.NewEncoder(res).Encode(myRequestError); err != nil {
 				log.Printf("failed json encode RequestError response %s", err)
 			}
 
 			return
-		default:
-			// since we don't know what the error is, we log the error
-			// then we return a generic StatusInternalServerError with a JSON payload
-			log.Error().Err(err).Msgf("HTTP %d", http.StatusInternalServerError)
-			unknownErr := UnknownError{StatusCode: http.StatusInternalServerError, Err: err.Error()}
-			// Any error types we don't specifically look out for default
-			// to serving a HTTP 500
-			res.WriteHeader(http.StatusInternalServerError)
-			res.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-			if err1 := json.NewEncoder(res).Encode(unknownErr); err1 != nil {
-				log.Error().Err(err1).Msg("failed json encode UnknownError response")
-			}
-
-			return
 		}
+		// since we don't know what the error is, we log the error
+		// then we return a generic StatusInternalServerError with a JSON payload
+		log.Error().Err(err).Msgf("HTTP %d", http.StatusInternalServerError)
+		unknownErr := UnknownError{StatusCode: http.StatusInternalServerError, Err: err.Error()}
+		// Any error types we don't specifically look out for default
+		// to serving a HTTP 500
+		res.WriteHeader(http.StatusInternalServerError)
+		res.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+		if err1 := json.NewEncoder(res).Encode(unknownErr); err1 != nil {
+			log.Error().Err(err1).Msg("failed json encode UnknownError response")
+		}
+
+		return
+
 	}
 }
 

@@ -337,27 +337,16 @@ func RetrieveTransactionByID(dStores *datastore.Datastores, transactionID uint64
 	}
 
 	myTransCore := TransactionCore(*eTxn)
-	myTrans := Transaction{TransactionCore: myTransCore}
 
 	myDCSet, err := dStores.TransactionDebitCreditStore().GetDCForTransactionID(transactionID)
 	if err != nil {
 		return nil, fmt.Errorf("TransactionDebitCreditStore().GetDCForTransactionID:%w", err)
 	}
 
-	myTrans.DebitCreditSet = entTransactionsDCToTransactionsDC(myDCSet)
+	debitCreditSet := entTransactionsDCToTransactionsDC(myDCSet)
+	myTrans := Transaction{TransactionCore: myTransCore, DebitCreditSet: debitCreditSet}
 
 	return &myTrans, nil
-}
-
-func entTransactionsToTransactions(eTxn []*datastore.Transaction) []*Transaction { //nolint:unused
-	txnSet := make([]*Transaction, len(eTxn))
-
-	for idx := range eTxn {
-		myTransCore := TransactionCore(*eTxn[idx])
-		txnSet[idx] = &Transaction{TransactionCore: myTransCore}
-	}
-
-	return txnSet
 }
 
 func transactionToEntTransaction(txn *Transaction) datastore.Transaction {

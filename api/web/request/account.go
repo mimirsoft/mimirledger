@@ -26,7 +26,7 @@ type Account struct {
 }
 
 func ReqAccountToAccount(act *Account) *models.Account {
-	return &models.Account{
+	return &models.Account{ //nolint:exhaustruct
 		AccountID:            act.AccountID,
 		AccountParent:        act.AccountParent,
 		AccountName:          act.AccountName,

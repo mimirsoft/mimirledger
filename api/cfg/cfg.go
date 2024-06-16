@@ -20,7 +20,7 @@ func LoadEnv() error {
 		envFile(appRoot, ".env."+appEnv), // APP_ENV specific file
 	)
 	if err != nil {
-		return fmt.Errorf("godotenv.Load err: %v", err)
+		return fmt.Errorf("godotenv.Load err: %w", err)
 	}
 
 	return nil

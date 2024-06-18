@@ -2,8 +2,9 @@ package response
 
 import (
 	"database/sql"
-	"github.com/mimirsoft/mimirledger/api/models"
 	"time"
+
+	"github.com/mimirsoft/mimirledger/api/models"
 )
 
 // AccountSet is for use in accounts controller responses

@@ -3,8 +3,9 @@ package web
 import (
 	"encoding/json"
 	"errors"
-	"github.com/rs/zerolog"
 	"net/http"
+
+	"github.com/rs/zerolog"
 )
 
 type UnknownError struct {

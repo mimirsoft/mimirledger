@@ -4,11 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/mimirsoft/mimirledger/api/web/request"
-	"github.com/mimirsoft/mimirledger/api/web/response"
 	"net/http"
 	"strconv"
+
+	"github.com/go-chi/chi/v5"
+
+	"github.com/mimirsoft/mimirledger/api/web/request"
+	"github.com/mimirsoft/mimirledger/api/web/response"
 )
 
 // GET /accounttypes

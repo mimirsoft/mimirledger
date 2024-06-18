@@ -38,7 +38,7 @@ var ErrAccountNotFound = errors.New("account not found")
 
 const spreadForOneAccount = uint64(2)
 
-func (c *Account) Store(dStores *datastore.Datastores) error { //nolint:gocyclo
+func (c *Account) Store(dStores *datastore.Datastores) error { 
 	// check if this is top level.  if it is not, the type must be the parent type
 	if c.AccountName == "" {
 		return errAccountNameEmptyString
@@ -103,7 +103,7 @@ func (c *Account) Store(dStores *datastore.Datastores) error { //nolint:gocyclo
 }
 
 // This whole function should be a transaction for safety
-func (c *Account) Update(dStores *datastore.Datastores) (err error) { //nolint:gocyclo
+func (c *Account) Update(dStores *datastore.Datastores) (err error) { 
 	// get existing Account record
 	acctB4Update, err := RetrieveAccountByID(dStores, c.AccountID)
 	if err != nil {

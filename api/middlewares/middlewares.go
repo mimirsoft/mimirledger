@@ -3,12 +3,13 @@ package middlewares
 import (
 	"bytes"
 	"context"
+	"net/http"
+	"time"
+
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/rs/zerolog"
 	uuid "github.com/satori/go.uuid"
 	"go.opentelemetry.io/otel/trace"
-	"net/http"
-	"time"
 )
 
 type ctxKey int

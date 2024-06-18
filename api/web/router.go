@@ -1,15 +1,16 @@
 package web
 
 import (
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/mimirsoft/mimirledger/api/datastore"
-	"github.com/mimirsoft/mimirledger/api/middlewares"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
-	"net/http"
+	"github.com/mimirsoft/mimirledger/api/datastore"
+	"github.com/mimirsoft/mimirledger/api/middlewares"
 )
 
 const maxAgeSeconds = 300

@@ -6,7 +6,7 @@ TEST_MODULES ?= $(GOPACKAGES)
 # INTERNAL TARGETS
 #
 lint-direct: # [INTERNAL]
-	@golangci-lint run
+	@golangci-lint run --fix
 
 start-web: # [INTERNAL]
 	air -c .air.toml

@@ -3,6 +3,7 @@ package datastore
 import (
 	"database/sql"
 	"fmt"
+
 	"github.com/jmoiron/sqlx"
 )
 

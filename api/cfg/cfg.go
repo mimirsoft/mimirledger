@@ -2,9 +2,10 @@ package cfg
 
 import (
 	"fmt"
-	"github.com/joho/godotenv"
 	"os"
 	"strings"
+
+	"github.com/joho/godotenv"
 )
 
 const (

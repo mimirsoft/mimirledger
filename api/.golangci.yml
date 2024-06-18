@@ -179,3 +179,8 @@ linters-settings:
             desc: not allowed
           - pkg: "github.com/pkg/errors"
             desc: Should be replaced by standard lib errors package
+  goimports:
+    # A comma-separated list of prefixes, which, if set, checks import paths
+    # with the given prefixes are grouped after 3rd-party packages.
+    # Default: ""
+    local-prefixes: github.com/mimirsoft/mimirledger

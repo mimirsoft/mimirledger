@@ -1,5 +1,6 @@
 services:
   mimirledger-base:
+    user: ${MY_UID}:${MY_GID}
     container_name: dev_mimirledger_1
     hostname: mimirledger
     image: dev_mimirledger

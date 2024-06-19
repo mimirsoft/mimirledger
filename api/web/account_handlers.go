@@ -8,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
-
 	"github.com/mimirsoft/mimirledger/api/web/request"
 	"github.com/mimirsoft/mimirledger/api/web/response"
 )
@@ -96,7 +95,8 @@ func PostAccounts(acctController *AccountsController) func(res http.ResponseWrit
 }
 
 // PUT /accounts/{accountID}
-func PutAccountUpdate(acctController *AccountsController) func(res http.ResponseWriter, req *http.Request) error {
+func PutAccountUpdate(acctController *AccountsController) func(res http.ResponseWriter, //nolint:dupl
+	req *http.Request) error {
 	return func(res http.ResponseWriter, req *http.Request) error {
 		accountIDStr := chi.URLParam(req, "accountID")
 

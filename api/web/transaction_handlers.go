@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+
+	"github.com/mimirsoft/mimirledger/api/models"
 	"github.com/mimirsoft/mimirledger/api/web/request"
 	"github.com/mimirsoft/mimirledger/api/web/response"
 )
@@ -126,8 +128,11 @@ func GetUnreconciledTransactionsOnAccount(contoller *TransactionsController) fun
 	}
 }
 
+var ErrInvalidTransactionID = errors.New("invalid transactionID request parameter")
+
 // PUT /transactions/{transactionID}
-func PutTransactionUpdate(contoller *TransactionsController) func(res http.ResponseWriter, req *http.Request) error {
+func PutTransactionUpdate(contoller *TransactionsController) func(res http.ResponseWriter, //nolint:dupl
+	req *http.Request) error {
 	return func(res http.ResponseWriter, req *http.Request) error {
 		idStr := chi.URLParam(req, "transactionID")
 
@@ -137,7 +142,7 @@ func PutTransactionUpdate(contoller *TransactionsController) func(res http.Respo
 		}
 
 		if transactionID == 0 {
-			return NewRequestError(http.StatusBadRequest, ErrInvalidAccountID)
+			return NewRequestError(http.StatusBadRequest, ErrInvalidTransactionID)
 		}
 
 		var reqTransaction request.Transaction
@@ -176,7 +181,7 @@ func DeleteTransaction(contoller *TransactionsController) func(res http.Response
 		}
 
 		if transactionID == 0 {
-			return NewRequestError(http.StatusBadRequest, ErrInvalidAccountID)
+			return NewRequestError(http.StatusBadRequest, ErrInvalidTransactionID)
 		}
 
 		transaction, err := contoller.DeleteTransaction(req.Context(), transactionID)
@@ -191,7 +196,8 @@ func DeleteTransaction(contoller *TransactionsController) func(res http.Response
 }
 
 // PUT /transactions/{transactionID}/reconciled
-func PutTransactionReconciled(contoller *TransactionsController) func(res http.ResponseWriter, req *http.Request) error {
+func PutTransactionReconciled(contoller *TransactionsController) func(res http.ResponseWriter, //nolint:dupl
+	req *http.Request) error {
 	return func(res http.ResponseWriter, req *http.Request) error {
 		idStr := chi.URLParam(req, "transactionID")
 
@@ -201,7 +207,7 @@ func PutTransactionReconciled(contoller *TransactionsController) func(res http.R
 		}
 
 		if transactionID == 0 {
-			return NewRequestError(http.StatusBadRequest, ErrInvalidAccountID)
+			return NewRequestError(http.StatusBadRequest, ErrInvalidTransactionID)
 		}
 
 		var reqTransaction request.Transaction
@@ -230,7 +236,8 @@ func PutTransactionReconciled(contoller *TransactionsController) func(res http.R
 }
 
 // PUT /transactions/{transactionID}/unreconciled
-func PutTransactionUnreconciled(contoller *TransactionsController) func(res http.ResponseWriter, req *http.Request) error {
+func PutTransactionUnreconciled(contoller *TransactionsController) func(res http.ResponseWriter,
+	req *http.Request) error {
 	return func(res http.ResponseWriter, req *http.Request) error {
 		idStr := chi.URLParam(req, "transactionID")
 
@@ -240,24 +247,13 @@ func PutTransactionUnreconciled(contoller *TransactionsController) func(res http
 		}
 
 		if transactionID == 0 {
-			return NewRequestError(http.StatusBadRequest, ErrInvalidAccountID)
+			return NewRequestError(http.StatusBadRequest, ErrInvalidTransactionID)
 		}
 
-		var reqTransaction request.Transaction
-
-		if req.Body == nil {
-			return NewRequestError(http.StatusBadRequest, ErrNoRequestBody)
-		}
-
-		err = json.NewDecoder(req.Body).Decode(&reqTransaction)
-		if err != nil {
-			return fmt.Errorf("json.NewDecoder(r.Body).Decode:%w", err)
-		}
-
-		mdlTransaction := request.ReqTransactionToTransaction(&reqTransaction)
+		mdlTransaction := models.Transaction{} //nolint:exhaustruct
 		mdlTransaction.TransactionID = transactionID
 
-		transaction, err := contoller.UpdateUnreconciled(req.Context(), mdlTransaction)
+		transaction, err := contoller.UpdateUnreconciled(req.Context(), &mdlTransaction)
 		if err != nil {
 			return NewRequestError(http.StatusBadRequest, err)
 		}

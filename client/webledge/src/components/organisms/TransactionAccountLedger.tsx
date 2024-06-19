@@ -7,7 +7,7 @@ import {
 } from "../../lib/definitions";
 import AccountSelector from "../molecules/AccountSelector";
 import {useGetAccounts, useGetTransactionsOnAccountLedger} from "../../lib/data";
-
+import {formatCurrency, parseCurrency} from "../../lib/utils";
 const postFormData = async (formData: FormData) => {
     try {
         // Do a bit of work to convert the entries to a plain JS object
@@ -19,7 +19,7 @@ const postFormData = async (formData: FormData) => {
         let accountSign = String(formEntries.accountSign)
         let otherAccountSign = accountSign == "DEBIT"  ? "CREDIT" : "DEBIT";
         const otherAccountID = Number(formEntries.otherAccountID)
-        let amount = Number(formEntries.amount)
+        let amount = parseCurrency(formEntries.amount)
         let dStr = String(formEntries.transactionDate)
         let txnDate: Date = new Date(dStr);
         // if amount is negative, swap debgits and credits
@@ -131,7 +131,7 @@ export default function TransactionAccountLedger() {
                 <div className="w-80">
                     Account
                 </div>
-                <div className="w-16 text-right mr-2">
+                <div className="w-20 text-right mr-2">
                     Amount
                 </div>
                 <div className="w-16">
@@ -152,8 +152,10 @@ export default function TransactionAccountLedger() {
             }
             console.log(transaction)
             let textColor = ""
+            let txnAmount = transaction.transactionDCAmount
             if (transaction.debitOrCredit != data.accountSign) {
                 textColor = "text-red-500"
+                txnAmount = -txnAmount
             }
             let txnDate: Date = new Date(transaction.transactionDate);
             let txnReconciledDate: Date = new Date(transaction.transactionReconcileDate);
@@ -198,8 +200,8 @@ export default function TransactionAccountLedger() {
                         <div className="w-80">
                             {otherAccountStr}
                         </div>
-                        <div className={"w-16 text-right mr-2 " + textColor}>
-                            {transaction.transactionDCAmount}
+                        <div className={"w-20 text-right mr-2 " + textColor}>
+                            {formatCurrency(txnAmount)}
                         </div>
                         <div className={"w-16 " + textColor}>
                             {transaction.debitOrCredit}

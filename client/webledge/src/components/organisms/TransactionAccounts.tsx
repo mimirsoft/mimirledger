@@ -9,6 +9,7 @@ import {Link} from "react-router-dom";
 import AccountSelector from "../molecules/AccountSelector";
 import AccountTypeSelector from "../molecules/AccountTypeSelector";
 import {useGetAccounts} from "../../lib/data";
+import {formatCurrency} from "../../lib/utils";
 
 const postFormData = async (formData: FormData) => {
     try {
@@ -132,7 +133,7 @@ export default function TransactionAccounts(){
                                     {account.accountFullName}
                                 </div>
                                 <div className={"w-32 text-right mr-4 "+textColor}>
-                                    {account.accountBalance}
+                                    {formatCurrency(account.accountBalance)}
                                 </div>
                                 <div className="w-80">
                                     {account.accountName}

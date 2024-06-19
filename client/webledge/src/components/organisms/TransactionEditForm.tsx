@@ -7,7 +7,7 @@ import {
 import React, {FormEvent, MouseEvent} from "react";
 import DebitsCreditsColumn from "../molecules/DebitsCreditsColumn";
 import {useGetTransaction} from "../../lib/data";
-
+import {parseCurrency} from "../../lib/utils";
 const postFormData = async (formData: FormData, debitsCount: number, creditsCount: number) => {
     try {
         // Do a bit of work to convert the entries to a plain JS object
@@ -24,7 +24,7 @@ const postFormData = async (formData: FormData, debitsCount: number, creditsCoun
         //iterate over all the debit/credit inputs
         // get debits
         for (let step = 0; step < debitsCount; step++) {
-            let tdcAmount = Number(formEntries['debitAmount' +step])
+            let tdcAmount = parseCurrency(formEntries['debitAmount' +step])
             const tdcAccount = Number(formEntries['debitAccount' +step])
             let tdcSign = "DEBIT"
             if (tdcAmount < 0){
@@ -37,7 +37,7 @@ const postFormData = async (formData: FormData, debitsCount: number, creditsCoun
         }
         // get credits
         for (let step = 0; step < creditsCount; step++) {
-            let tdcAmount = Number(formEntries['creditAmount' +step])
+            let tdcAmount = parseCurrency(formEntries['creditAmount' +step])
             const tdcAccount = Number(formEntries['creditAccount' +step])
             let tdcSign = "CREDIT"
             if (tdcAmount < 0){

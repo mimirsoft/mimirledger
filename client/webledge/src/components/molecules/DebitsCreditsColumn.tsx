@@ -1,6 +1,7 @@
 import React , { MouseEvent }from "react";
 import {TransactionDebitCreditResponse} from "../../lib/definitions";
 import AccountSelector from "./AccountSelector";
+import {formatCurrency, formatCurrencyNoSign} from "../../lib/utils";
 
 
 const DebitsCreditsColumn = ( props:{name:string;
@@ -44,7 +45,7 @@ const DebitsCreditsColumn = ( props:{name:string;
     );
     return (
         <div className="my-2 mx-2 flex flex-col flex-wrap">
-            <label className="my-2 w-80 text-xl font-bold bg-slate-200 w-full">{title}S
+            <label className="my-2 w-96 text-xl font-bold bg-slate-200 w-full">{title}S
             </label>
             {debitsCredits.map((transaction: TransactionDebitCreditResponse,
                             index: number) => {
@@ -53,16 +54,16 @@ const DebitsCreditsColumn = ( props:{name:string;
                         <AccountSelector name={props.name+"Account" + index} id={transaction.accountID}
                                      includeTop={true}
                                      excludeID={0}/>
-                        <input className="w-16 text-xl bg-slate-300 text-right" type="text"
+                        <input className="w-24 text-xl bg-slate-300 text-right" type="text"
                                name={props.name+"Amount" + index}
-                               defaultValue={transaction.transactionDCAmount}/>
+                               defaultValue={formatCurrencyNoSign(transaction.transactionDCAmount)}/>
                         <button className="mx-1 text-xl font-bold" onClick={removeDebitCredit} data-index={index}>
                             &times;
                         </button>
                     </div>
                 );
             })}
-            <div className="my-0 w-80 text-xl font-bold  w-full">
+            <div className="my-0 w-96 text-xl font-bold  w-full">
                 <button onClick={addDebitCredit} className="bg-slate-300 my-2 p-3 font-bold" type="button"
                 >Add {title}</button>
             </div>

@@ -12,7 +12,7 @@ const NavBar = () => {
     const [navActive, setNavActive] = useState(false);
     const [activeIdx, setActiveIdx] = useState<number>(-1);
 
-    const siteName = "Mimir Ledger";
+    const siteName = "MimirLedger";
     return (
         <div>
             <NavTitle navLogo={siteName}/>

@@ -1,5 +1,6 @@
 services:
   test_mimirledger:
+    user: ${MY_UID}:${MY_GID}
     image: dev_mimirledger
     environment:
       - TEST_RUN
@@ -8,8 +9,8 @@ services:
       - APP_ENV=test
     volumes:
       - ../api:/app:delegated
-      - ../tmp/go/pkg:/go/pkg:delegated
-      - ../tmp/go/cache:/root/.cache/go-build:delegated
+      - ../tmp/go/pkg:/go/pkg:cache
+      - ../tmp/go/cache:/go/cache/go-build:cache
     working_dir: /app
     command: make -e test-direct
     networks:

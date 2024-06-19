@@ -5,6 +5,10 @@ RUN apk add --no-cache make build-base
 WORKDIR /tmp
 RUN go install github.com/air-verse/air@latest && go install github.com/maruel/panicparse@latest
 
+RUN mkdir -p /go/cache
+RUN chmod 777 /go/cache
+ENV GOCACHE=/go/cache/go-build
+ENV GOLANGCI_LINT_CACHE=/go/cache/golangci-lint
 ENV GOFLAGS=-buildvcs=false
 ARG APP_ROOT=/app
 ENV APP_ROOT=${APP_ROOT}

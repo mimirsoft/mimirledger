@@ -1,20 +1,25 @@
+LOG_TAIL_LENGTH=50
+MY_UID := $(shell id -u)
+MY_GID := $(shell id -g)
+
 SERVICE_NAME := mimirledger
-DOCKER_COMPOSE := MY_UID="$(id -u)" MY_GID="$(id -g)" docker compose -f dev/dev.yml
-DOCKER_COMPOSE_START := MY_UID="$(id -u)" MY_GID="$(id -g)" ${DOCKER_COMPOSE} up -d ${SERVICE_NAME}
+DOCKER_COMPOSE := MY_UID=${MY_UID} MY_GID=${MY_GID} docker compose -f dev/dev.yml
+DOCKER_COMPOSE_START := MY_UID=${MY_UID} MY_GID=${MY_GID} ${DOCKER_COMPOSE} up -d ${SERVICE_NAME}
+DOCKER_COMPOSE_TEST := MY_UID=${MY_UID} MY_GID=${MY_GID} docker compose -f dev/test.yml
 DB_SERVICE_NAME := postgres
 DB_DOCKER_COMPOSE := docker compose -f db/db.yml
 DB_DOCKER_COMPOSE_START := ${DB_DOCKER_COMPOSE} up -d ${DB_SERVICE_NAME}
 WEB_SERVICE_NAME := web
 WEB_DOCKER_COMPOSE := docker compose -f client/client.yml
 WEB_DOCKER_COMPOSE_START := ${WEB_DOCKER_COMPOSE} up -d ${WEB_SERVICE_NAME}
-DOCKER_COMPOSE_TEST := docker compose -f dev/test.yml
-LOG_TAIL_LENGTH=50
-MY_UID="$(id -u)"
-MY_GID="$(id -g)"
 
 ifdef TEST_RUN
  TESTRUN := -run ${TEST_RUN}
 endif
+
+print_vars:
+	echo ${MY_UID}
+	echo ${MY_GID}
 
 start: start-db start-api start-web
 

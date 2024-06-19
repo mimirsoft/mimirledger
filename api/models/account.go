@@ -65,19 +65,11 @@ func (c *Account) Store(dStores *datastore.Datastores) error {
 
 	c.AccountSign = accountSign
 
-	// Find the new spot in the tree.
-	afterValue, err := findSpotInTree(dStores, c.AccountParent, c.AccountName)
+	err := c.findAndOpenSpotInTree(dStores, spreadForOneAccount)
 	if err != nil {
-		return fmt.Errorf("findSpotInTree:%w", err)
+		return fmt.Errorf("closeSpotInTree:%w", err)
 	}
 
-	err = openSpotInTree(dStores, afterValue, spreadForOneAccount)
-	if err != nil {
-		return fmt.Errorf("openSpotInTree:%w", err)
-	}
-	// a single account with not children has a right and left that are sequential numbers.
-	c.AccountLeft = afterValue + 1
-	c.AccountRight = afterValue + 2 //nolint:mnd
 	eAcct := datastore.Account(*c)
 
 	err = dStores.AccountStore().Store(&eAcct)
@@ -85,25 +77,18 @@ func (c *Account) Store(dStores *datastore.Datastores) error {
 		return fmt.Errorf("ds.AccountStore().Store:%w [account:%+v]", err, eAcct)
 	}
 
-	fullName, err := retrieveAccountFullName(dStores, eAcct.AccountID)
-	if err != nil {
-		return fmt.Errorf("retrieveAccountFullName:%w [account:%+v]", err, eAcct)
-	}
-
-	eAcct.AccountFullName = fullName
-
-	err = dStores.AccountStore().Update(&eAcct)
-	if err != nil {
-		return fmt.Errorf("ds.AccountStore().Update:%w", err)
-	}
-
 	*c = Account(eAcct)
+
+	err = c.updateFullname(dStores)
+	if err != nil {
+		return fmt.Errorf("c.updateFullname:%w", err)
+	}
 
 	return nil
 }
 
 // This whole function should be a transaction for safety
-func (c *Account) Update(dStores *datastore.Datastores) (err error) {
+func (c *Account) Update(dStores *datastore.Datastores) error { //nolint:funlen,cyclop
 	// get existing Account record
 	acctB4Update, err := RetrieveAccountByID(dStores, c.AccountID)
 	if err != nil {
@@ -160,49 +145,27 @@ func (c *Account) Update(dStores *datastore.Datastores) (err error) {
 	if err != nil {
 		return fmt.Errorf("closeSpotInTree:%w", err)
 	}
-	// Find the new spot in the tree. after value is the value which this account's AccountLeft should be
-	afterValue, err := findSpotInTree(dStores, c.AccountParent, c.AccountName)
+
+	err = c.findAndOpenSpotInTree(dStores, spread)
 	if err != nil {
-		return fmt.Errorf("findSpotInTree:%w", err)
+		return fmt.Errorf("c.findAndOpenSpotInTree:%w", err)
 	}
 
-	err = openSpotInTree(dStores, afterValue, spread)
-	if err != nil {
-		return fmt.Errorf("openSpotInTree:%w", err)
-	}
-
-	c.AccountLeft = afterValue + 1
-	c.AccountRight = afterValue + spread
 	eAcct := datastore.Account(*c)
 
 	err = dStores.AccountStore().Update(&eAcct)
 	if err != nil {
 		return fmt.Errorf("ds.AccountStore().Update:%w", err)
 	}
+
+	*c = Account(eAcct)
 	// Update all the children
 	shift := c.AccountLeft - oldAccountLeft
 
 	for idx := range children {
-		child := children[idx]
-		child.AccountLeft += shift
-		child.AccountRight += shift
-		childEAcct := datastore.Account(*child)
-
-		err = dStores.AccountStore().Update(&childEAcct)
+		err = updateChildrenPostMove(dStores, children[idx], shift)
 		if err != nil {
-			return fmt.Errorf("accountStore().Update:%w", err)
-		}
-		// retrieve name after updating left and right
-		fullName, err := retrieveAccountFullName(dStores, children[idx].AccountID)
-		if err != nil {
-			return fmt.Errorf("retrieveAccountFullName:%w [account:%+v]", err, eAcct)
-		}
-		// update the record again, with the full name
-		childEAcct.AccountFullName = fullName
-
-		err = dStores.AccountStore().Update(&childEAcct)
-		if err != nil {
-			return fmt.Errorf("accountStore().Update:%w", err)
+			return fmt.Errorf("updateChildrenPostMove:%w", err)
 		}
 	}
 
@@ -222,20 +185,12 @@ func (c *Account) Update(dStores *datastore.Datastores) (err error) {
 		}
 	}
 
-	// now get the fullName, after the Update to all AccountLefts and Account Rights
-	fullName, err := retrieveAccountFullName(dStores, eAcct.AccountID)
-	if err != nil {
-		return fmt.Errorf("retrieveAccountFullName:%w [account:%+v]", err, eAcct)
-	}
-
-	eAcct.AccountFullName = fullName
-
-	err = dStores.AccountStore().Update(&eAcct)
-	if err != nil {
-		return fmt.Errorf("ds.AccountStore().Update:%w", err)
-	}
-
 	*c = Account(eAcct)
+
+	err = c.updateFullname(dStores)
+	if err != nil {
+		return fmt.Errorf("c.updateFullname:%w", err)
+	}
 
 	return nil
 }
@@ -303,6 +258,45 @@ func (c *Account) updateBalance(dStores *datastore.Datastores) error {
 	return nil
 }
 
+// updateFullname
+func (c *Account) updateFullname(dStores *datastore.Datastores) error {
+	eAcct := datastore.Account(*c)
+	// now get the fullName, after the Update to all AccountLefts and Account Rights
+	fullName, err := retrieveAccountFullName(dStores, eAcct.AccountID)
+	if err != nil {
+		return fmt.Errorf("retrieveAccountFullName:%w [account:%+v]", err, c)
+	}
+
+	eAcct.AccountFullName = fullName
+
+	err = dStores.AccountStore().Update(&eAcct)
+	if err != nil {
+		return fmt.Errorf("ds.AccountStore().Update:%w", err)
+	}
+
+	*c = Account(eAcct)
+
+	return nil
+}
+
+func (c *Account) findAndOpenSpotInTree(dStores *datastore.Datastores, spread uint64) error {
+	// Find the new spot in the tree. after value is the value which this account's AccountLeft should be
+	afterValue, err := findSpotInTree(dStores, c.AccountParent, c.AccountName)
+	if err != nil {
+		return fmt.Errorf("findSpotInTree:%w", err)
+	}
+
+	err = openSpotInTree(dStores, afterValue, spread)
+	if err != nil {
+		return fmt.Errorf("openSpotInTree:%w", err)
+	}
+
+	c.AccountLeft = afterValue + 1
+	c.AccountRight = afterValue + spread
+
+	return nil
+}
+
 // updateBalance retrieves a specificAccount
 func (c *Account) UpdateReconciledDate(dStores *datastore.Datastores) error {
 	eAcct := datastore.Account(*c)
@@ -313,6 +307,32 @@ func (c *Account) UpdateReconciledDate(dStores *datastore.Datastores) error {
 	}
 
 	*c = Account(eAcct)
+
+	return nil
+}
+
+// updateChildrenPostMove
+func updateChildrenPostMove(dStores *datastore.Datastores, child *Account, shift uint64) error {
+	child.AccountLeft += shift
+	child.AccountRight += shift
+	childEAcct := datastore.Account(*child)
+
+	err := dStores.AccountStore().Update(&childEAcct)
+	if err != nil {
+		return fmt.Errorf("accountStore().Update:%w", err)
+	}
+	// retrieve name after updating left and right
+	fullName, err := retrieveAccountFullName(dStores, child.AccountID)
+	if err != nil {
+		return fmt.Errorf("retrieveAccountFullName:%w [account:%+v]", err, childEAcct)
+	}
+	// update the record again, with the full name
+	childEAcct.AccountFullName = fullName
+
+	err = dStores.AccountStore().Update(&childEAcct)
+	if err != nil {
+		return fmt.Errorf("accountStore().Update:%w", err)
+	}
 
 	return nil
 }
@@ -435,7 +455,7 @@ func closeSpotInTree(dStores *datastore.Datastores, afterValue uint64, spread ui
 
 	err := as.CloseSpotInTree(afterValue, spread)
 	if err != nil {
-		return fmt.Errorf("as.OpenSpotInTree:%w", err)
+		return fmt.Errorf("as.CloseSpotInTree:%w", err)
 	}
 
 	return nil

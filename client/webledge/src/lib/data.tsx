@@ -35,4 +35,11 @@ export const useGetTransactionAccountTypes =  ():{data:TransactionAccountTypeSet
    return useSWR(accountTypesURL)
 }
 
+
+
+// get the transactionLedger
+export const useGetUnreconciledTransactionOnAccount = (accountID:string |undefined, date:string):{data:TransactionLedgerResponse | undefined, isLoading:boolean, error: string|undefined} => {
+    return useSWR<TransactionLedgerResponse, string>(process.env.REACT_APP_MIMIRLEDGER_API_URL+'/transactions/account/'+accountID+'/unreconciled?date='+date);
+};
+
 // getAccounts - make map ID to name

@@ -1,0 +1,10 @@
+import React from 'react'
+import AccountReconcileForm from '../components/organisms/AccountReconcileForm';
+
+export default function AccountReconcilePage() {
+    return (
+        <div>
+            <AccountReconcileForm />
+        </div>
+    );
+}

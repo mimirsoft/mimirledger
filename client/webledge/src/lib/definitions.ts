@@ -13,6 +13,8 @@ export type Account = {
     accountSign: string;
     accountMemo: string;
     accountBalance: number;
+    accountReconcileDate: string;
+
 };
 
 

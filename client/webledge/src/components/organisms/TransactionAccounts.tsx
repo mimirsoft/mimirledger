@@ -51,6 +51,9 @@ export default function TransactionAccounts(){
     if (isLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>
     let rowColor = "bg-slate-200"
+    var minDate = new Date('0001-01-01T00:00:00Z');
+    minDate.setDate(minDate.getDate() + 1);
+
     return (
         <div className="flex w-full flex-col md:col-span-4">
             <div className="flex grow flex-col justify-between rounded-xl bg-slate-100 p-4">
@@ -99,11 +102,14 @@ export default function TransactionAccounts(){
                     <div className="w-80 font-bold">
                         Name
                     </div>
-                    <div className="w-32 font-bold">
+                    <div className="w-20 font-bold">
                         Type
                     </div>
-                    <div className="w-32 font-bold">
+                    <div className="w-20 font-bold">
                         Sign
+                    </div>
+                    <div className="w-20 font-bold">
+                        Rec Date
                     </div>
                 </div>
                 {data?.accounts && data.accounts.map((account: Account, index: number) => {
@@ -115,6 +121,14 @@ export default function TransactionAccounts(){
                     let textColor = ""
                     if (account.accountBalance < 0) {
                         textColor = "text-red-500"
+                    }
+                    let acctReconciledDate: Date = new Date(account.accountReconcileDate);
+
+                    let acctReconciledDateStr :string
+                    if (acctReconciledDate < minDate) {
+                        acctReconciledDateStr = "";
+                    } else {
+                        acctReconciledDateStr = acctReconciledDate.toISOString().split('T')[0]
                     }
                     return (
                         <div className={'flex '+rowColor} key={index}>
@@ -132,21 +146,27 @@ export default function TransactionAccounts(){
                                 <div className="w-80">
                                     {account.accountFullName}
                                 </div>
-                                <div className={"w-32 text-right mr-4 "+textColor}>
+                                <div className={"w-32 text-right mr-4 " + textColor}>
                                     {formatCurrency(account.accountBalance)}
                                 </div>
                                 <div className="w-80">
                                     {account.accountName}
                                 </div>
-                                <div className="w-32">
+                                <div className="w-20">
                                     {account.accountType}
                                 </div>
-                                <div className="w-32">
+                                <div className="w-20">
                                     {account.accountSign}
                                 </div>
+                                <div className="w-20">
+                                    {acctReconciledDateStr}
+                                </div>
                             </Link>
-                            <Link to={'/accounts/' + account.accountID} className={`nav__item font-bold`}>
+                            <Link to={'/accounts/' + account.accountID} className={`nav__item font-bold mr-2`}>
                                 Edit Account
+                            </Link>
+                            <Link to={'/reconcile/' + account.accountID} className={`nav__item font-bold`}>
+                                Reconcile
                             </Link>
                         </div>
                     );

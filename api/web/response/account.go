@@ -25,7 +25,7 @@ type Account struct {
 	AccountBalance       int64          `json:"accountBalance"`
 	AccountSubtotal      int64          `json:"accountSubtotal"`
 	AccountDecimals      uint64         `json:"accountDecimals"`
-	AccountReconcileDate sql.NullTime   `json:"accountReconcileDate"`
+	AccountReconcileDate time.Time      `json:"accountReconcileDate"`
 	AccountFlagged       bool           `json:"accountFlagged"`
 	AccountLocked        bool           `json:"accountLocked"`
 	AccountOpenDate      time.Time      `json:"accountOpenDate"`
@@ -58,7 +58,7 @@ func AccountToRespAccount(act *models.Account) *Account {
 		AccountBalance:       act.AccountBalance,
 		AccountSubtotal:      act.AccountSubtotal,
 		AccountDecimals:      act.AccountDecimals,
-		AccountReconcileDate: act.AccountReconcileDate,
+		AccountReconcileDate: act.AccountReconcileDate.Time,
 		AccountFlagged:       act.AccountFlagged,
 		AccountLocked:        act.AccountLocked,
 		AccountOpenDate:      act.AccountOpenDate,

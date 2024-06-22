@@ -5,7 +5,7 @@ import {
 import {useState} from "react";
 import Modal from '../molecules/Modal'
 import React, {FormEvent} from "react";
-import {Link} from "react-router-dom";
+import {Link, useSearchParams} from "react-router-dom";
 import AccountSelector from "../molecules/AccountSelector";
 import AccountTypeSelector from "../molecules/AccountTypeSelector";
 import {useGetAccounts} from "../../lib/data";
@@ -48,11 +48,16 @@ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
 export default function TransactionAccounts(){
     const { data, error, isLoading } = useGetAccounts()
 
+    let [searchParams] = useSearchParams();
+    let returnAccountID = searchParams.get("returnAccount");
+
     if (isLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>
     let rowColor = "bg-slate-200"
     var minDate = new Date('0001-01-01T00:00:00Z');
     minDate.setDate(minDate.getDate() + 1);
+    let reconcileDate: Date = new Date();
+    let reconcileDateStr = reconcileDate.toISOString().split('T')[0]
 
     return (
         <div className="flex w-full flex-col md:col-span-4">
@@ -165,7 +170,10 @@ export default function TransactionAccounts(){
                             <Link to={'/accounts/' + account.accountID} className={`nav__item font-bold mr-2`}>
                                 Edit Account
                             </Link>
-                            <Link to={'/reconcile/' + account.accountID} className={`nav__item font-bold`}>
+                            <Link to={{
+                                pathname: '/reconcile/' + account.accountID,
+                                search: '?date=' + reconcileDateStr
+                                }} className={`nav__item font-bold`}>
                                 Reconcile
                             </Link>
                         </div>

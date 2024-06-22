@@ -51,20 +51,20 @@ func (tc *TransactionsController) GetTransactionsForAccount(_ context.Context, a
 
 // GET /transactions/account/{accountID}/unreconciled?date=<date>
 func (tc *TransactionsController) GetUnreconciledTransactionsOnAccount(_ context.Context, accountID uint64,
-	searchDate time.Time) ([]*models.TransactionReconciliation,
+	searchDate time.Time) (*models.Account, []*models.TransactionReconciliation,
 	error) {
 	account, err := models.RetrieveAccountByID(tc.DataStores, accountID)
 	if err != nil {
-		return nil, fmt.Errorf("models.RetrieveAccountByID:%w", err)
+		return nil, nil, fmt.Errorf("models.RetrieveAccountByID:%w", err)
 	}
 
 	myTxn, err := models.RetrieveUnreconciledTransactionsForDate(tc.DataStores, account.AccountLeft, account.AccountRight,
 		searchDate, account.AccountReconcileDate.Time)
 	if err != nil {
-		return nil, fmt.Errorf("models.RetrieveUnreconciledTransactionsForDate:%w", err)
+		return nil, nil, fmt.Errorf("models.RetrieveUnreconciledTransactionsForDate:%w", err)
 	}
 
-	return myTxn, nil
+	return account, myTxn, nil
 }
 
 // GET /transactions/{transactionID}

@@ -1,7 +1,7 @@
 import { formatCurrency } from './utils';
 import useSWR from "swr";
 import {
-    Account,
+    Account, AccountReconcileResponse,
     AccountSet, TransactionAccountType, TransactionAccountTypeSet,
     TransactionLedgerResponse, TransactionResponse
 } from "./definitions";
@@ -38,8 +38,8 @@ export const useGetTransactionAccountTypes =  ():{data:TransactionAccountTypeSet
 
 
 // get the transactionLedger
-export const useGetUnreconciledTransactionOnAccount = (accountID:string |undefined, date:string):{data:TransactionLedgerResponse | undefined, isLoading:boolean, error: string|undefined} => {
-    return useSWR<TransactionLedgerResponse, string>(process.env.REACT_APP_MIMIRLEDGER_API_URL+'/transactions/account/'+accountID+'/unreconciled?date='+date);
+export const useGetUnreconciledTransactionOnAccount = (accountID:string |undefined, date:string):{data:AccountReconcileResponse | undefined, isLoading:boolean, error: string|undefined} => {
+    return useSWR<AccountReconcileResponse, string>(process.env.REACT_APP_MIMIRLEDGER_API_URL+'/transactions/account/'+accountID+'/unreconciled?date='+date);
 };
 
 // getAccounts - make map ID to name

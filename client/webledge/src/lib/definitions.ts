@@ -91,3 +91,13 @@ export type TransactionLedgerEntry = {
     isReconciled: boolean
 };
 
+
+export type AccountReconcileResponse = {
+    accountID: number;
+    accountReconcileDate: string;
+    searchDate: string;
+    accountName: string;
+    accountFullName: string;
+    accountSign: string;
+    transactions: TransactionLedgerEntry[];
+};

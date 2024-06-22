@@ -145,76 +145,75 @@ export default function TransactionAccountLedger() {
                 </div>
             </div>
             {data?.transactions && data.transactions.map((transaction: TransactionLedgerEntry, index: number) => {
-            if (rowColor == "bg-slate-200"){
-                rowColor = "bg-slate-300"
-            } else {
-                rowColor = "bg-slate-200"
-            }
-            console.log(transaction)
-            let textColor = ""
-            let txnAmount = transaction.transactionDCAmount
-            if (transaction.debitOrCredit != data.accountSign) {
-                textColor = "text-red-500"
-                txnAmount = -txnAmount
-            }
-            let txnDate: Date = new Date(transaction.transactionDate);
-            let txnReconciledDate: Date = new Date(transaction.transactionReconcileDate);
-
-            let txnReconciledDateStr :string
-            if (txnReconciledDate < minDate) {
-                txnReconciledDateStr = "";
-            } else {
-                txnReconciledDateStr = txnReconciledDate.toISOString().split('T')[0]
-            }
-
-            let otherAccounts= [];
-            let otherAccountStr = ""
-            // if the transaction split has a comma, we have a split transaction
-            if (transaction.split.indexOf(',') != -1) {
-                var segments = transaction.split.split(',');
-                for(let i=0; i<segments.length; i++){
-                    // add to the array
-                    otherAccounts.push(acctMap.get(Number(segments[i])))
+                if (rowColor == "bg-slate-200"){
+                    rowColor = "bg-slate-300"
+                } else {
+                    rowColor = "bg-slate-200"
                 }
-                otherAccountStr = otherAccounts.join(",")
-            } else {
-                otherAccountStr = String(acctMap.get(Number(transaction.split)))
-            }
-            let txnReconciled = transaction.isReconciled ? "Y" : "N";
+                console.log(transaction)
+                let textColor = ""
+                let txnAmount = transaction.transactionDCAmount
+                if (transaction.debitOrCredit != data.accountSign) {
+                    textColor = "text-red-500"
+                    txnAmount = -txnAmount
+                }
+                let txnDate: Date = new Date(transaction.transactionDate);
+                let txnReconciledDate: Date = new Date(transaction.transactionReconcileDate);
 
+                let txnReconciledDateStr :string
+                if (txnReconciledDate < minDate) {
+                    txnReconciledDateStr = "";
+                } else {
+                    txnReconciledDateStr = txnReconciledDate.toISOString().split('T')[0]
+                }
+
+                let otherAccounts= [];
+                let otherAccountStr = ""
+                // if the transaction split has a comma, we have a split transaction
+                if (transaction.split.indexOf(',') != -1) {
+                    var segments = transaction.split.split(',');
+                    for(let i=0; i<segments.length; i++){
+                        // add to the array
+                        otherAccounts.push(acctMap.get(Number(segments[i])))
+                    }
+                    otherAccountStr = otherAccounts.join(",")
+                } else {
+                    otherAccountStr = String(acctMap.get(Number(transaction.split)))
+                }
+                let txnReconciled = transaction.isReconciled ? "Y" : "N";
                 return (
-                <div className={'flex '+rowColor}  key={index}>
-                    <Link to={{
-                        pathname: '/transactions/' + transaction.transactionID,
-                        search: '?returnAccount=' + accountID
-                    }} className={`flex nav__item font-bold`}>
-                        <div className="w-8">
-                            {transaction.transactionID}
-                        </div>
-                        <div className="w-80">
-                            {txnDate.toISOString().split('T')[0]}
-                        </div>
-                        <div className="w-80">
-                            {transaction.transactionComment}
-                        </div>
-                        <div className="w-80">
-                            {otherAccountStr}
-                        </div>
-                        <div className={"w-20 text-right mr-2 " + textColor}>
-                            {formatCurrency(txnAmount)}
-                        </div>
-                        <div className={"w-16 " + textColor}>
-                            {transaction.debitOrCredit}
-                        </div>
-                        <div className="w-20">
-                            {txnReconciled}
-                        </div>
-                        <div className="w-80">
-                            {txnReconciledDateStr}
-                        </div>
-                    </Link>
-                </div>
-            );
+                    <div className={'flex '+rowColor}  key={index}>
+                        <Link to={{
+                            pathname: '/transactions/' + transaction.transactionID,
+                            search: '?returnAccount=' + accountID
+                        }} className={`flex nav__item font-bold`}>
+                            <div className="w-8">
+                                {transaction.transactionID}
+                            </div>
+                            <div className="w-80">
+                                {txnDate.toISOString().split('T')[0]}
+                            </div>
+                            <div className="w-80">
+                                {transaction.transactionComment}
+                            </div>
+                            <div className="w-80">
+                                {otherAccountStr}
+                            </div>
+                            <div className={"w-20 text-right mr-2 " + textColor}>
+                                {formatCurrency(txnAmount)}
+                            </div>
+                            <div className={"w-16 " + textColor}>
+                                {transaction.debitOrCredit}
+                            </div>
+                            <div className="w-20">
+                                {txnReconciled}
+                            </div>
+                            <div className="w-80">
+                                {txnReconciledDateStr}
+                            </div>
+                        </Link>
+                    </div>
+                );
             })}
         </div>
     );

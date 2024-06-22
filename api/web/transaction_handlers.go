@@ -117,12 +117,12 @@ func GetUnreconciledTransactionsOnAccount(contoller *TransactionsController) fun
 			return NewRequestError(http.StatusBadRequest, ErrInvalidReconcileDate)
 		}
 
-		transactions, err := contoller.GetUnreconciledTransactionsOnAccount(req.Context(), accountID, dateCutoff)
+		account, transactions, err := contoller.GetUnreconciledTransactionsOnAccount(req.Context(), accountID, dateCutoff)
 		if err != nil {
 			return NewRequestError(http.StatusNotFound, err)
 		}
 
-		jsonResponse := response.ConvertTransactionRecSetToRespTransactionRecSet(transactions)
+		jsonResponse := response.ConvertTransactionRecToRespTransactionRec(account, transactions, &dateCutoff)
 
 		return RespondOK(res, jsonResponse)
 	}

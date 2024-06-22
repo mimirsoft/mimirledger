@@ -85,13 +85,13 @@ type TransactionLedger struct {
 	TransactionDate          time.Time `json:"transactionDate"`
 	TransactionReconcileDate time.Time `json:"transactionReconcileDate"`
 	TransactionComment       string    `json:"transactionComment"`
-	TransactionReference     string    `json:"transactionReference"`
 	// TransactionReference could be a check number, batch ,etc
-	IsReconciled        bool                  `json:"isReconciled"`
-	IsSplit             bool                  `json:"isSplit"`
-	TransactionDCAmount uint64                `json:"transactionDCAmount"` //nolint:tagliatelle
-	DebitOrCredit       datastore.AccountSign `json:"debitOrCredit"`
-	Split               string                `json:"split"` // this could be a check number, batch ,etc
+	TransactionReference string                `json:"transactionReference"`
+	IsReconciled         bool                  `json:"isReconciled"`
+	IsSplit              bool                  `json:"isSplit"`
+	TransactionDCAmount  uint64                `json:"transactionDCAmount"` //nolint:tagliatelle
+	DebitOrCredit        datastore.AccountSign `json:"debitOrCredit"`
+	Split                string                `json:"split"` // this could be a check number, batch ,etc
 }
 
 // ConvertTransactionLedgerToRespTransactionLedger converts []models.TransactionLedger to TransactionLedger
@@ -127,34 +127,38 @@ func ConvertTransactionLedgerToRespTransactionLeger(trans *models.TransactionLed
 	return &respTransLedger
 }
 
-type TransactionReconciliation struct {
-	TransactionID            uint64    `json:"transactionID"`
-	TransactionDate          time.Time `json:"transactionDate"`
-	TransactionReconcileDate time.Time `json:"transactionReconcileDate"`
-	TransactionComment       string    `json:"transactionComment"`
-	// TransactionReference could be a check number, batch ,etc
-	TransactionReference string                `json:"transactionReference"`
-	IsReconciled         bool                  `json:"isReconciled"`
-	IsSplit              bool                  `json:"isSplit"`
-	TransactionDCAmount  uint64                `json:"transactionDCAmount"` //nolint:tagliatelle
-	DebitOrCredit        datastore.AccountSign `json:"debitOrCredit"`
-	Split                string                `json:"split"`
+// AccountReconciliation is for use in transaction controller responses for a single account reconcilication
+type AccountReconciliation struct {
+	AccountID            uint64               `json:"accountID"`
+	SearchDate           time.Time            `json:"searchDate"`
+	AccountReconcileDate time.Time            `json:"accountReconcileDate"`
+	AccountSign          string               `json:"accountSign"`
+	AccountName          string               `json:"accountName"`
+	AccountFullName      string               `json:"accountFullName"`
+	Transactions         []*TransactionLedger `json:"transactions"`
 }
 
-// ConvertTransactionRecSetToRespTransactionRecSet converts
-// []models.TransactionReconciliation to []*TransactionReconciliation
-func ConvertTransactionRecSetToRespTransactionRecSet(
-	txns []*models.TransactionReconciliation) []*TransactionReconciliation {
-	var tas = make([]*TransactionReconciliation, len(txns))
+// ConvertTransactionLedgerToRespTransactionLedger converts []models.TransactionLedger to TransactionLedger
+func ConvertTransactionRecToRespTransactionRec(act *models.Account,
+	txns []*models.TransactionReconciliation, searchCutoffDate *time.Time) *AccountReconciliation {
+	var tas = make([]*TransactionLedger, len(txns))
 	for idx := range txns {
-		tas[idx] = ConvertTransactionReconcileToRespTransactionReconcile(txns[idx])
+		tas[idx] = ConvertTransactionReconcileToRespTransactionLedger(txns[idx])
 	}
 
-	return tas
+	return &AccountReconciliation{
+		AccountID:            act.AccountID,
+		SearchDate:           *searchCutoffDate,
+		AccountReconcileDate: act.AccountReconcileDate.Time,
+		AccountSign:          string(act.AccountSign),
+		AccountName:          act.AccountName,
+		AccountFullName:      act.AccountFullName,
+		Transactions:         tas}
 }
-func ConvertTransactionReconcileToRespTransactionReconcile(
-	trans *models.TransactionReconciliation) *TransactionReconciliation {
-	respTransLedger := TransactionReconciliation{
+
+func ConvertTransactionReconcileToRespTransactionLedger(
+	trans *models.TransactionReconciliation) *TransactionLedger {
+	respTransLedger := TransactionLedger{
 		TransactionID:            trans.TransactionID,
 		TransactionDate:          trans.TransactionDate,
 		TransactionReconcileDate: trans.TransactionReconcileDate.Time,

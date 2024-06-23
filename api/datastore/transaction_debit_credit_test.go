@@ -6,6 +6,7 @@ import (
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	"testing"
+	"time"
 )
 
 func createTransactionDCStore() TransactionDebitCreditStore {
@@ -373,4 +374,139 @@ func TestTransactionDebitCreditStore_GetSubtotals_DebitsAndCredits(t *testing.T)
 	g.Expect(myDCSet[0].Subtotal).To(gomega.Equal(uint64(47000)))
 	g.Expect(myDCSet[1].DebitOrCredit).To(gomega.Equal(AccountSignDebit))
 	g.Expect(myDCSet[1].Subtotal).To(gomega.Equal(uint64(40000)))
+}
+
+func TestTransactionDebitCreditStore_GetReconciledSubtotal(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+
+	aStore := createAccountStore()
+	myAcct := Account{AccountName: "myBank", AccountFullName: "BankAccounts:myBank",
+		AccountSign: AccountSignDebit, AccountType: AccountTypeAsset,
+		AccountBalance: 0, AccountDecimals: 2, AccountSubtotal: 0,
+		AccountLeft: 1, AccountRight: 2}
+	err := aStore.Store(&myAcct)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myAcct2 := Account{AccountName: "myBank", AccountFullName: "ExpensesRent",
+		AccountSign: AccountSignDebit, AccountType: AccountTypeExpense,
+		AccountBalance: 0, AccountDecimals: 2, AccountSubtotal: 0,
+		AccountLeft: 3, AccountRight: 4}
+	err = aStore.Store(&myAcct2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	transStore := createTransactionStore()
+	myTrans := Transaction{TransactionComment: "woot", TransactionAmount: 13000}
+	err = transStore.Store(&myTrans)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	dcStore := createTransactionDCStore()
+	myDC := TransactionDebitCredit{DebitOrCredit: AccountSignCredit, TransactionDCAmount: 13000,
+		TransactionID: myTrans.TransactionID, AccountID: myAcct.AccountID}
+	err = dcStore.Store(&myDC)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	myDCb := TransactionDebitCredit{DebitOrCredit: AccountSignDebit, TransactionDCAmount: 13000,
+		TransactionID: myTrans.TransactionID, AccountID: myAcct2.AccountID}
+	err = dcStore.Store(&myDCb)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// set is_reconciled and the reconciled_date on one of the transactions
+	myTrans.IsReconciled = true
+	err = transStore.SetIsReconciled(&myTrans)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	reconciledDate2, err := time.Parse("2006-01-02", "2023-09-08")
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	myTrans.TransactionReconcileDate = sql.NullTime{Time: reconciledDate2, Valid: true}
+	err = transStore.SetTransactionReconcileDate(&myTrans)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	reconciledDateCutoff0, err := time.Parse("2006-01-02", "2023-08-30")
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// cut off date is far in past, zero transactions in sum
+	myDCSet, err := dcStore.GetReconciledSubtotals(1, 2, reconciledDateCutoff0)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myDCSet).To(gomega.HaveLen(0))
+
+	reconciledDateCutoff1, err := time.Parse("2006-01-02", "2023-09-30")
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myDCSet, err = dcStore.GetReconciledSubtotals(1, 2, reconciledDateCutoff1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myDCSet).To(gomega.HaveLen(1))
+	g.Expect(myDCSet[0].DebitOrCredit).To(gomega.Equal(AccountSignCredit))
+	g.Expect(myDCSet[0].Subtotal).To(gomega.Equal(uint64(13000)))
+
+	// add an income account
+	myAcct3 := Account{AccountName: "subcriptionFees", AccountFullName: "IncomeSubscriptions",
+		AccountSign: AccountSignCredit, AccountType: AccountTypeIncome,
+		AccountBalance: 0, AccountDecimals: 2, AccountSubtotal: 0,
+		AccountLeft: 5, AccountRight: 6}
+	err = aStore.Store(&myAcct3)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// add an income transactions
+	myTrans2 := Transaction{TransactionComment: "woot", TransactionAmount: 20000}
+	err = transStore.Store(&myTrans2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	myDC2 := TransactionDebitCredit{DebitOrCredit: AccountSignCredit, TransactionDCAmount: 20000,
+		TransactionID: myTrans2.TransactionID, AccountID: myAcct3.AccountID}
+	err = dcStore.Store(&myDC2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	myDC2b := TransactionDebitCredit{DebitOrCredit: AccountSignDebit, TransactionDCAmount: 20000,
+		TransactionID: myTrans2.TransactionID, AccountID: myAcct.AccountID}
+	err = dcStore.Store(&myDC2b)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// set is_reconciled and the reconciled_date on myTrans2
+	myTrans2.IsReconciled = true
+	err = transStore.SetIsReconciled(&myTrans2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	myTrans2.TransactionReconcileDate = sql.NullTime{Time: reconciledDate2, Valid: true}
+	err = transStore.SetTransactionReconcileDate(&myTrans2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// cut off date is far in past, zero transactions in sum
+	myDCSet, err = dcStore.GetReconciledSubtotals(1, 2, reconciledDateCutoff0)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myDCSet).To(gomega.HaveLen(0))
+
+	// should now be 2 transaction,
+	myDCSet, err = dcStore.GetReconciledSubtotals(1, 2, reconciledDateCutoff1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myDCSet).To(gomega.HaveLen(2))
+	g.Expect(myDCSet[0].DebitOrCredit).To(gomega.Equal(AccountSignCredit))
+	g.Expect(myDCSet[0].Subtotal).To(gomega.Equal(uint64(13000)))
+	g.Expect(myDCSet[1].DebitOrCredit).To(gomega.Equal(AccountSignDebit))
+	g.Expect(myDCSet[1].Subtotal).To(gomega.Equal(uint64(20000)))
+
+	// add an 2nd income transactions
+	myTrans3 := Transaction{TransactionComment: "woot", TransactionAmount: 45000}
+	err = transStore.Store(&myTrans3)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	myDC3 := TransactionDebitCredit{DebitOrCredit: AccountSignCredit, TransactionDCAmount: 45000,
+		TransactionID: myTrans3.TransactionID, AccountID: myAcct3.AccountID}
+	err = dcStore.Store(&myDC3)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	myDC3b := TransactionDebitCredit{DebitOrCredit: AccountSignDebit, TransactionDCAmount: 45000,
+		TransactionID: myTrans3.TransactionID, AccountID: myAcct.AccountID}
+	err = dcStore.Store(&myDC3b)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// set is_reconciled and the reconciled_date on myTrans2
+	myTrans3.IsReconciled = true
+	err = transStore.SetIsReconciled(&myTrans3)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	myTrans3.TransactionReconcileDate = sql.NullTime{Time: reconciledDate2, Valid: true}
+	err = transStore.SetTransactionReconcileDate(&myTrans3)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// should now be 3 transaction, 13000 in credit and 65000 in debit on account1
+	myDCSet, err = dcStore.GetReconciledSubtotals(1, 2, reconciledDateCutoff1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myDCSet).To(gomega.HaveLen(2))
+	g.Expect(myDCSet[0].DebitOrCredit).To(gomega.Equal(AccountSignCredit))
+	g.Expect(myDCSet[0].Subtotal).To(gomega.Equal(uint64(13000)))
+	g.Expect(myDCSet[1].DebitOrCredit).To(gomega.Equal(AccountSignDebit))
+	g.Expect(myDCSet[1].Subtotal).To(gomega.Equal(uint64(65000)))
 }

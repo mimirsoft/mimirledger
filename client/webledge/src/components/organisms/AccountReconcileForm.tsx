@@ -2,7 +2,7 @@ import React, {FormEvent} from 'react'
 import {Link, useParams, useSearchParams} from "react-router-dom";
 import {useGetAccounts, useGetUnreconciledTransactionOnAccount} from "../../lib/data";
 import {Account, TransactionLedgerEntry} from "../../lib/definitions";
-import {formatCurrency} from "../../lib/utils";
+import {formatCurrency, formatCurrencyNoSign} from "../../lib/utils";
 
 async function updateReconcileSearchDate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -12,7 +12,17 @@ async function updateReconcileSearchDate(event: FormEvent<HTMLFormElement>) {
     const accountID = Number(formEntries.accountID)
     window.open("/reconcile/"+accountID+"?date="+searchDateString,"_self");
 };
-
+const updateReconcileTransaction = async (formData: FormData) => {
+    try {
+        // Do a bit of work to convert the entries to a plain JS object
+        const formEntries = Object.fromEntries(formData);
+        const transactionID = Number(formEntries.transactionID)
+        let dStr = String(formEntries.reconcileDate)
+        let txnDate: Date = new Date(dStr);
+    }catch (error) {
+        console.error('Error making POST request:', error);
+    }
+}
 export default function AccountReconcileForm() {
     const {accountID} = useParams();
     let [searchParams] = useSearchParams();
@@ -24,6 +34,12 @@ export default function AccountReconcileForm() {
         isLoading,
         error
     } = useGetUnreconciledTransactionOnAccount(accountID, searchDate);
+
+    async function toggleReconcile(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        const formData = new FormData(event.currentTarget)
+        const response = await updateReconcileTransaction(formData);
+    };
 
     if (isLoading) return <div className="Loading">Loading...</div>
     if (acctIsLoading) return <div className="Loading">Loading...</div>
@@ -118,38 +134,46 @@ export default function AccountReconcileForm() {
                 let txnReconciled = transaction.isReconciled ? "Y" : "N";
                 return (
                     <div className={'flex ' + rowColor} key={index}>
-                        <Link to={{
-                            pathname: '/transactions/' + transaction.transactionID,
-                            search: '?returnAccount=' + accountID
-                        }} className={`flex nav__item font-bold`}>
-                            <div className="w-8">
-                                {transaction.transactionID}
-                            </div>
-                            <div className="w-80">
-                                {txnDate.toISOString().split('T')[0]}
-                            </div>
-                            <div className="w-80">
-                                {transaction.transactionComment}
-                            </div>
-                            <div className="w-80">
-                                {otherAccountStr}
-                            </div>
-                            <div className={"w-20 text-right mr-2 " + textColor}>
-                                {formatCurrency(txnAmount)}
-                            </div>
-                            <div className={"w-16 " + textColor}>
-                                {transaction.debitOrCredit}
-                            </div>
-                            <div className="w-20">
-                                {txnReconciled}
-                            </div>
-                            <div className="w-80">
-                                {txnReconciledDateStr}
-                            </div>
-                        </Link>
+                        <div className="w-8">
+                            {transaction.transactionID}
+                        </div>
+                        <div className="w-80">
+                            {txnDate.toISOString().split('T')[0]}
+                        </div>
+                        <div className="w-80">
+                            {transaction.transactionComment}
+                        </div>
+                        <div className="w-80">
+                            {otherAccountStr}
+                        </div>
+                        <div className={"w-20 text-right mr-2 " + textColor}>
+                            {formatCurrency(txnAmount)}
+                        </div>
+                        <div className={"w-16 " + textColor}>
+                            {transaction.debitOrCredit}
+                        </div>
+                        <div className="w-20">
+                            {txnReconciled}
+                        </div>
+                        <div className="w-80">
+                            <form onSubmit={toggleReconcile}>
+                                <input className="bg-slate-300 text-xl font-normal" type="date" name="reconcileDate"
+                                       defaultValue={txnReconciledDateStr}/>
+                                <button className="bg-blue-500 m-1 p-2 font-bold"
+                                        type="submit">Mark Reconciled
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                );
+            );
             })}
+            <div className="flex m-2 justify-end">
+                <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Ending Balance:
+                   <input className="w-24 text-xl bg-slate-300 text-right" type="text"
+                       name="endingBalance"/>
+                </label>
+
+            </div>
         </div>
     );
 }

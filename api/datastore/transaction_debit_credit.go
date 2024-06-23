@@ -3,6 +3,7 @@ package datastore
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -114,6 +115,47 @@ func (store TransactionDebitCreditStore) GetSubtotals(accountID uint64) ([]*Acco
 	GROUP BY  debit_or_credit`
 
 	rows, err := store.Client.Queryx(query, accountID)
+	if err != nil {
+		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
+	}
+	defer rows.Close()
+
+	var txnSet []*AccountSubtotal
+
+	for rows.Next() {
+		var txn AccountSubtotal
+		if err = rows.StructScan(&txn); err != nil {
+			return nil, fmt.Errorf("rows.StructScan:%w", err)
+		}
+
+		txnSet = append(txnSet, &txn)
+	}
+
+	return txnSet, nil
+}
+
+func (store TransactionDebitCreditStore) GetReconciledSubtotals(accountLeft, accountRight uint64,
+	reconciledCutoffDate time.Time) ([]*AccountSubtotal, error) {
+	query := `SELECT SUM(z.transaction_dc_amount) AS subtotal, z.debit_or_credit
+					FROM (SELECT  workingtdc.transaction_dc_amount,
+						  workingtdc.debit_or_credit
+					FROM  transaction_debit_credit AS workingtdc
+					LEFT JOIN transaction_debit_credit AS odc
+					ON workingtdc.transaction_id=odc.transaction_id
+					INNER JOIN transaction_main AS tm
+					ON tm.transaction_id=workingtdc.transaction_id
+					WHERE (workingtdc.account_id 
+						IN (SELECT account_id FROM transaction_accounts WHERE account_left BETWEEN $2 AND $3)  
+						AND odc.account_id 
+						NOT IN (SELECT account_id FROM transaction_accounts WHERE account_left BETWEEN $2 AND $3) )
+					  
+					AND tm.is_reconciled IS TRUE 
+					AND EXTRACT(EPOCH FROM tm.transaction_reconcile_date) <= EXTRACT(EPOCH FROM  $1::timestamp)
+					  )
+				 AS z    
+	  GROUP BY z.debit_or_credit`
+
+	rows, err := store.Client.Queryx(query, reconciledCutoffDate, accountLeft, accountRight)
 	if err != nil {
 		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
 	}

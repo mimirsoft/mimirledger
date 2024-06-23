@@ -533,13 +533,13 @@ func TestTransactions_GetUnreconciledTransactionsOnAccount(t *testing.T) {
 		RequestURL: fmt.Sprintf("/transactions/account/%d/unreconciled?date=2024-06-30", a2.AccountID),
 	}, GomegaWithT: g, Code: http.StatusOK}
 
-	var res []*response.TransactionReconciliation
+	var res response.AccountReconciliation
 	test.ExecWithUnmarshal(&res)
-	g.Expect(res).To(gomega.HaveLen(1))
+	g.Expect(res.Transactions).To(gomega.HaveLen(1))
 
-	g.Expect(res[0].TransactionComment).To(gomega.Equal("woot"))
-	g.Expect(res[0].TransactionDCAmount).To(gomega.Equal(uint64(10000)))
-	g.Expect(res[0].TransactionDate).To(gomega.BeTemporally("~", time.Now(), time.Second))
+	g.Expect(res.Transactions[0].TransactionComment).To(gomega.Equal("woot"))
+	g.Expect(res.Transactions[0].TransactionDCAmount).To(gomega.Equal(uint64(10000)))
+	g.Expect(res.Transactions[0].TransactionDate).To(gomega.BeTemporally("~", time.Now(), time.Second))
 }
 
 func TestTransactions_GetUnreconciledTransactionsOnAccountForDate(t *testing.T) {
@@ -578,9 +578,9 @@ func TestTransactions_GetUnreconciledTransactionsOnAccountForDate(t *testing.T) 
 		RequestURL: fmt.Sprintf("/transactions/account/%d/unreconciled?date=2015-07-08", a1.AccountID),
 	}, GomegaWithT: g, Code: http.StatusOK}
 
-	var res []*response.TransactionReconciliation
+	var res response.AccountReconciliation
 	test.ExecWithUnmarshal(&res)
-	g.Expect(res).To(gomega.HaveLen(0))
+	g.Expect(res.Transactions).To(gomega.HaveLen(0))
 
 	// should return 1 transaction
 	var testb = RouterTest{Request: Request{
@@ -589,12 +589,12 @@ func TestTransactions_GetUnreconciledTransactionsOnAccountForDate(t *testing.T) 
 		RequestURL: fmt.Sprintf("/transactions/account/%d/unreconciled?date=2024-07-08", a1.AccountID),
 	}, GomegaWithT: g, Code: http.StatusOK}
 
-	var resb []*response.TransactionReconciliation
+	var resb response.AccountReconciliation
 	testb.ExecWithUnmarshal(&resb)
-	g.Expect(resb).To(gomega.HaveLen(1))
-	g.Expect(resb[0].TransactionComment).To(gomega.Equal("woot"))
-	g.Expect(resb[0].TransactionDCAmount).To(gomega.Equal(uint64(10000)))
-	g.Expect(resb[0].TransactionDate).To(gomega.BeTemporally("~", oldDate1, time.Second))
+	g.Expect(resb.Transactions).To(gomega.HaveLen(1))
+	g.Expect(resb.Transactions[0].TransactionComment).To(gomega.Equal("woot"))
+	g.Expect(resb.Transactions[0].TransactionDCAmount).To(gomega.Equal(uint64(10000)))
+	g.Expect(resb.Transactions[0].TransactionDate).To(gomega.BeTemporally("~", oldDate1, time.Second))
 
 	// set is_reconciled and the reconciled_date on myTrans1
 	txn.IsReconciled = true
@@ -611,9 +611,9 @@ func TestTransactions_GetUnreconciledTransactionsOnAccountForDate(t *testing.T) 
 		RequestURL: fmt.Sprintf("/transactions/account/%d/unreconciled?date=2015-07-08", a1.AccountID),
 	}, GomegaWithT: g, Code: http.StatusOK}
 
-	var res2 []*response.TransactionReconciliation
+	var res2 response.AccountReconciliation
 	test2.ExecWithUnmarshal(&res2)
-	g.Expect(res).To(gomega.HaveLen(0))
+	g.Expect(res.Transactions).To(gomega.HaveLen(0))
 
 	reconciledDateCutoff, err := time.Parse("2006-01-02", "2016-06-30")
 	g.Expect(err).NotTo(gomega.HaveOccurred())
@@ -628,9 +628,9 @@ func TestTransactions_GetUnreconciledTransactionsOnAccountForDate(t *testing.T) 
 		RequestURL: fmt.Sprintf("/transactions/account/%d/unreconciled?date=2016-07-31", a1.AccountID),
 	}, GomegaWithT: g, Code: http.StatusOK}
 
-	var res3 []*response.TransactionReconciliation
+	var res3 response.AccountReconciliation
 	test3.ExecWithUnmarshal(&res3)
-	g.Expect(res3).To(gomega.HaveLen(1))
+	g.Expect(res3.Transactions).To(gomega.HaveLen(1))
 
 	reconciledDateCutoff2, err := time.Parse("2006-01-02", "2016-07-31")
 	g.Expect(err).NotTo(gomega.HaveOccurred())
@@ -645,7 +645,7 @@ func TestTransactions_GetUnreconciledTransactionsOnAccountForDate(t *testing.T) 
 		RequestURL: fmt.Sprintf("/transactions/account/%d/unreconciled?date=2020-07-31", a1.AccountID),
 	}, GomegaWithT: g, Code: http.StatusOK}
 
-	var res4 []*response.TransactionReconciliation
+	var res4 response.AccountReconciliation
 	test4.ExecWithUnmarshal(&res4)
-	g.Expect(res4).To(gomega.HaveLen(0))
+	g.Expect(res4.Transactions).To(gomega.HaveLen(0))
 }

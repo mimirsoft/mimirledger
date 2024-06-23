@@ -132,6 +132,7 @@ type AccountReconciliation struct {
 	AccountID            uint64               `json:"accountID"`
 	SearchDate           time.Time            `json:"searchDate"`
 	AccountReconcileDate time.Time            `json:"accountReconcileDate"`
+	ReconciledBalance    int64                `json:"reconciledBalance"`
 	AccountSign          string               `json:"accountSign"`
 	AccountName          string               `json:"accountName"`
 	AccountFullName      string               `json:"accountFullName"`
@@ -140,7 +141,8 @@ type AccountReconciliation struct {
 
 // ConvertTransactionLedgerToRespTransactionLedger converts []models.TransactionLedger to TransactionLedger
 func ConvertTransactionRecToRespTransactionRec(act *models.Account,
-	txns []*models.TransactionReconciliation, searchCutoffDate *time.Time) *AccountReconciliation {
+	txns []*models.TransactionReconciliation, searchCutoffDate *time.Time,
+	reconciledBalance int64) *AccountReconciliation {
 	var tas = make([]*TransactionLedger, len(txns))
 	for idx := range txns {
 		tas[idx] = ConvertTransactionReconcileToRespTransactionLedger(txns[idx])
@@ -150,6 +152,7 @@ func ConvertTransactionRecToRespTransactionRec(act *models.Account,
 		AccountID:            act.AccountID,
 		SearchDate:           *searchCutoffDate,
 		AccountReconcileDate: act.AccountReconcileDate.Time,
+		ReconciledBalance:    reconciledBalance,
 		AccountSign:          string(act.AccountSign),
 		AccountName:          act.AccountName,
 		AccountFullName:      act.AccountFullName,

@@ -546,3 +546,38 @@ func getParentsAccountIDs(dStores *datastore.Datastores, accountID uint64) ([]ui
 
 	return parentIDs, nil
 }
+
+// GetReconciledSubtotal
+func GetReconciledSubtotal(dStores *datastore.Datastores, accountLeft, accountRight uint64,
+	reconciledCutoffDate time.Time, accountSign datastore.AccountSign) (int64, error) {
+	tcdStore := dStores.TransactionDebitCreditStore()
+
+	subtotals, err := tcdStore.GetReconciledSubtotals(accountLeft, accountRight, reconciledCutoffDate)
+	if err != nil {
+		return 0, fmt.Errorf("tcdStore.GetReconciledSubtotals:%w", err)
+	}
+
+	var (
+		debitSubtotal      int64
+		creditSubtotal     int64
+		reconciledSubtotal int64
+	)
+
+	for idx := range subtotals {
+		switch subtotalSign := subtotals[idx].DebitOrCredit; subtotalSign {
+		case datastore.AccountSignDebit:
+			debitSubtotal = int64(subtotals[idx].Subtotal)
+		case datastore.AccountSignCredit:
+			creditSubtotal = int64(subtotals[idx].Subtotal)
+		}
+	}
+
+	switch accountSign {
+	case datastore.AccountSignDebit:
+		reconciledSubtotal = debitSubtotal - creditSubtotal
+	case datastore.AccountSignCredit:
+		reconciledSubtotal = creditSubtotal - debitSubtotal
+	}
+
+	return reconciledSubtotal, nil
+}

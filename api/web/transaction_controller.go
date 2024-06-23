@@ -51,20 +51,25 @@ func (tc *TransactionsController) GetTransactionsForAccount(_ context.Context, a
 
 // GET /transactions/account/{accountID}/unreconciled?date=<date>
 func (tc *TransactionsController) GetUnreconciledTransactionsOnAccount(_ context.Context, accountID uint64,
-	searchDate time.Time) (*models.Account, []*models.TransactionReconciliation,
-	error) {
+	searchDate time.Time) (*models.Account, []*models.TransactionReconciliation, int64, error) {
 	account, err := models.RetrieveAccountByID(tc.DataStores, accountID)
 	if err != nil {
-		return nil, nil, fmt.Errorf("models.RetrieveAccountByID:%w", err)
+		return nil, nil, 0, fmt.Errorf("models.RetrieveAccountByID:%w", err)
 	}
 
 	myTxn, err := models.RetrieveUnreconciledTransactionsForDate(tc.DataStores, account.AccountLeft, account.AccountRight,
 		searchDate, account.AccountReconcileDate.Time)
 	if err != nil {
-		return nil, nil, fmt.Errorf("models.RetrieveUnreconciledTransactionsForDate:%w", err)
+		return nil, nil, 0, fmt.Errorf("models.RetrieveUnreconciledTransactionsForDate:%w", err)
 	}
 
-	return account, myTxn, nil
+	reconciledSubtotal, err := models.GetReconciledSubtotal(tc.DataStores, account.AccountLeft, account.AccountRight,
+		account.AccountReconcileDate.Time, account.AccountSign)
+	if err != nil {
+		return nil, nil, 0, fmt.Errorf("models.RetrieveUnreconciledTransactionsForDate:%w", err)
+	}
+
+	return account, myTxn, reconciledSubtotal, nil
 }
 
 // GET /transactions/{transactionID}

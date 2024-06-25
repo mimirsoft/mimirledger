@@ -1,7 +1,11 @@
 import React, {FormEvent} from 'react'
 import {Link, useParams, useSearchParams} from "react-router-dom";
 import {useGetAccounts, useGetUnreconciledTransactionOnAccount} from "../../lib/data";
-import {Account, TransactionLedgerEntry} from "../../lib/definitions";
+import {
+    Account,
+    TransactionLedgerEntry,
+    TransactionReconciledPostRequest
+} from "../../lib/definitions";
 import {formatCurrency, formatCurrencyNoSign} from "../../lib/utils";
 
 async function updateReconcileSearchDate(event: FormEvent<HTMLFormElement>) {
@@ -19,6 +23,21 @@ const updateReconcileTransaction = async (formData: FormData) => {
         const transactionID = Number(formEntries.transactionID)
         let dStr = String(formEntries.reconcileDate)
         let txnDate: Date = new Date(dStr);
+
+        const myURL = new URL('/transactions/'+transactionID+"/reconciled", process.env.REACT_APP_MIMIRLEDGER_API_URL);
+
+        const reconciledPostRequest : TransactionReconciledPostRequest = {
+            transactionID : transactionID,
+            transactionReconcileDate: txnDate.toISOString(),
+        };
+        var json = JSON.stringify(reconciledPostRequest);
+        console.log(json);
+
+        const settings :RequestInit = {
+            method: 'PUT',
+            body: json,
+        };
+        return await fetch(myURL, settings);
     }catch (error) {
         console.error('Error making POST request:', error);
     }
@@ -35,7 +54,7 @@ export default function AccountReconcileForm() {
         error
     } = useGetUnreconciledTransactionOnAccount(accountID, searchDate);
 
-    async function toggleReconcile(event: FormEvent<HTMLFormElement>) {
+    async function toggleReconciled(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
         const formData = new FormData(event.currentTarget)
         const response = await updateReconcileTransaction(formData);
@@ -156,16 +175,18 @@ export default function AccountReconcileForm() {
                             {txnReconciled}
                         </div>
                         <div className="w-80">
-                            <form onSubmit={toggleReconcile}>
+                            <form onSubmit={toggleReconciled}>
                                 <input className="bg-slate-300 text-xl font-normal" type="date" name="reconcileDate"
                                        defaultValue={txnReconciledDateStr}/>
+                                <input className=" bg-slate-300" type="hidden" name="transactionID"
+                                       defaultValue={transaction.transactionID}/>
                                 <button className="bg-blue-500 m-1 p-2 font-bold"
                                         type="submit">Mark Reconciled
                                 </button>
                             </form>
                         </div>
                     </div>
-            );
+                );
             })}
             <div className="flex m-2 justify-end">
                 <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Ending Balance:

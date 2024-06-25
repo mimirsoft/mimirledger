@@ -204,6 +204,7 @@ func PutTransactionReconciled(contoller *TransactionsController) func(res http.R
 
 		transactionID, err := strconv.ParseUint(idStr, 10, 64)
 		if err != nil {
+			err = fmt.Errorf("%w : [transactionIDstr: %s]", err, idStr)
 			return NewRequestError(http.StatusBadRequest, err)
 		}
 

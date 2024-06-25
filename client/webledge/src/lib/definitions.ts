@@ -65,6 +65,12 @@ export type TransactionEditPostRequest = {
     debitCreditSet: TransactionDebitCreditRequest[]
 };
 
+export type TransactionReconciledPostRequest = {
+    transactionID: number
+    transactionReconcileDate: string
+};
+
+
 export type TransactionDebitCreditRequest = {
     accountID: number
     transactionDCAmount: number

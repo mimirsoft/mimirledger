@@ -76,7 +76,7 @@ export default function AccountReconcileForm() {
                 <div className="w-8">
                     id
                 </div>
-                <div className="w-80">
+                <div className="w-24">
                     Date
                 </div>
                 <div className="w-80">
@@ -148,7 +148,7 @@ export default function AccountReconcileForm() {
                         <div className="w-8">
                             {transaction.transactionID}
                         </div>
-                        <div className="w-80">
+                        <div className="w-24">
                             {txnDate.toISOString().split('T')[0]}
                         </div>
                         <div className="w-80">

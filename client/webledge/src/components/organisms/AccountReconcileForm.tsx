@@ -128,6 +128,7 @@ export default function AccountReconcileForm() {
                 } else {
                     txnReconciledDateStr = txnReconciledDate.toISOString().split('T')[0]
                 }
+
                 let otherAccounts = [];
                 let otherAccountStr = ""
                 // if the transaction split has a comma, we have a split transaction

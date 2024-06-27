@@ -7,6 +7,8 @@ import {
     TransactionReconciledPostRequest
 } from "../../lib/definitions";
 import {formatCurrency, formatCurrencyNoSign} from "../../lib/utils";
+import TransactionToggleReconcileForm from "../molecules/TransactionToggleReconcileForm";
+import DebitsCreditsColumn from "../molecules/DebitsCreditsColumn";
 
 async function updateReconcileSearchDate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -16,49 +18,21 @@ async function updateReconcileSearchDate(event: FormEvent<HTMLFormElement>) {
     const accountID = Number(formEntries.accountID)
     window.open("/reconcile/"+accountID+"?date="+searchDateString,"_self");
 };
-const updateReconcileTransaction = async (formData: FormData) => {
-    try {
-        // Do a bit of work to convert the entries to a plain JS object
-        const formEntries = Object.fromEntries(formData);
-        const transactionID = Number(formEntries.transactionID)
-        let dStr = String(formEntries.reconcileDate)
-        let txnDate: Date = new Date(dStr);
 
-        const myURL = new URL('/transactions/'+transactionID+"/reconciled", process.env.REACT_APP_MIMIRLEDGER_API_URL);
-
-        const reconciledPostRequest : TransactionReconciledPostRequest = {
-            transactionID : transactionID,
-            transactionReconcileDate: txnDate.toISOString(),
-        };
-        var json = JSON.stringify(reconciledPostRequest);
-        console.log(json);
-
-        const settings :RequestInit = {
-            method: 'PUT',
-            body: json,
-        };
-        return await fetch(myURL, settings);
-    }catch (error) {
-        console.error('Error making POST request:', error);
-    }
-}
 export default function AccountReconcileForm() {
     const {accountID} = useParams();
     let [searchParams] = useSearchParams();
     let date = searchParams.get("date");
     let searchDate = String(date)
-    const { data:acctData, error:acctError, isLoading:acctIsLoading } = useGetAccounts()
+    const { data:acctData, error:acctError,
+        isLoading:acctIsLoading } = useGetAccounts()
     const {
         data,
         isLoading,
-        error
+        mutate,
+        error,
     } = useGetUnreconciledTransactionOnAccount(accountID, searchDate);
 
-    async function toggleReconciled(event: FormEvent<HTMLFormElement>) {
-        event.preventDefault()
-        const formData = new FormData(event.currentTarget)
-        const response = await updateReconcileTransaction(formData);
-    };
 
     if (isLoading) return <div className="Loading">Loading...</div>
     if (acctIsLoading) return <div className="Loading">Loading...</div>
@@ -175,15 +149,11 @@ export default function AccountReconcileForm() {
                             {txnReconciled}
                         </div>
                         <div className="w-80">
-                            <form onSubmit={toggleReconciled}>
-                                <input className="bg-slate-300 text-xl font-normal" type="date" name="reconcileDate"
-                                       defaultValue={txnReconciledDateStr}/>
-                                <input className=" bg-slate-300" type="hidden" name="transactionID"
-                                       defaultValue={transaction.transactionID}/>
-                                <button className="bg-blue-500 m-1 p-2 font-bold"
-                                        type="submit">Mark Reconciled
-                                </button>
-                            </form>
+                            <TransactionToggleReconcileForm
+                             transactionID={transaction?.transactionID}
+                             reconciledDate={txnReconciledDateStr}
+                             mutator={mutate}
+                            isReconciled={transaction.isReconciled}/>
                         </div>
                     </div>
                 );

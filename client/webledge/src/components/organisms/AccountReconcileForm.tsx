@@ -47,6 +47,7 @@ export default function AccountReconcileForm() {
     var minDate = new Date('0001-01-01T00:00:00Z');
     minDate.setDate(minDate.getDate() + 1);
 
+    let runningTotal = Number(data?.priorReconciledBalance)
     return (
         <div className="flex w-full flex-col md:col-span-4 grow justify-between rounded-xl bg-slate-100 p-4">
             <div className="flex font-bold text-xl">AccountReconcileForm</div>
@@ -62,6 +63,14 @@ export default function AccountReconcileForm() {
                         <button className="p-3 font-bold" type="submit">Search For Date</button>
                     </div>
                 </form>
+            </div>
+            <div className="flex m-2 justify-end">
+                <div className="w-80 my-4 text-xl font-bold mx-0 bg-slate-200">
+                    Starting Reconciled Balance:
+                </div>
+                <div className="w-20 my-4 text-xl font-bold mx-0 bg-slate-200">
+                    {formatCurrency(Number(data?.priorReconciledBalance))}
+                </div>
             </div>
             <div className="flex">
                 <div className="w-8">
@@ -102,6 +111,14 @@ export default function AccountReconcileForm() {
                     textColor = "text-red-500"
                     txnAmount = -txnAmount
                 }
+                if (transaction.isReconciled){
+                    runningTotal +=txnAmount
+                }
+                let runningTotalColor = ""
+                if (runningTotal < 0) {
+                    runningTotalColor = "text-red-500"
+                }
+
                 let txnDate: Date = new Date(transaction.transactionDate);
                 let txnReconciledDate: Date = new Date(transaction.transactionReconcileDate);
 
@@ -150,18 +167,22 @@ export default function AccountReconcileForm() {
                         </div>
                         <div className="w-80">
                             <TransactionToggleReconcileForm
-                             transactionID={transaction?.transactionID}
-                             reconciledDate={txnReconciledDateStr}
-                             mutator={mutate}
-                            isReconciled={transaction.isReconciled}/>
+                                transactionID={transaction?.transactionID}
+                                reconciledDate={txnReconciledDateStr}
+                                mutator={mutate}
+                                isReconciled={transaction.isReconciled}/>
                         </div>
+                        <div className={"w-20 text-right font-bold mr-2 " + runningTotalColor}>
+                            {formatCurrency(runningTotal)}
+                        </div>
+
                     </div>
                 );
             })}
             <div className="flex m-2 justify-end">
                 <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Ending Balance:
-                   <input className="w-24 text-xl bg-slate-300 text-right" type="text"
-                       name="endingBalance"/>
+                    <input className="w-24 text-xl bg-slate-300 text-right" type="text"
+                           name="endingBalance"/>
                 </label>
 
             </div>

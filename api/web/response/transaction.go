@@ -129,14 +129,14 @@ func ConvertTransactionLedgerToRespTransactionLeger(trans *models.TransactionLed
 
 // AccountReconciliation is for use in transaction controller responses for a single account reconcilication
 type AccountReconciliation struct {
-	AccountID            uint64               `json:"accountID"`
-	SearchDate           time.Time            `json:"searchDate"`
-	AccountReconcileDate time.Time            `json:"accountReconcileDate"`
-	ReconciledBalance    int64                `json:"reconciledBalance"`
-	AccountSign          string               `json:"accountSign"`
-	AccountName          string               `json:"accountName"`
-	AccountFullName      string               `json:"accountFullName"`
-	Transactions         []*TransactionLedger `json:"transactions"`
+	AccountID              uint64               `json:"accountID"`
+	SearchDate             time.Time            `json:"searchDate"`
+	AccountReconcileDate   time.Time            `json:"accountReconcileDate"`
+	PriorReconciledBalance int64                `json:"priorReconciledBalance"`
+	AccountSign            string               `json:"accountSign"`
+	AccountName            string               `json:"accountName"`
+	AccountFullName        string               `json:"accountFullName"`
+	Transactions           []*TransactionLedger `json:"transactions"`
 }
 
 // ConvertTransactionLedgerToRespTransactionLedger converts []models.TransactionLedger to TransactionLedger
@@ -149,14 +149,14 @@ func ConvertTransactionRecToRespTransactionRec(act *models.Account,
 	}
 
 	return &AccountReconciliation{
-		AccountID:            act.AccountID,
-		SearchDate:           *searchCutoffDate,
-		AccountReconcileDate: act.AccountReconcileDate.Time,
-		ReconciledBalance:    reconciledBalance,
-		AccountSign:          string(act.AccountSign),
-		AccountName:          act.AccountName,
-		AccountFullName:      act.AccountFullName,
-		Transactions:         tas}
+		AccountID:              act.AccountID,
+		SearchDate:             *searchCutoffDate,
+		AccountReconcileDate:   act.AccountReconcileDate.Time,
+		PriorReconciledBalance: reconciledBalance,
+		AccountSign:            string(act.AccountSign),
+		AccountName:            act.AccountName,
+		AccountFullName:        act.AccountFullName,
+		Transactions:           tas}
 }
 
 func ConvertTransactionReconcileToRespTransactionLedger(

@@ -101,6 +101,7 @@ export type TransactionLedgerEntry = {
 export type AccountReconcileResponse = {
     accountID: number;
     accountReconcileDate: string;
+    priorReconciledBalance: number;
     searchDate: string;
     accountName: string;
     accountFullName: string;

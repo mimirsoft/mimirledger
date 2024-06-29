@@ -63,6 +63,12 @@ export default function AccountReconcileForm() {
                         <button className="p-3 font-bold" type="submit">Search For Date</button>
                     </div>
                 </form>
+                <div className="flex justify-end">
+                    <label className="my-4 font-bold bg-slate-200">Ending Balance:
+                        <input className="w-20 bg-slate-300 text-right" type="text"
+                               name="endingBalance"/>
+                    </label>
+                </div>
             </div>
             <div className="flex justify-end text-right">
                 <div className="w-80 my-4 font-bold mx-0 bg-slate-200">
@@ -94,7 +100,7 @@ export default function AccountReconcileForm() {
                 <div className="w-8">
                     Rec
                 </div>
-                <div className="w-80">
+                <div className="w-72">
                     Rec Date
                 </div>
                 <div className="w-20">
@@ -169,7 +175,7 @@ export default function AccountReconcileForm() {
                         <div className="w-8">
                             {txnReconciled}
                         </div>
-                        <div className="w-80">
+                        <div className="w-72">
                             <TransactionToggleReconcileForm
                                 transactionID={transaction?.transactionID}
                                 reconciledDate={txnReconciledDateStr}
@@ -183,12 +189,13 @@ export default function AccountReconcileForm() {
                     </div>
                 );
             })}
-            <div className="flex justify-end">
-                <label className="my-4 font-bold bg-slate-200">Ending Balance:
-                    <input className="w-20 bg-slate-300 text-right" type="text"
-                           name="endingBalance"/>
-                </label>
-
+            <div className="flex justify-end text-right">
+                <div className="w-80 my-4 font-bold mx-0 bg-slate-200">
+                    Ending Reconciled Balance:
+                </div>
+                <div className="w-20 my-4 font-bold mx-0 bg-slate-200">
+                    {formatCurrency(runningTotal)}
+                </div>
             </div>
         </div>
     );

@@ -1,14 +1,12 @@
-import React, {FormEvent} from 'react'
+import React,  {useState, FormEvent} from 'react'
 import {Link, useParams, useSearchParams} from "react-router-dom";
 import {useGetAccounts, useGetUnreconciledTransactionOnAccount} from "../../lib/data";
 import {
     Account,
     TransactionLedgerEntry,
-    TransactionReconciledPostRequest
 } from "../../lib/definitions";
-import {formatCurrency, formatCurrencyNoSign} from "../../lib/utils";
+import {formatCurrency, formatCurrencyNoSign, parseCurrency} from "../../lib/utils";
 import TransactionToggleReconcileForm from "../molecules/TransactionToggleReconcileForm";
-import DebitsCreditsColumn from "../molecules/DebitsCreditsColumn";
 
 async function updateReconcileSearchDate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -18,6 +16,7 @@ async function updateReconcileSearchDate(event: FormEvent<HTMLFormElement>) {
     const accountID = Number(formEntries.accountID)
     window.open("/reconcile/"+accountID+"?date="+searchDateString,"_self");
 };
+
 
 export default function AccountReconcileForm() {
     const {accountID} = useParams();
@@ -33,6 +32,11 @@ export default function AccountReconcileForm() {
         error,
     } = useGetUnreconciledTransactionOnAccount(accountID, searchDate);
 
+    const [expectedEndingBalance, setExpectedEndingBalance] = useState(0);
+
+    const handleEndingBalanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setExpectedEndingBalance(parseCurrency(e.target.value));
+     };
 
     if (isLoading) return <div className="Loading">Loading...</div>
     if (acctIsLoading) return <div className="Loading">Loading...</div>
@@ -47,6 +51,7 @@ export default function AccountReconcileForm() {
     var minDate = new Date('0001-01-01T00:00:00Z');
     minDate.setDate(minDate.getDate() + 1);
 
+    let startingBalance =  Number(data?.priorReconciledBalance)
     let runningTotal = Number(data?.priorReconciledBalance)
     return (
         <div className="flex w-full flex-col md:col-span-4 grow justify-between rounded-xl bg-slate-100 p-4">
@@ -59,14 +64,15 @@ export default function AccountReconcileForm() {
                     </label>
                     <div className="bg-slate-300 flex">
                         <input className=" bg-slate-300" type="hidden" name="accountID"
-                               defaultValue={accountID}/>
+                              defaultValue={accountID}/>
                         <button className="p-3 font-bold" type="submit">Search For Date</button>
                     </div>
                 </form>
                 <div className="flex justify-end">
                     <label className="my-4 font-bold bg-slate-200">Ending Balance:
                         <input className="w-20 bg-slate-300 text-right" type="text"
-                               name="endingBalance"/>
+                               onChange={handleEndingBalanceChange}
+                               defaultValue={"0"} name="endingBalance"/>
                     </label>
                 </div>
             </div>
@@ -120,8 +126,8 @@ export default function AccountReconcileForm() {
                     textColor = "text-red-500"
                     txnAmount = -txnAmount
                 }
-                if (transaction.isReconciled){
-                    runningTotal +=txnAmount
+                if (transaction.isReconciled) {
+                    runningTotal += txnAmount
                 }
                 let runningTotalColor = ""
                 if (runningTotal < 0) {
@@ -195,6 +201,14 @@ export default function AccountReconcileForm() {
                 </div>
                 <div className="w-20 my-4 font-bold mx-0 bg-slate-200">
                     {formatCurrency(runningTotal)}
+                </div>
+            </div>
+            <div className="flex justify-end text-right">
+                <div className="w-80 my-4 font-bold mx-0 bg-slate-200">
+                    Difference:
+                </div>
+                <div className="w-20 my-4 font-bold mx-0 bg-slate-200">
+                    {formatCurrency(runningTotal-expectedEndingBalance)}
                 </div>
             </div>
         </div>

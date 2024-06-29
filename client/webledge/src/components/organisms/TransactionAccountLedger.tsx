@@ -82,13 +82,23 @@ export default function TransactionAccountLedger() {
     var minDate = new Date('0001-01-01T00:00:00Z');
     minDate.setDate(minDate.getDate() + 1);
 
-
+    let runningTotal = 0
     console.log(acctMap)
     let rowColor = "bg-slate-200"
+
+    let reconcileDate: Date = new Date();
+    let reconcileDateStr = reconcileDate.toISOString().split('T')[0]
+
     return (
         <div className="flex w-full flex-col md:col-span-4 grow justify-between rounded-xl bg-slate-100 p-4">
-            <div className="text-xl font-bold">
-                Add Transaction to {data?.accountFullName}
+            <div className="flex text-xl font-bold">
+                <div className="mr-2">Add Transaction to {data?.accountFullName}</div>
+                <Link to={{
+                    pathname: '/reconcile/' + accountID,
+                    search: '?date=' + reconcileDateStr
+                }} className="underline text-blue-600 hover:text-blue-800 visited:text-purple-600">
+                    Reconcile
+                </Link>
             </div>
             <div className="flex">
                 <form className="flex" onSubmit={handleSubmit}>
@@ -122,10 +132,10 @@ export default function TransactionAccountLedger() {
                 <div className="w-8">
                     id
                 </div>
-                <div className="w-80">
+                <div className="w-24">
                     Date
                 </div>
-                <div className="w-80">
+                <div className="flex-grow">
                     Comment
                 </div>
                 <div className="w-80">
@@ -140,8 +150,11 @@ export default function TransactionAccountLedger() {
                 <div className="w-20">
                     Rec?
                 </div>
-                <div className="w-80">
-                    ReconciledDate
+                <div className="w-24">
+                    Rec Date
+                </div>
+                <div className="w-24">
+                    Balance
                 </div>
             </div>
             {data?.transactions && data.transactions.map((transaction: TransactionLedgerEntry, index: number) => {
@@ -157,6 +170,12 @@ export default function TransactionAccountLedger() {
                     textColor = "text-red-500"
                     txnAmount = -txnAmount
                 }
+                runningTotal +=txnAmount
+                let runningTotalColor = ""
+                if (runningTotal < 0) {
+                    runningTotalColor = "text-red-500"
+                }
+
                 let txnDate: Date = new Date(transaction.transactionDate);
                 let txnReconciledDate: Date = new Date(transaction.transactionReconcileDate);
 
@@ -181,19 +200,20 @@ export default function TransactionAccountLedger() {
                     otherAccountStr = String(acctMap.get(Number(transaction.split)))
                 }
                 let txnReconciled = transaction.isReconciled ? "Y" : "N";
+
                 return (
-                    <div className={'flex '+rowColor}  key={index}>
-                        <Link to={{
-                            pathname: '/transactions/' + transaction.transactionID,
-                            search: '?returnAccount=' + accountID
-                        }} className={`flex nav__item font-bold`}>
+                    <Link to={{
+                        pathname: '/transactions/' + transaction.transactionID,
+                        search: '?returnAccount=' + accountID
+                    }} className={`flex w-full font-bold`}>
+                        <div className={'flex flex-grow '+rowColor}  key={index}>
                             <div className="w-8">
                                 {transaction.transactionID}
                             </div>
-                            <div className="w-80">
+                            <div className="w-24">
                                 {txnDate.toISOString().split('T')[0]}
                             </div>
-                            <div className="w-80">
+                            <div className="flex-grow">
                                 {transaction.transactionComment}
                             </div>
                             <div className="w-80">
@@ -208,11 +228,15 @@ export default function TransactionAccountLedger() {
                             <div className="w-20">
                                 {txnReconciled}
                             </div>
-                            <div className="w-80">
+                            <div className="w-24">
                                 {txnReconciledDateStr}
                             </div>
-                        </Link>
+                            <div className={"w-20 text-right font-bold mr-2 " + runningTotalColor}>
+                                {formatCurrency(runningTotal)}
+                            </div>
                     </div>
+                    </Link>
+
                 );
             })}
         </div>

@@ -64,11 +64,11 @@ export default function AccountReconcileForm() {
                     </div>
                 </form>
             </div>
-            <div className="flex m-2 justify-end">
-                <div className="w-80 my-4 text-xl font-bold mx-0 bg-slate-200">
+            <div className="flex justify-end text-right">
+                <div className="w-80 my-4 font-bold mx-0 bg-slate-200">
                     Starting Reconciled Balance:
                 </div>
-                <div className="w-20 my-4 text-xl font-bold mx-0 bg-slate-200">
+                <div className="w-20 my-4 font-bold mx-0 bg-slate-200">
                     {formatCurrency(Number(data?.priorReconciledBalance))}
                 </div>
             </div>
@@ -79,7 +79,7 @@ export default function AccountReconcileForm() {
                 <div className="w-24">
                     Date
                 </div>
-                <div className="w-80">
+                <div className="flex-grow">
                     Comment
                 </div>
                 <div className="w-80">
@@ -91,11 +91,14 @@ export default function AccountReconcileForm() {
                 <div className="w-16">
                     Sign
                 </div>
-                <div className="w-20">
-                    Rec?
+                <div className="w-8">
+                    Rec
                 </div>
                 <div className="w-80">
-                    ReconciledDate
+                    Rec Date
+                </div>
+                <div className="w-20">
+                    Running Total
                 </div>
             </div>
             {data?.transactions && data.transactions.map((transaction: TransactionLedgerEntry, index: number) => {
@@ -151,7 +154,7 @@ export default function AccountReconcileForm() {
                         <div className="w-24">
                             {txnDate.toISOString().split('T')[0]}
                         </div>
-                        <div className="w-80">
+                        <div className="flex-grow">
                             {transaction.transactionComment}
                         </div>
                         <div className="w-80">
@@ -163,7 +166,7 @@ export default function AccountReconcileForm() {
                         <div className={"w-16 " + textColor}>
                             {transaction.debitOrCredit}
                         </div>
-                        <div className="w-20">
+                        <div className="w-8">
                             {txnReconciled}
                         </div>
                         <div className="w-80">
@@ -173,16 +176,16 @@ export default function AccountReconcileForm() {
                                 mutator={mutate}
                                 isReconciled={transaction.isReconciled}/>
                         </div>
-                        <div className={"w-20 text-right font-bold mr-2 " + runningTotalColor}>
+                        <div className={"w-20 text-right font-bold" + runningTotalColor}>
                             {formatCurrency(runningTotal)}
                         </div>
 
                     </div>
                 );
             })}
-            <div className="flex m-2 justify-end">
-                <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Ending Balance:
-                    <input className="w-24 text-xl bg-slate-300 text-right" type="text"
+            <div className="flex justify-end">
+                <label className="my-4 font-bold bg-slate-200">Ending Balance:
+                    <input className="w-20 bg-slate-300 text-right" type="text"
                            name="endingBalance"/>
                 </label>
 

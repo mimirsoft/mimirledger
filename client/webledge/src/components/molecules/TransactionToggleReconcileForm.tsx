@@ -78,24 +78,24 @@ export default function TransactionToggleReconcileForm(props:{
     if (props.isReconciled) {
         return (
             <form key={'toggleUnrec'+props.transactionID} onSubmit={toggleUnreconciled}>
-                <input className="bg-slate-300 text-xl font-normal" type="date" name="reconcileDate"
+                <input className="w-48 bg-slate-300 text-xl font-normal" type="date" name="reconcileDate"
                        defaultValue={props.reconciledDate}/>
                 <input className="bg-slate-300" type="hidden" name="transactionID"
                        defaultValue={props.transactionID}/>
                 <button className="bg-red-600 m-1 p-2 font-bold"
-                        type="submit">Mark Unreconciled
+                        type="submit">Unreconcile
                 </button>
             </form>
         )
     }
     return (
         <form key={'toggleRec'+props.transactionID} onSubmit={toggleReconciled}>
-            <input className="bg-slate-300 text-xl font-normal" type="date" name="reconcileDate"
+            <input className="w-48 bg-slate-300 text-xl font-normal" type="date" name="reconcileDate"
                    defaultValue={props.reconciledDate}/>
             <input className="bg-slate-300" type="hidden" name="transactionID"
                    defaultValue={props.transactionID}/>
             <button className="bg-blue-500 m-1 p-2 font-bold"
-                    type="submit">Mark Reconciled
+                    type="submit">Reconcile
             </button>
         </form>
     )

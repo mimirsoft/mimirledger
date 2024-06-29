@@ -147,13 +147,13 @@ export default function TransactionAccountLedger() {
                 <div className="w-16">
                     Sign
                 </div>
-                <div className="w-20">
-                    Rec?
+                <div className="w-8">
+                    Rec
                 </div>
                 <div className="w-24">
                     Rec Date
                 </div>
-                <div className="w-24">
+                <div className="w-20">
                     Balance
                 </div>
             </div>
@@ -225,13 +225,13 @@ export default function TransactionAccountLedger() {
                             <div className={"w-16 " + textColor}>
                                 {transaction.debitOrCredit}
                             </div>
-                            <div className="w-20">
+                            <div className="w-8">
                                 {txnReconciled}
                             </div>
                             <div className="w-24">
                                 {txnReconciledDateStr}
                             </div>
-                            <div className={"w-20 text-right font-bold mr-2 " + runningTotalColor}>
+                            <div className={"w-20 text-right font-bold " + runningTotalColor}>
                                 {formatCurrency(runningTotal)}
                             </div>
                     </div>

@@ -134,3 +134,43 @@ func PutAccountUpdate(acctController *AccountsController) func(res http.Response
 		return RespondOK(res, jsonResponse)
 	}
 }
+
+// PUT /accounts/{accountID}/reconciled
+func PutAccountUpdateReconciled(contoller *AccountsController) func(res http.ResponseWriter, //nolint:dupl
+	req *http.Request) error {
+	return func(res http.ResponseWriter, req *http.Request) error {
+		accountIDStr := chi.URLParam(req, "accountID")
+
+		accountID, err := strconv.ParseUint(accountIDStr, 10, 64)
+		if err != nil {
+			return NewRequestError(http.StatusBadRequest, err)
+		}
+
+		if accountID == 0 {
+			return NewRequestError(http.StatusBadRequest, ErrInvalidAccountID)
+		}
+
+		var reqAcct request.Account
+
+		if req.Body == nil {
+			return NewRequestError(http.StatusBadRequest, ErrNoRequestBody)
+		}
+
+		err = json.NewDecoder(req.Body).Decode(&reqAcct)
+		if err != nil {
+			return fmt.Errorf("json.NewDecoder(r.Body).Decode:%w", err)
+		}
+
+		mdlAccount := request.ReqAccountToAccount(&reqAcct)
+		mdlAccount.AccountID = accountID
+
+		account, err := contoller.UpdateAccountReconciledDate(req.Context(), mdlAccount)
+		if err != nil {
+			return NewRequestError(http.StatusBadRequest, err)
+		}
+
+		jsonResponse := response.AccountToRespAccount(account)
+
+		return RespondOK(res, jsonResponse)
+	}
+}

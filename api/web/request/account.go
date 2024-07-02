@@ -17,7 +17,7 @@ type Account struct {
 	AccountMemo          string                `json:"accountMemo"`
 	AccountCurrent       bool                  `json:"accountCurrent"`
 	AccountDecimals      uint64                `json:"accountDecimals"`
-	AccountReconcileDate sql.NullTime          `json:"accountReconcileDate"`
+	AccountReconcileDate *time.Time            `json:"accountReconcileDate"`
 	AccountFlagged       bool                  `json:"accountFlagged"`
 	AccountLocked        bool                  `json:"accountLocked"`
 	AccountOpenDate      time.Time             `json:"accountOpenDate"`
@@ -27,6 +27,11 @@ type Account struct {
 }
 
 func ReqAccountToAccount(act *Account) *models.Account {
+	acctReconcileDate := sql.NullTime{Time: time.Time{}, Valid: false}
+	if act.AccountReconcileDate != nil {
+		acctReconcileDate = sql.NullTime{Time: *act.AccountReconcileDate, Valid: true}
+	}
+
 	return &models.Account{ //nolint:exhaustruct
 		AccountID:            act.AccountID,
 		AccountParent:        act.AccountParent,
@@ -35,7 +40,7 @@ func ReqAccountToAccount(act *Account) *models.Account {
 		AccountMemo:          act.AccountMemo,
 		AccountCurrent:       act.AccountCurrent,
 		AccountDecimals:      act.AccountDecimals,
-		AccountReconcileDate: act.AccountReconcileDate,
+		AccountReconcileDate: acctReconcileDate,
 		AccountFlagged:       act.AccountFlagged,
 		AccountLocked:        act.AccountLocked,
 		AccountOpenDate:      act.AccountOpenDate,

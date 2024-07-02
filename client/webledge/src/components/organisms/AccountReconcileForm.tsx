@@ -7,6 +7,7 @@ import {
 } from "../../lib/definitions";
 import {formatCurrency, formatCurrencyNoSign, parseCurrency} from "../../lib/utils";
 import TransactionToggleReconcileForm from "../molecules/TransactionToggleReconcileForm";
+import AccountReconcileDateSubmitForm from "../molecules/AccountReconcileDateSubmitForm";
 
 async function updateReconcileSearchDate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -52,10 +53,32 @@ export default function AccountReconcileForm() {
     minDate.setDate(minDate.getDate() + 1);
 
     let startingBalance =  Number(data?.priorReconciledBalance)
+    let reconciledTotal = Number(data?.priorReconciledBalance)
+    {data?.transactions && data.transactions.map((transaction: TransactionLedgerEntry, index: number) => {
+        let txnAmount = transaction.transactionDCAmount
+        if (transaction.debitOrCredit != data.accountSign) {
+            txnAmount = -txnAmount
+        }
+        if (transaction.isReconciled) {
+            reconciledTotal += txnAmount
+        }
+    })};
+    let reconciledDifferenceRemaining = reconciledTotal-expectedEndingBalance
     let runningTotal = Number(data?.priorReconciledBalance)
+
+    let acctDate: Date = new Date(String(data?.accountReconcileDate))
+
     return (
         <div className="flex w-full flex-col md:col-span-4 grow justify-between rounded-xl bg-slate-100 p-4">
             <div className="flex font-bold text-xl">AccountReconcileForm</div>
+            <div className="flex m-2">
+                <div className="w-80 my-4 font-bold mx-0 bg-slate-200">
+                    Currently reconciled thru date:
+                </div>
+                <div className="w-24 my-4 font-bold mx-0 bg-slate-200">
+                    {acctDate.toISOString().split('T')[0]}
+                </div>
+            </div>
             <div className="flex m-2">
                 <form className="flex" onSubmit={updateReconcileSearchDate}>
                     <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Date:
@@ -64,7 +87,7 @@ export default function AccountReconcileForm() {
                     </label>
                     <div className="bg-slate-300 flex">
                         <input className=" bg-slate-300" type="hidden" name="accountID"
-                              defaultValue={accountID}/>
+                               defaultValue={accountID}/>
                         <button className="p-3 font-bold" type="submit">Search For Date</button>
                     </div>
                 </form>
@@ -75,6 +98,10 @@ export default function AccountReconcileForm() {
                                defaultValue={"0"} name="endingBalance"/>
                     </label>
                 </div>
+                <AccountReconcileDateSubmitForm
+                    accountID={Number(accountID)}
+                    reconcileDate={searchDate}
+                    reconciledDifferenceRemaining={reconciledDifferenceRemaining}/>
             </div>
             <div className="flex justify-end text-right">
                 <div className="w-80 my-4 font-bold mx-0 bg-slate-200">
@@ -119,7 +146,6 @@ export default function AccountReconcileForm() {
                 } else {
                     rowColor = "bg-slate-200"
                 }
-                console.log(transaction)
                 let textColor = ""
                 let txnAmount = transaction.transactionDCAmount
                 if (transaction.debitOrCredit != data.accountSign) {
@@ -208,7 +234,7 @@ export default function AccountReconcileForm() {
                     Difference:
                 </div>
                 <div className="w-20 my-4 font-bold mx-0 bg-slate-200">
-                    {formatCurrency(runningTotal-expectedEndingBalance)}
+                    {formatCurrency(runningTotal - expectedEndingBalance)}
                 </div>
             </div>
         </div>

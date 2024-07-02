@@ -514,7 +514,10 @@ func TestTransactions_GetUnreconciledTransactionsOnAccount(t *testing.T) {
 	err = a2.Store(TestDataStore)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	txn := models.Transaction{TransactionCore: models.TransactionCore{TransactionComment: "woot"},
+	// must set a specific date for this test
+	oldDate, _ := time.Parse("2006-01-02", "2024-06-02")
+	txn := models.Transaction{TransactionCore: models.TransactionCore{TransactionComment: "woot",
+		TransactionDate: oldDate},
 		DebitCreditSet: []*models.TransactionDebitCredit{
 			&models.TransactionDebitCredit{AccountID: a2.AccountID,
 				DebitOrCredit:       datastore.AccountSignCredit,
@@ -539,7 +542,7 @@ func TestTransactions_GetUnreconciledTransactionsOnAccount(t *testing.T) {
 
 	g.Expect(res.Transactions[0].TransactionComment).To(gomega.Equal("woot"))
 	g.Expect(res.Transactions[0].TransactionDCAmount).To(gomega.Equal(uint64(10000)))
-	g.Expect(res.Transactions[0].TransactionDate).To(gomega.BeTemporally("~", time.Now(), time.Second))
+	g.Expect(res.Transactions[0].TransactionDate).To(gomega.BeTemporally("~", oldDate, time.Second))
 }
 
 func TestTransactions_GetUnreconciledTransactionsOnAccountForDate(t *testing.T) {

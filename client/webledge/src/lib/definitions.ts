@@ -96,6 +96,11 @@ export type TransactionLedgerEntry = {
     isSplit: boolean
     isReconciled: boolean
 };
+export type AccountReconcileDatePostRequest = {
+    accountID: number
+    accountReconcileDate: string
+};
+
 
 
 export type AccountReconcileResponse = {

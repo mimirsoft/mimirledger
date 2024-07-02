@@ -71,7 +71,7 @@ func (ac *AccountsController) CreateAccount(_ context.Context, account *models.A
 	return account, nil
 }
 
-// POST /accounts/{accountID}
+// PUT /accounts/{accountID}
 func (ac *AccountsController) UpdateAccount(_ context.Context, account *models.Account) (*models.Account, error) {
 	err := account.Update(ac.DataStores)
 	if err != nil {
@@ -79,4 +79,19 @@ func (ac *AccountsController) UpdateAccount(_ context.Context, account *models.A
 	}
 
 	return account, nil
+}
+
+// PUT /accounts/{accountID}/reconciled
+func (ac *AccountsController) UpdateAccountReconciledDate(_ context.Context, account *models.Account) (*models.Account, error) {
+	myAccount, err := models.RetrieveAccountByID(ac.DataStores, account.AccountID)
+	if err != nil {
+		return nil, fmt.Errorf("models.RetrieveAccountByID:%w", err)
+	}
+	myAccount.AccountReconcileDate = account.AccountReconcileDate
+	err = myAccount.UpdateReconciledDate(ac.DataStores)
+	if err != nil {
+		return nil, fmt.Errorf("account.Update:%w", err)
+	}
+
+	return myAccount, nil
 }

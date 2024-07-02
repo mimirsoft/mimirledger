@@ -303,7 +303,7 @@ func (c *Account) UpdateReconciledDate(dStores *datastore.Datastores) error {
 
 	err := dStores.AccountStore().SetAccountReconciledDate(&eAcct)
 	if err != nil {
-		return fmt.Errorf("ds.AccountStore().GetBalance:%w", err)
+		return fmt.Errorf("ds.AccountStore().SetAccountReconciledDate:%w", err)
 	}
 
 	*c = Account(eAcct)

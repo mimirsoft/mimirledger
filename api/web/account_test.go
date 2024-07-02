@@ -9,6 +9,7 @@ import (
 	"github.com/onsi/gomega"
 	"net/http"
 	"testing"
+	"time"
 )
 
 func TestAccount_GetAccountsIDInvalid(t *testing.T) {
@@ -292,4 +293,58 @@ func TestAccountPost_Update(t *testing.T) {
 	g.Expect(resAcct.AccountSign).To(gomega.Equal("DEBIT"))
 	g.Expect(resAcct.AccountParent).To(gomega.Equal(a1.AccountID))
 	g.Expect(resAcct.AccountFullName).To(gomega.Equal("MY BANK:my_bank_update_sub"))
+}
+
+func TestAccount_PutUpdateAccountReconciledDate(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDatastores(TestDataStore)
+
+	// store 1 account manually
+	a1 := models.Account{AccountName: "MY BANK", AccountSign: datastore.AccountSignDebit,
+		AccountType: datastore.AccountTypeAsset}
+	err := a1.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred()) // reset datastore
+
+	acctReq := map[string]interface{}{
+		"accountName": "my bank",
+		"accountType": "ASSET",
+	}
+	// create the account
+	var test = RouterTest{Request: Request{
+		Method:     http.MethodPost,
+		Router:     TestRouter,
+		RequestURL: "/accounts",
+		Payload:    acctReq,
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	var accountRes response.Account
+	test.ExecWithUnmarshal(&accountRes)
+	g.Expect(accountRes.AccountName).To(gomega.Equal("my bank"))
+	g.Expect(accountRes.AccountType).To(gomega.Equal("ASSET"))
+	g.Expect(accountRes.AccountSign).To(gomega.Equal("DEBIT"))
+	g.Expect(accountRes.AccountReconcileDate).To(gomega.Equal(time.Time{}))
+
+	oldDate, err := time.Parse("2006-01-02", "2016-07-08")
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	acctReq = map[string]interface{}{
+		"accountReconcileDate": oldDate.Format(time.RFC3339),
+	}
+	// update the account name
+	var test2 = RouterTest{Request: Request{
+		Method:     http.MethodPut,
+		Router:     TestRouter,
+		RequestURL: fmt.Sprintf("/accounts/%d/reconciled", accountRes.AccountID),
+		Payload:    acctReq,
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	var resAcct response.Account
+	test2.ExecWithUnmarshal(&resAcct)
+	g.Expect(resAcct.AccountName).To(gomega.Equal("my bank"))
+	g.Expect(resAcct.AccountType).To(gomega.Equal("ASSET"))
+	g.Expect(resAcct.AccountSign).To(gomega.Equal("DEBIT"))
+	g.Expect(resAcct.AccountParent).To(gomega.Equal(uint64(0)))
+	g.Expect(resAcct.AccountFullName).To(gomega.Equal("my bank"))
+	g.Expect(resAcct.AccountReconcileDate).To(gomega.Equal(oldDate))
 }

@@ -70,25 +70,30 @@ export default function AccountReconcileForm() {
 
     return (
         <div className="flex w-full flex-col md:col-span-4 grow justify-between rounded-xl bg-slate-100 p-4">
-            <div className="flex font-bold text-xl">AccountReconcileForm</div>
+            <div className="flex font-bold text-xl">Account Reconciliation Form</div>
             <div className="flex m-2">
-                <div className="w-80 my-4 font-bold mx-0 bg-slate-200">
+                <div className="w-80 my-0 font-bold mx-0 bg-slate-200">
+                    {data?.accountName}
+                </div>
+            </div>
+            <div className="flex m-2">
+                <div className="w-80 my-0 font-bold mx-0 bg-slate-200">
                     Currently reconciled thru date:
                 </div>
-                <div className="w-24 my-4 font-bold mx-0 bg-slate-200">
+                <div className="w-24 my-0 font-bold mx-0 bg-slate-200">
                     {acctDate.toISOString().split('T')[0]}
                 </div>
             </div>
             <div className="flex m-2">
                 <form className="flex" onSubmit={updateReconcileSearchDate}>
-                    <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Date:
+                    <label className="my-4 text-xl font-bold mr-4 bg-slate-200">Date:
                         <input className="bg-slate-300 font-normal" type="date" name="accountReconcileSearchDate"
                                defaultValue={searchDate}/>
                     </label>
-                    <div className="bg-slate-300 flex">
-                        <input className=" bg-slate-300" type="hidden" name="accountID"
+                    <div className="bg-slate-300 flex  mr-4">
+                        <input type="hidden" name="accountID"
                                defaultValue={accountID}/>
-                        <button className="p-3 font-bold" type="submit">Search For Date</button>
+                        <button className="p-3 font-bold bg-blue-500" type="submit">Search For Date</button>
                     </div>
                 </form>
                 <div className="flex justify-end">

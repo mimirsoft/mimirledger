@@ -14,7 +14,7 @@ import (
 
 const maxAgeSeconds = 300
 
-func NewRouter(dStores *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
+func NewRouter(dStores *datastore.Datastores, logger *zerolog.Logger) *chi.Mux { //nolint:funlen
 	r := chi.NewRouter() //nolint:varnamelen
 	r.Use(middlewares.RequestID)
 
@@ -41,6 +41,7 @@ func NewRouter(dStores *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 
 	healthController := NewHealthController(dStores)
 	accountsController := NewAccountsController(dStores)
+	reportsController := NewReportsController(dStores)
 	transController := NewTransactionsController(dStores)
 
 	r.Get("/", func(w http.ResponseWriter, _ *http.Request) {
@@ -62,6 +63,9 @@ func NewRouter(dStores *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 	r.Put("/accounts/{accountID}", NewRootHandler(PutAccountUpdate(accountsController)).ServeHTTP)
 	r.Put("/accounts/{accountID}/reconciled", NewRootHandler(PutAccountUpdateReconciled(accountsController)).ServeHTTP)
 	r.Get("/accounttypes", NewRootHandler(GetAccountTypes(accountsController)).ServeHTTP)
+	r.Get("/reports", NewRootHandler(GetReports(reportsController)).ServeHTTP)
+	r.Post("/reports", NewRootHandler(PostReports(reportsController)).ServeHTTP)
+
 	r.Post("/transactions", NewRootHandler(PostTransactions(transController)).ServeHTTP)
 	r.Get("/transactions/account/{accountID}", NewRootHandler(GetTransactionsOnAccount(transController)).ServeHTTP)
 	r.Get("/transactions/account/{accountID}/unreconciled",

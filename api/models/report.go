@@ -70,6 +70,24 @@ func RetrieveReportByID(dStores *datastore.Datastores, reportID uint64) (*Report
 	return myReport, nil
 }
 
+// RetrieveReports retrieves all reports
+func RetrieveReports(dStores *datastore.Datastores) ([]*Report, error) {
+	store := dStores.ReportStore()
+
+	eReport, err := store.Retrieve()
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrReportNotFound
+		}
+
+		return nil, fmt.Errorf("ReportStore().RetrieveByID:%w", err)
+	}
+
+	myReportSet := entReportsSetToReportsSet(eReport)
+
+	return myReportSet, nil
+}
+
 func reportToEntReport(myReport *Report) *datastore.Report {
 	eReport := datastore.Report{
 		ReportID:   myReport.ReportID,
@@ -82,6 +100,16 @@ func reportToEntReport(myReport *Report) *datastore.Report {
 	}
 
 	return &eReport
+}
+func entReportsSetToReportsSet(eReportSet []*datastore.Report) []*Report {
+	reportSet := make([]*Report, len(eReportSet))
+
+	for idx := range eReportSet {
+		myRpt := entReportToReport(eReportSet[idx])
+		reportSet[idx] = myRpt
+	}
+
+	return reportSet
 }
 
 func entReportToReport(entReport *datastore.Report) *Report {

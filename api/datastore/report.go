@@ -1,6 +1,7 @@
 package datastore
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
@@ -113,4 +114,32 @@ func (store ReportStore) RetrieveByID(id uint64) (*Report, error) {
 	}
 
 	return &myReport, nil
+}
+
+// Gets All Reports.
+func (store ReportStore) Retrieve() ([]*Report, error) {
+	query := `select * from reports order by report_name`
+
+	rows, err := store.Client.Queryx(query)
+	if err != nil {
+		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
+	}
+	defer rows.Close()
+
+	var set []*Report
+
+	for rows.Next() {
+		var report Report
+		if err = rows.StructScan(&report); err != nil { //nolint:musttag
+			return nil, fmt.Errorf("rows.StructScan:%w", err)
+		}
+
+		set = append(set, &report)
+	}
+
+	if len(set) == 0 {
+		return nil, sql.ErrNoRows
+	}
+
+	return set, nil
 }

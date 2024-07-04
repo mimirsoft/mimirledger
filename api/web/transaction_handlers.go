@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/mimirsoft/mimirledger/api/models"
 	"github.com/mimirsoft/mimirledger/api/web/request"
 	"github.com/mimirsoft/mimirledger/api/web/response"
@@ -197,7 +198,7 @@ func DeleteTransaction(contoller *TransactionsController) func(res http.Response
 }
 
 // PUT /transactions/{transactionID}/reconciled
-func PutTransactionReconciled(contoller *TransactionsController) func(res http.ResponseWriter, //nolint:dupl
+func PutTransactionReconciled(contoller *TransactionsController) func(res http.ResponseWriter,
 	req *http.Request) error {
 	return func(res http.ResponseWriter, req *http.Request) error {
 		idStr := chi.URLParam(req, "transactionID")
@@ -205,6 +206,7 @@ func PutTransactionReconciled(contoller *TransactionsController) func(res http.R
 		transactionID, err := strconv.ParseUint(idStr, 10, 64)
 		if err != nil {
 			err = fmt.Errorf("%w : [transactionIDstr: %s]", err, idStr)
+
 			return NewRequestError(http.StatusBadRequest, err)
 		}
 

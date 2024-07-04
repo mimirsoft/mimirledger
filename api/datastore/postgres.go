@@ -19,6 +19,7 @@ type Datastores struct {
 	accountStore       AccountStore
 	transactionStore   TransactionStore
 	transactionDCStore TransactionDebitCreditStore
+	reportStore        ReportStore
 }
 
 // AccountStore is the way to access the AccountStore.
@@ -36,6 +37,11 @@ func (ds *Datastores) TransactionDebitCreditStore() TransactionDebitCreditStore 
 	return ds.transactionDCStore
 }
 
+// ReportStore is the way to access the ReportStore.
+func (ds *Datastores) ReportStore() ReportStore {
+	return ds.reportStore
+}
+
 // PGClient is the way to access the Postgres Client
 func (ds *Datastores) PGClient() *sqlx.DB {
 	return ds.postgresClient
@@ -44,6 +50,9 @@ func (ds *Datastores) PGClient() *sqlx.DB {
 func NewDatastores(conn *sqlx.DB) *Datastores {
 	return &Datastores{postgresClient: conn,
 		accountStore: AccountStore{
+			Client: conn,
+		},
+		reportStore: ReportStore{
 			Client: conn,
 		},
 		transactionStore: TransactionStore{

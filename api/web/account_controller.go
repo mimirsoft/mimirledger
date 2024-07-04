@@ -82,12 +82,15 @@ func (ac *AccountsController) UpdateAccount(_ context.Context, account *models.A
 }
 
 // PUT /accounts/{accountID}/reconciled
-func (ac *AccountsController) UpdateAccountReconciledDate(_ context.Context, account *models.Account) (*models.Account, error) {
+func (ac *AccountsController) UpdateAccountReconciledDate(_ context.Context,
+	account *models.Account) (*models.Account, error) {
 	myAccount, err := models.RetrieveAccountByID(ac.DataStores, account.AccountID)
 	if err != nil {
 		return nil, fmt.Errorf("models.RetrieveAccountByID:%w", err)
 	}
+
 	myAccount.AccountReconcileDate = account.AccountReconcileDate
+
 	err = myAccount.UpdateReconciledDate(ac.DataStores)
 	if err != nil {
 		return nil, fmt.Errorf("account.Update:%w", err)

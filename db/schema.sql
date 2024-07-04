@@ -49,3 +49,9 @@ CREATE INDEX transactions_debit_credit_transaction_id_idx ON transaction_debit_c
 ALTER TABLE transaction_debit_credit
     ADD CONSTRAINT transactions_debit_credit_transaction_account_id_fkey FOREIGN KEY (account_id) REFERENCES transaction_accounts(account_id);
 CREATE INDEX transactions_debit_credit_transaction_account_idx ON transaction_debit_credit (account_id);
+
+
+CREATE TABLE reports (
+          report_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
+          report_name varchar(250) NOT NULL CHECK (report_name <> ''),
+          report_body JSONB NOT NULL) ;

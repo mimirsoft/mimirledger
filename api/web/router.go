@@ -6,11 +6,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-
 	"github.com/mimirsoft/mimirledger/api/datastore"
 	"github.com/mimirsoft/mimirledger/api/middlewares"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 const maxAgeSeconds = 300

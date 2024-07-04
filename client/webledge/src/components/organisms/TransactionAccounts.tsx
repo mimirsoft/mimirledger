@@ -113,7 +113,7 @@ export default function TransactionAccounts(){
                     <div className="w-20 font-bold">
                         Sign
                     </div>
-                    <div className="w-20 font-bold">
+                    <div className="w-24 font-bold">
                         Rec Date
                     </div>
                 </div>
@@ -163,7 +163,7 @@ export default function TransactionAccounts(){
                                 <div className="w-20">
                                     {account.accountSign}
                                 </div>
-                                <div className="w-20">
+                                <div className="w-24">
                                     {acctReconciledDateStr}
                                 </div>
                             </Link>

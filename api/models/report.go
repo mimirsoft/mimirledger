@@ -35,7 +35,7 @@ func (c *Report) Store(dStores *datastore.Datastores) error {
 	return nil
 }
 
-// Store inserts a Transaction
+// Update updates a Report
 func (c *Report) Update(dStores *datastore.Datastores) error {
 	eReport := reportToEntReport(c)
 
@@ -62,7 +62,7 @@ func RetrieveReportByID(dStores *datastore.Datastores, reportID uint64) (*Report
 			return nil, ErrReportNotFound
 		}
 
-		return nil, fmt.Errorf("AccountStore().GetAccountByID:%w", err)
+		return nil, fmt.Errorf("ReportStore().RetrieveByID:%w", err)
 	}
 
 	myReport := entReportToReport(eReport)

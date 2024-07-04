@@ -5,7 +5,7 @@ import NavTitle from "../molecules/NavTitle";
 const MENU_LIST = [
     { text: "Home", href: "/" },
     { text: "Accounts", href: "/accounts" },
-    { text: "AccountTypes", href: "/accounttypes" },
+    { text: "Reports", href: "/reports" },
 ];
 
 const NavBar = () => {

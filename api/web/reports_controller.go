@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/mimirsoft/mimirledger/api/datastore"
@@ -24,6 +25,10 @@ func NewReportsController(ds *datastore.Datastores) *ReportsController {
 func (ac *ReportsController) ReportList(_ context.Context) ([]*models.Report, error) {
 	reports, err := models.RetrieveReports(ac.DataStores)
 	if err != nil {
+		if errors.Is(err, models.ErrNoReports) {
+			return nil, nil
+		}
+
 		return nil, fmt.Errorf("models.RetrieveReports:%w", err)
 	}
 

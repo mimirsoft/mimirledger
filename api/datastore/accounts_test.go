@@ -509,4 +509,8 @@ func setupDB(g *gomega.WithT) {
 	query = `delete from transaction_accounts `
 	_, err = TestPostgresClient.Exec(query)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	query = `delete from reports `
+	_, err = TestPostgresClient.Exec(query)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
 }

@@ -36,7 +36,7 @@ func TestReportStore_StoreInvalidEmpty(t *testing.T) {
 func TestReportStore_StoreValid(t *testing.T) {
 	g := gomega.NewWithT(t)
 	gomega.RegisterFailHandler(ginkgo.Fail)
-
+	setupDB(g)
 	store := createReportStore()
 
 	a1 := Report{
@@ -51,10 +51,10 @@ func TestReportStore_StoreValid(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 }
 
-func TestReportStore_StoreAndRetrieve(t *testing.T) {
+func TestReportStore_StoreAndRetrieveByID(t *testing.T) {
 	g := gomega.NewWithT(t)
 	gomega.RegisterFailHandler(ginkgo.Fail)
-
+	setupDB(g)
 	store := createReportStore()
 
 	a1 := Report{
@@ -76,10 +76,49 @@ func TestReportStore_StoreAndRetrieve(t *testing.T) {
 	g.Expect(myReport.ReportBody.RecurseSubAccounts).To(gomega.Equal(0))
 }
 
+func TestReportStore_StoreAndRetrieve(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDB(g)
+	store := createReportStore()
+
+	a1 := Report{
+		ReportName: "test",
+		ReportBody: ReportBody{
+			AccountSetType:     ReportAccountSetGroup,
+			PredefinedAccounts: []uint64{1, 2, 3},
+			RecurseSubAccounts: 0,
+		},
+	}
+	err := store.Store(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	a2 := Report{
+		ReportName: "test2",
+		ReportBody: ReportBody{
+			AccountSetType:     ReportAccountSetGroup,
+			PredefinedAccounts: []uint64{1, 2, 3},
+			RecurseSubAccounts: 0,
+		},
+	}
+	err = store.Store(&a2)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myReports, err := store.Retrieve()
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myReports).To(gomega.HaveLen(2))
+	g.Expect(myReports[0].ReportName).To(gomega.Equal("test"))
+	g.Expect(myReports[0].ReportBody.AccountSetType).To(gomega.Equal(ReportAccountSetGroup))
+	g.Expect(myReports[0].ReportBody.PredefinedAccounts).To(gomega.ConsistOf([]uint64{1, 2, 3}))
+	g.Expect(myReports[0].ReportBody.RecurseSubAccounts).To(gomega.Equal(0))
+	g.Expect(myReports[1].ReportName).To(gomega.Equal("test2"))
+
+}
+
 func TestReportStore_StoreAndUpdate(t *testing.T) {
 	g := gomega.NewWithT(t)
 	gomega.RegisterFailHandler(ginkgo.Fail)
-
+	setupDB(g)
 	store := createReportStore()
 
 	a1 := Report{

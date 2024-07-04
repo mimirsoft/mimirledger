@@ -49,6 +49,9 @@ func setupDatastores(ds *datastore.Datastores) {
 	if err := TeardownTestAccounts(ds.PGClient()); err != nil {
 		log.Panicln(err)
 	}
+	if err := TeardownTestReports(ds.PGClient()); err != nil {
+		log.Panicln(err)
+	}
 }
 
 // TeardownTestTransactionDebitsCredits truncates the transactions_accounts table
@@ -60,6 +63,12 @@ func TeardownTestTransactionDebitsCredits(client *sqlx.DB) (err error) {
 // TeardownTestAccounts truncates the transactions_accounts table
 func TeardownTestAccounts(client *sqlx.DB) (err error) {
 	_, err = client.Exec("TRUNCATE TABLE transaction_accounts CASCADE;")
+	return
+}
+
+// TeardownTestReports truncates the reports table
+func TeardownTestReports(client *sqlx.DB) (err error) {
+	_, err = client.Exec("TRUNCATE TABLE reports CASCADE;")
 	return
 }
 

@@ -70,6 +70,8 @@ func RetrieveReportByID(dStores *datastore.Datastores, reportID uint64) (*Report
 	return myReport, nil
 }
 
+var ErrNoReports = errors.New("no reports found")
+
 // RetrieveReports retrieves all reports
 func RetrieveReports(dStores *datastore.Datastores) ([]*Report, error) {
 	store := dStores.ReportStore()
@@ -77,10 +79,10 @@ func RetrieveReports(dStores *datastore.Datastores) ([]*Report, error) {
 	eReport, err := store.Retrieve()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrReportNotFound
+			return nil, ErrNoReports
 		}
 
-		return nil, fmt.Errorf("ReportStore().RetrieveByID:%w", err)
+		return nil, fmt.Errorf("ReportStore().RetrieveReports:%w", err)
 	}
 
 	myReportSet := entReportsSetToReportsSet(eReport)

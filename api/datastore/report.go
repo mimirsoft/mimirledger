@@ -77,6 +77,30 @@ func (store ReportStore) Store(myReport *Report) error {
 	return nil
 }
 
+// Store inserts a UserNotification into postgres, we do not include :report_id in our insert
+func (store ReportStore) Update(myReport *Report) error {
+	query := `UPDATE  reports 
+		   SET (report_name,
+				report_body) 
+		       = (:report_name,
+				:report_body)
+		   WHERE report_id = :report_id
+		 RETURNING *`
+
+	stmt, err := store.Client.PrepareNamed(query)
+	if err != nil {
+		return fmt.Errorf("error preparing report update: %w", err)
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRow(myReport).StructScan(myReport) //nolint:musttag
+	if err != nil {
+		return fmt.Errorf("stmt.QueryRow().StructScan():%w", err)
+	}
+
+	return nil
+}
+
 func (store ReportStore) RetrieveByID(id uint64) (*Report, error) {
 	query := `select * from reports where report_id = $1`
 

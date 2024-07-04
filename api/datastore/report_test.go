@@ -75,3 +75,46 @@ func TestReportStore_StoreAndRetrieve(t *testing.T) {
 	g.Expect(myReport.ReportBody.PredefinedAccounts).To(gomega.ConsistOf([]uint64{1, 2, 3}))
 	g.Expect(myReport.ReportBody.RecurseSubAccounts).To(gomega.Equal(0))
 }
+
+func TestReportStore_StoreAndUpdate(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+
+	store := createReportStore()
+
+	a1 := Report{
+		ReportName: "test",
+		ReportBody: ReportBody{
+			AccountSetType:     ReportAccountSetGroup,
+			PredefinedAccounts: []uint64{1, 2, 3},
+			RecurseSubAccounts: 0,
+		},
+	}
+	err := store.Store(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myReport, err := store.RetrieveByID(a1.ReportID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myReport.ReportName).To(gomega.Equal("test"))
+	g.Expect(myReport.ReportBody.AccountSetType).To(gomega.Equal(ReportAccountSetGroup))
+	g.Expect(myReport.ReportBody.PredefinedAccounts).To(gomega.ConsistOf([]uint64{1, 2, 3}))
+	g.Expect(myReport.ReportBody.RecurseSubAccounts).To(gomega.Equal(0))
+
+	myReport.ReportName = "updatedName"
+	myReport.ReportBody.AccountSetType = ReportAccountSetPredefined
+	myReport.ReportBody.PredefinedAccounts = []uint64{2, 3, 4, 5}
+	myReport.ReportBody.RecurseSubAccounts = 1
+	err = store.Update(myReport)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myReport.ReportName).To(gomega.Equal("updatedName"))
+	g.Expect(myReport.ReportBody.AccountSetType).To(gomega.Equal(ReportAccountSetPredefined))
+	g.Expect(myReport.ReportBody.PredefinedAccounts).To(gomega.ConsistOf([]uint64{2, 3, 4, 5}))
+	g.Expect(myReport.ReportBody.RecurseSubAccounts).To(gomega.Equal(1))
+
+	updatedRetrieve, err := store.RetrieveByID(a1.ReportID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(updatedRetrieve.ReportName).To(gomega.Equal("updatedName"))
+	g.Expect(updatedRetrieve.ReportBody.AccountSetType).To(gomega.Equal(ReportAccountSetPredefined))
+	g.Expect(updatedRetrieve.ReportBody.PredefinedAccounts).To(gomega.ConsistOf([]uint64{2, 3, 4, 5}))
+	g.Expect(updatedRetrieve.ReportBody.RecurseSubAccounts).To(gomega.Equal(1))
+}

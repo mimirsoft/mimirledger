@@ -1,8 +1,9 @@
-import React, {FormEvent} from "react";
+import React, {FormEvent, ReactElement} from "react";
 import {ReportPostRequest, ReportBody, Report} from "../../lib/definitions";
 import { useGetReports} from "../../lib/data";
 import {Link} from "react-router-dom";
 import {formatCurrency} from "../../lib/utils";
+import Modal from "../molecules/Modal";
 
 const postFormData = async (formData: FormData) => {
     try {
@@ -31,17 +32,35 @@ const postFormData = async (formData: FormData) => {
         console.error('Error making POST request:', error);
     }
 }
+type ErrResponse = {
+    statusCode: number
+    err: string
+}
 export default function ReportsForm(){
     const { data, error, isLoading } = useGetReports()
+
+    const [showModal, setShowModal] = React.useState(false);
+    const [modalBody, setModalBody] = React.useState("");
+    const [modalTitle, setModalTitle] = React.useState("");
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
         const formData = new FormData(event.currentTarget)
-        const result = await postFormData(formData);
-        window.location.reload();
+        const myResponse = await postFormData(formData);
+        if (myResponse?.status == 200) {
+            window.location.reload();
+        } else {
+            setModalTitle("ERROR SAVING REPORT")
+            let errMsg= ""
+            let errData = await myResponse?.json()
+
+            setModalBody("<h1>"+errData.err+"</h1>")
+            setShowModal(true)
+        }
     };
 
     return (
+    <div>
         <div className="flex w-full flex-col md:col-span-4 bg-slate-100 p-4">
             <div className="text-xl font-bold">
                 Create New Report
@@ -88,7 +107,9 @@ export default function ReportsForm(){
                         </div>
                     );
                 })}
-
         </div>
+        {modalBody}
+        <Modal showModal={showModal} setShowModal={setShowModal} title={modalTitle} body={modalBody}/>
+    </div>
     );
 }

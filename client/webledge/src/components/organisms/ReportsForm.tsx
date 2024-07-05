@@ -1,24 +1,94 @@
-import React from "react";
+import React, {FormEvent} from "react";
+import {ReportPostRequest, ReportBody, Report} from "../../lib/definitions";
+import { useGetReports} from "../../lib/data";
+import {Link} from "react-router-dom";
+import {formatCurrency} from "../../lib/utils";
 
+const postFormData = async (formData: FormData) => {
+    try {
+        const myURL = new URL('/reports', process.env.REACT_APP_MIMIRLEDGER_API_URL);
+        // Do a bit of work to convert the entries to a plain JS object
+        const formEntries = Object.fromEntries(formData);
+        console.log(formEntries.accountParent)
+
+        const newReportBody : ReportBody = {
+            accountSetType:  String(formEntries.accountSetType),
+            predefinedAccounts: [],
+            recurseSubAccounts: 0,
+        }
+        const newReport : ReportPostRequest = {
+            reportName : String(formEntries.reportName),
+            reportBody:newReportBody,
+        };
+        var json = JSON.stringify(newReport);
+        console.log(json)
+        const settings :RequestInit = {
+            method: 'POST',
+            body: json,
+        };
+        return await fetch(myURL, settings);
+    } catch (error) {
+        console.error('Error making POST request:', error);
+    }
+}
 export default function ReportsForm(){
+    const { data, error, isLoading } = useGetReports()
+
+    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        const formData = new FormData(event.currentTarget)
+        const result = await postFormData(formData);
+        window.location.reload();
+    };
 
     return (
-        <div className="flex w-full flex-col md:col-span-4">
-            <div className="flex grow flex-col justify-between rounded-xl bg-slate-100 p-4">
-                <div className="text-xl font-bold">
-                    Create New Report
+        <div className="flex w-full flex-col md:col-span-4 bg-slate-100 p-4">
+            <div className="text-xl font-bold">
+                Create New Report
+            </div>
+            <form className="mb-2" onSubmit={handleSubmit}>
+                <div className="flex-col w-fit">
+                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Report Name:
+                        <input className="bg-slate-300 font-normal" type="text" name="reportName"/>
+                    </div>
+                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Account Group Type:
+                        <select name="accountSetType" className="font-normal">
+                            <option value="GROUP">GROUP</option>
+                            <option value="PREDEFINED">PREDEFINED</option>
+                            <option value="USER_SUPPLIED">USER_SUPPLIED</option>
+                        </select>
+                    </div>
+                    <div className=" flex">
+                        <button className="p-3 font-bold bg-slate-300" type="submit">Create Report</button>
+                    </div>
+                </div>
+            </form>
+            <div className="text-xl font-bold">
+                    My Reports
                 </div>
                 <div className="flex">
-                    <form className="flex">
-                        <label className="my-4 mr-4 text-xl font-bold bg-slate-200">Report Name:
-                            <input className="bg-slate-300 font-normal" type="text" name="reportName"/>
-                        </label>
-                        <div className="bg-slate-300 flex">
-                            <button className="p-3 font-bold" type="submit">Create Report</button>
-                        </div>
-                    </form>
+                    <div className="w-20 font-bold">
+                        Name
+                    </div>
+                    <div className="w-20 font-bold">
+                        Body
+                    </div>
                 </div>
-            </div>
+                {data?.reports && data.reports.map((report: Report, index: number) => {
+
+                    return (
+                        <div className={'flex '} key={index}>
+                            <div className="w-20">
+                                {report.reportName}
+                            </div>
+                            <div className="w-20">
+                                {JSON.stringify(report.reportBody)}
+                            </div>
+
+                        </div>
+                    );
+                })}
+
         </div>
     );
 }

@@ -53,5 +53,5 @@ CREATE INDEX transactions_debit_credit_transaction_account_idx ON transaction_de
 
 CREATE TABLE reports (
           report_id INTEGER PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-          report_name varchar(250) NOT NULL CHECK (report_name <> ''),
+          report_name varchar(250) NOT NULL CHECK (report_name <> '') UNIQUE,
           report_body JSONB NOT NULL) ;

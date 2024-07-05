@@ -1,16 +1,15 @@
-import { formatCurrency } from './utils';
 import useSWR from "swr";
 import {
     Account, AccountReconcileResponse,
     AccountSet, TransactionAccountType, TransactionAccountTypeSet,
-    TransactionLedgerResponse, TransactionResponse
+    TransactionLedgerResponse, TransactionResponse,
+    ReportSet
 } from "./definitions";
 import {KeyedMutator} from "swr/_internal";
 
 
-const accountURL = new URL('/accounts', process.env.REACT_APP_MIMIRLEDGER_API_URL);
 export const  useGetAccounts = ():{data:AccountSet | undefined, isLoading:boolean, error: string|undefined} => {
-   return useSWR<AccountSet, string>(accountURL);
+   return useSWR<AccountSet, string>(process.env.REACT_APP_MIMIRLEDGER_API_URL+'/accounts');
 }
 
 export const useGetAccount = (accountID:string |undefined):{data:Account | undefined, isLoading:boolean, error: string|undefined} => {
@@ -24,7 +23,6 @@ export const useGetTransaction = (transactionID:string |undefined):{
     return useSWR<TransactionResponse, string>(process.env.REACT_APP_MIMIRLEDGER_API_URL+'/transactions/'+transactionID);
 }
 
-
 // get the transactionLedger
 export const useGetTransactionsOnAccountLedger = (accountID:string |undefined):{data:TransactionLedgerResponse | undefined, isLoading:boolean, error: string|undefined} => {
     return useSWR<TransactionLedgerResponse, string>(process.env.REACT_APP_MIMIRLEDGER_API_URL+'/transactions/account/'+accountID);
@@ -35,7 +33,9 @@ export const useGetTransactionAccountTypes =  ():{data:TransactionAccountTypeSet
    return useSWR(accountTypesURL)
 }
 
-
+export const  useGetReports = ():{data:ReportSet | undefined, isLoading:boolean, error: string|undefined} => {
+    return useSWR<ReportSet, string>(process.env.REACT_APP_MIMIRLEDGER_API_URL+'/reports');
+}
 
 // get the transactionLedger
 export const useGetUnreconciledTransactionOnAccount = (accountID:string |undefined, date:string):{
@@ -46,5 +46,3 @@ export const useGetUnreconciledTransactionOnAccount = (accountID:string |undefin
     return useSWR<AccountReconcileResponse, string>(process.env.REACT_APP_MIMIRLEDGER_API_URL+
         '/transactions/account/'+accountID+'/unreconciled?date='+date);
 };
-
-// getAccounts - make map ID to name

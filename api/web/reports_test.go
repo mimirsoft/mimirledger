@@ -42,6 +42,7 @@ func TestReports_GetAll(t *testing.T) {
 
 	test.ExecWithUnmarshal(&reportSet)
 	g.Expect(reportSet.Reports).To(gomega.HaveLen(1))
+	g.Expect(reportSet.Reports[0].ReportID).To(gomega.Equal(a1.ReportID))
 	g.Expect(reportSet.Reports[0].ReportName).To(gomega.Equal("testName"))
 	g.Expect(reportSet.Reports[0].ReportBody.AccountSetType).To(gomega.Equal(datastore.ReportAccountSetGroup))
 	g.Expect(reportSet.Reports[0].ReportBody.PredefinedAccounts).To(gomega.ConsistOf([]uint64{1, 2, 3}))

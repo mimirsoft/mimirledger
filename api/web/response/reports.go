@@ -10,6 +10,7 @@ type ReportSet struct {
 	Reports []*Report `json:"reports"`
 }
 type Report struct {
+	ReportID   uint64     `json:"reportID"`
 	ReportName string     `json:"reportName"`
 	ReportBody ReportBody `json:"reportBody"`
 }
@@ -21,6 +22,7 @@ type ReportBody struct {
 
 func ReportToRespReport(rpt *models.Report) *Report {
 	return &Report{
+		ReportID:   rpt.ReportID,
 		ReportName: rpt.ReportName,
 		ReportBody: ReportBody{
 			AccountSetType:     rpt.ReportBody.AccountSetType,

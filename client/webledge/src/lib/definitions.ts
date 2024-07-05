@@ -17,8 +17,6 @@ export type Account = {
 
 };
 
-
-
 export type TransactionAccountPostRequest = {
     accountParent: number;
     accountName: string;
@@ -30,12 +28,10 @@ export type TransactionAccountTypeSet = {
     accountTypes:TransactionAccountType[]
 };
 
-
 export type TransactionAccountType = {
     name:string
     sign:string
 };
-
 
 export type TransactionResponse = {
     transactionID: number
@@ -101,8 +97,6 @@ export type AccountReconcileDatePostRequest = {
     accountReconcileDate: string
 };
 
-
-
 export type AccountReconcileResponse = {
     accountID: number;
     accountReconcileDate: string;
@@ -112,4 +106,24 @@ export type AccountReconcileResponse = {
     accountFullName: string;
     accountSign: string;
     transactions: TransactionLedgerEntry[];
+};
+
+export type ReportSet = {
+    reports: Report[];
+};
+
+export type Report = {
+    reportID: number;
+    reportName: string;
+    reportBody: ReportBody;
+};
+export type ReportBody = {
+    accountSetType: string;
+    predefinedAccounts: number[];
+    recurseSubAccounts: number;
+};
+
+export type ReportPostRequest = {
+    reportName: string;
+    reportBody: ReportBody;
 };

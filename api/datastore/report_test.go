@@ -31,6 +31,15 @@ func TestReportStore_StoreInvalidEmpty(t *testing.T) {
 	}
 	err = store.Store(&a2)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	// try to save another with same name should throw error
+	a3 := Report{
+		ReportName: "report_name",
+	}
+	err = store.Store(&a3)
+	g.Expect(err).To(gomega.HaveOccurred())
+	g.Expect(err.Error()).To(gomega.ContainSubstring(`duplicate key value violates unique constraint ` +
+		`"reports_report_name_key"`))
 }
 
 func TestReportStore_StoreValid(t *testing.T) {

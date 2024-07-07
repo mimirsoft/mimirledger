@@ -44,20 +44,41 @@ export default function ReportEditForm(){
     if (error) return <div>Failed to load</div>
 
      return (
-        <div className="flex">
-            <form className="flex" onSubmit={handleSubmit}>
-                <label className="my-4 text-xl font-bold mx-4 bg-slate-200">ReportName:
-                    <input className="bg-slate-300 font-normal" type="text" name="reportName"
-                           defaultValue={data?.reportName}/>
-                </label>
-                <div className="w-20">
-                    {JSON.stringify(data?.reportBody)}
-                </div>
-                <div className="bg-slate-300 flex">
-                    <input className=" bg-slate-300" type="hidden" name="accountID" defaultValue={data?.reportID}/>
-                    <button className="p-3 font-bold" type="submit">Update</button>
-                </div>
-            </form>
-        </div>
+         <div className="flex w-full flex-col p-4 ">
+             <div className="text-xl font-bold mb-2">
+                 Edit Report
+             </div>
+             <form className="flex-col w-fit" onSubmit={handleSubmit}>
+                 <label className="my-4 text-xl font-bold mx-4 bg-slate-200">ReportName:
+                     <input className="bg-slate-300 font-normal" type="text" name="reportName"
+                            defaultValue={data?.reportName}/>
+                 </label>
+                 <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Account Set Type:
+                     <select name="accountSetType" defaultValue={data?.reportBody.accountSetType}
+                             className="font-normal">
+                         <option value="GROUP">GROUP</option>
+                         <option value="PREDEFINED">PREDEFINED</option>
+                         <option value="USER_SUPPLIED">USER_SUPPLIED</option>
+                     </select>
+                 </div>
+                 <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Account Group:
+                     <select name="accountGroup" defaultValue={data?.reportBody.accountGroup} className="font-normal">
+                         <option value="null">NULL</option>
+                         <option value="ASSET">ASSET</option>
+                         <option value="LIABILITY">LIABILITY</option>
+                         <option value="EQUITY">EQUITY</option>
+                         <option value="INCOME">INCOME</option>
+                         <option value="EXPENSE">EXPENSE</option>
+                     </select>
+                 </div>
+                 <div className="w-20">
+                     {JSON.stringify(data?.reportBody)}
+                 </div>
+                 <div className="bg-slate-300 flex">
+                     <input className=" bg-slate-300" type="hidden" name="reportID" defaultValue={data?.reportID}/>
+                     <button className="p-3 font-bold" type="submit">Update</button>
+                 </div>
+             </form>
+         </div>
      );
 }

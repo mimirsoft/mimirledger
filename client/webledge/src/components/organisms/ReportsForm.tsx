@@ -2,7 +2,6 @@ import React, {FormEvent, ReactElement} from "react";
 import {ReportPostRequest, ReportBody, Report} from "../../lib/definitions";
 import { useGetReports} from "../../lib/data";
 import {Link} from "react-router-dom";
-import {formatCurrency} from "../../lib/utils";
 import Modal from "../molecules/Modal";
 
 const postFormData = async (formData: FormData) => {

@@ -54,3 +54,13 @@ func (ac *ReportsController) CreateReport(_ context.Context, report *models.Repo
 
 	return report, nil
 }
+
+// PUT /reports/{reportID}
+func (ac *ReportsController) UpdateReport(_ context.Context, report *models.Report) (*models.Report, error) {
+	err := report.Update(ac.DataStores)
+	if err != nil {
+		return nil, fmt.Errorf("account.Update:%w", err)
+	}
+
+	return report, nil
+}

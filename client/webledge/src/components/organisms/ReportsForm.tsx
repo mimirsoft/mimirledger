@@ -14,6 +14,7 @@ const postFormData = async (formData: FormData) => {
 
         const newReportBody : ReportBody = {
             accountSetType:  String(formEntries.accountSetType),
+            accountGroup:  String(formEntries.accountGroup),
             predefinedAccounts: [],
             recurseSubAccounts: 0,
         }
@@ -70,11 +71,21 @@ export default function ReportsForm(){
                     <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Report Name:
                         <input className="bg-slate-300 font-normal" type="text" name="reportName"/>
                     </div>
-                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Account Group Type:
+                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Account Set Type:
                         <select name="accountSetType" className="font-normal">
                             <option value="GROUP">GROUP</option>
                             <option value="PREDEFINED">PREDEFINED</option>
                             <option value="USER_SUPPLIED">USER_SUPPLIED</option>
+                        </select>
+                    </div>
+                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Account Group:
+                        <select name="accountGroup" className="font-normal">
+                            <option value="null">NULL</option>
+                            <option value="ASSET">ASSET</option>
+                            <option value="LIABILITY">LIABILITY</option>
+                            <option value="EQUITY">EQUITY</option>
+                            <option value="INCOME">INCOME</option>
+                            <option value="EXPENSE">EXPENSE</option>
                         </select>
                     </div>
                     <div className=" flex">
@@ -83,30 +94,32 @@ export default function ReportsForm(){
                 </div>
             </form>
             <div className="text-xl font-bold">
-                    My Reports
+                My Reports
+            </div>
+            <div className="flex">
+                <div className="w-20 font-bold">
+                    Name
                 </div>
-                <div className="flex">
-                    <div className="w-20 font-bold">
-                        Name
-                    </div>
-                    <div className="w-20 font-bold">
-                        Body
-                    </div>
+                <div className="w-20 font-bold">
+                    Body
                 </div>
-                {data?.reports && data.reports.map((report: Report, index: number) => {
-
-                    return (
-                        <div className={'flex '} key={index}>
-                            <div className="w-20">
-                                {report.reportName}
-                            </div>
-                            <div className="w-20">
-                                {JSON.stringify(report.reportBody)}
-                            </div>
-
+            </div>
+            {data?.reports && data.reports.map((report: Report, index: number) => {
+                return (
+                    <Link to={{
+                        pathname: '/reports/' + report.reportID,
+                    }} className={`font-bold`}>
+                    <div className={'flex '} key={index}>
+                        <div className="w-20">
+                            {report.reportName}
                         </div>
-                    );
-                })}
+                        <div className="w-20">
+                            {JSON.stringify(report.reportBody)}
+                        </div>
+                    </div>
+                    </Link>
+                );
+            })}
         </div>
         {modalBody}
         <Modal showModal={showModal} setShowModal={setShowModal} title={modalTitle} body={modalBody}/>

@@ -3,7 +3,7 @@ import {
     Account, AccountReconcileResponse,
     AccountSet, TransactionAccountType, TransactionAccountTypeSet,
     TransactionLedgerResponse, TransactionResponse,
-    ReportSet
+    ReportSet, Report
 } from "./definitions";
 import {KeyedMutator} from "swr/_internal";
 
@@ -35,6 +35,9 @@ export const useGetTransactionAccountTypes =  ():{data:TransactionAccountTypeSet
 
 export const  useGetReports = ():{data:ReportSet | undefined, isLoading:boolean, error: string|undefined} => {
     return useSWR<ReportSet, string>(process.env.REACT_APP_MIMIRLEDGER_API_URL+'/reports');
+}
+export const useGetReport = (reportID:string |undefined):{data:Report | undefined, isLoading:boolean, error: string|undefined} => {
+    return useSWR<Report, string>(process.env.REACT_APP_MIMIRLEDGER_API_URL+'/reports/'+reportID);
 }
 
 // get the transactionLedger

@@ -35,6 +35,16 @@ func (ac *ReportsController) ReportList(_ context.Context) ([]*models.Report, er
 	return reports, nil
 }
 
+// GET /reports/:reportID
+func (ac *ReportsController) GetReportByID(_ context.Context, reportID uint64) (*models.Report, error) {
+	report, err := models.RetrieveReportByID(ac.DataStores, reportID)
+	if err != nil {
+		return nil, fmt.Errorf("models.RetrieveReportByID:%w", err)
+	}
+
+	return report, nil
+}
+
 // POST /reports
 func (ac *ReportsController) CreateReport(_ context.Context, report *models.Report) (*models.Report, error) {
 	err := report.Store(ac.DataStores)

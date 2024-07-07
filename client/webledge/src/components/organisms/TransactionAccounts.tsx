@@ -138,7 +138,7 @@ export default function TransactionAccounts(){
                     return (
                         <div className={'flex '+rowColor} key={index}>
                             <Link to={'/transactions/account/' + account.accountID}
-                                  className={`flex nav__item mr-4 }`}>
+                                  className={`flex mr-4 }`}>
                                 <div className="w-8">
                                     {account.accountID}
                                 </div>
@@ -173,7 +173,7 @@ export default function TransactionAccounts(){
                             <Link to={{
                                 pathname: '/reconcile/' + account.accountID,
                                 search: '?date=' + reconcileDateStr
-                                }} className={`nav__item font-bold`}>
+                                }} className={`font-bold`}>
                                 Reconcile
                             </Link>
                         </div>

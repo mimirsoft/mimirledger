@@ -2,9 +2,14 @@ package web
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
+	"github.com/go-chi/chi/v5"
+
+	"github.com/mimirsoft/mimirledger/api/models"
 	"github.com/mimirsoft/mimirledger/api/web/request"
 	"github.com/mimirsoft/mimirledger/api/web/response"
 )
@@ -18,6 +23,37 @@ func GetReports(reportsCtl *ReportsController) func(res http.ResponseWriter, req
 		}
 
 		jsonResponse := response.ConvertReportsToRespReportsSet(Reports)
+
+		return RespondOK(res, jsonResponse)
+	}
+}
+
+var ErrInvalidReportID = errors.New("invalid reportID request parameter")
+
+// GET /reports/{reportID}
+func GetReport(reportsCtl *ReportsController) func(res http.ResponseWriter, req *http.Request) error {
+	return func(res http.ResponseWriter, req *http.Request) error {
+		reportIDStr := chi.URLParam(req, "reportID")
+
+		reportID, err := strconv.ParseUint(reportIDStr, 10, 64)
+		if err != nil {
+			return NewRequestError(http.StatusBadRequest, err)
+		}
+
+		if reportID == 0 {
+			return NewRequestError(http.StatusBadRequest, ErrInvalidAccountID)
+		}
+
+		report, err := reportsCtl.GetReportByID(req.Context(), reportID)
+		if err != nil {
+			if errors.Is(err, models.ErrReportNotFound) {
+				return NewRequestError(http.StatusNotFound, err)
+			}
+
+			return NewRequestError(http.StatusServiceUnavailable, err)
+		}
+
+		jsonResponse := response.ReportToRespReport(report)
 
 		return RespondOK(res, jsonResponse)
 	}

@@ -21,8 +21,10 @@ type Report struct {
 }
 type ReportBody struct {
 	AccountSetType     ReportAccountSetType `json:"accountSetType"`
+	AccountGroup       AccountType          `json:"accountGroup,omitempty"`
 	PredefinedAccounts []uint64             `json:"predefinedAccounts"`
 	RecurseSubAccounts int                  `json:"recurseSubAccounts"` // how many layers deep to recurse
+	DataSetType        ReportDataSetType    `json:"dataSetType"`
 }
 
 // AccountType is an enum for account type.
@@ -32,6 +34,15 @@ const (
 	ReportAccountSetGroup        = ReportAccountSetType("GROUP")
 	ReportAccountSetPredefined   = ReportAccountSetType("PREDEFINED")
 	ReportAccountSetUserSupplied = ReportAccountSetType("USER_SUPPLIED")
+)
+
+type ReportDataSetType string
+
+const (
+	ReportDataSetTypeBalance = ReportDataSetType("BALANCE")
+	ReportDataSetTypeLedger  = ReportDataSetType("LEDGER")
+	ReportDataSetTypeIncome  = ReportDataSetType("INCOME")
+	ReportDataSetTypeExpense = ReportDataSetType("EXPENSE")
 )
 
 // Make the struct implement the driver.Valuer interface. This method

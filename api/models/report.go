@@ -16,8 +16,10 @@ type Report struct {
 }
 type ReportBody struct {
 	AccountSetType     datastore.ReportAccountSetType
+	AccountGroup       datastore.AccountType
 	PredefinedAccounts []uint64
 	RecurseSubAccounts int
+	DataSetType        datastore.ReportDataSetType
 }
 
 // Store inserts a Report
@@ -96,8 +98,10 @@ func reportToEntReport(myReport *Report) *datastore.Report {
 		ReportName: myReport.ReportName,
 		ReportBody: datastore.ReportBody{
 			AccountSetType:     myReport.ReportBody.AccountSetType,
+			AccountGroup:       myReport.ReportBody.AccountGroup,
 			PredefinedAccounts: myReport.ReportBody.PredefinedAccounts,
 			RecurseSubAccounts: myReport.ReportBody.RecurseSubAccounts,
+			DataSetType:        myReport.ReportBody.DataSetType,
 		},
 	}
 
@@ -120,8 +124,10 @@ func entReportToReport(entReport *datastore.Report) *Report {
 		ReportName: entReport.ReportName,
 		ReportBody: ReportBody{
 			AccountSetType:     entReport.ReportBody.AccountSetType,
+			AccountGroup:       entReport.ReportBody.AccountGroup,
 			PredefinedAccounts: entReport.ReportBody.PredefinedAccounts,
 			RecurseSubAccounts: entReport.ReportBody.RecurseSubAccounts,
+			DataSetType:        entReport.ReportBody.DataSetType,
 		},
 	}
 

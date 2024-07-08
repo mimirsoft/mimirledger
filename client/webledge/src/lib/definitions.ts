@@ -122,6 +122,7 @@ export type ReportBody = {
     accountGroup: string;
     predefinedAccounts: number[];
     recurseSubAccounts: number;
+    dataSetType: string;
 };
 
 export type ReportPostRequest = {

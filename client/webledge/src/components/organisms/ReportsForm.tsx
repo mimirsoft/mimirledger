@@ -16,6 +16,7 @@ const postFormData = async (formData: FormData) => {
             accountGroup:  String(formEntries.accountGroup),
             predefinedAccounts: [],
             recurseSubAccounts: 0,
+            dataSetType:  String(formEntries.dataSetType),
         }
         const newReport : ReportPostRequest = {
             reportName : String(formEntries.reportName),
@@ -87,6 +88,20 @@ export default function ReportsForm(){
                             <option value="EXPENSE">EXPENSE</option>
                         </select>
                     </div>
+                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Data Set Type:
+                        <select name="dataSetType">
+                            <option value="AGING">Aging Summary</option>
+                            <option value="SUMGROUPLINE">Sum/Group/Line</option>
+                            <option value="BALANCE">Balance</option>
+                            <option value="INCOME">Income</option>
+                            <option value="EXPENSE">Expense</option>
+                            <option value="INCOMETRANS">Income Transactions</option>
+                            <option value="EXPENSETRANS">Expense Transactions</option>
+                            <option value="NETTRANS">Net Transactions</option>
+                            <option value="LEDGER">Ledger</option>
+                            <option value="RECONCILIATION">Reconciliation</option>
+                        </select>
+                    </div>
                     <div className=" flex">
                         <button className="p-3 font-bold bg-slate-300" type="submit">Create Report</button>
                     </div>
@@ -96,7 +111,7 @@ export default function ReportsForm(){
                 My Reports
             </div>
             <div className="flex">
-                <div className="w-20 font-bold">
+                <div className="w-32 font-bold">
                     Name
                 </div>
                 <div className="w-20 font-bold">
@@ -108,11 +123,11 @@ export default function ReportsForm(){
                     <Link to={{
                         pathname: '/reports/' + report.reportID,
                     }} className={`font-bold`}>
-                    <div className={'flex '} key={index}>
-                        <div className="w-20">
-                            {report.reportName}
-                        </div>
-                        <div className="w-20">
+                        <div className={'flex '} key={index}>
+                            <div className="w-32">
+                                {report.reportName}
+                            </div>
+                            <div className="w-20">
                             {JSON.stringify(report.reportBody)}
                         </div>
                     </div>

@@ -13,6 +13,7 @@ const postFormData = async (formData: FormData) => {
             accountGroup:  String(formEntries.accountGroup),
             predefinedAccounts: [],
             recurseSubAccounts: 0,
+            dataSetType:  String(formEntries.dataSetType),
         }
         const newReport : ReportPostRequest = {
             reportName : String(formEntries.reportName),
@@ -69,6 +70,20 @@ export default function ReportEditForm(){
                          <option value="EQUITY">EQUITY</option>
                          <option value="INCOME">INCOME</option>
                          <option value="EXPENSE">EXPENSE</option>
+                     </select>
+                 </div>
+                 <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Data Set Type:
+                     <select name="dataSetType" defaultValue={data?.reportBody.dataSetType}>
+                         <option value="AGING">Aging Summary</option>
+                         <option value="SUMGROUPLINE">Sum/Group/Line</option>
+                         <option value="BALANCE">Balance</option>
+                         <option value="INCOME">Income</option>
+                         <option value="EXPENSE">Expense</option>
+                         <option value="INCOMETRANS">Income Transactions</option>
+                         <option value="EXPENSETRANS">Expense Transactions</option>
+                         <option value="NETTRANS">Net Transactions</option>
+                         <option value="LEDGER">Ledger</option>
+                         <option value="RECONCILIATION">Reconciliation</option>
                      </select>
                  </div>
                  <div className="w-20">

@@ -52,8 +52,10 @@ const DebitsCreditsColumn = ( props:{name:string;
                 return (
                     <div className="mx-0 mb-2 flex flex-row flex-wrap text-right text-xl " key={index}>
                         <AccountSelector name={props.name+"Account" + index} id={transaction.accountID}
-                                     includeTop={true}
-                                     excludeID={0}/>
+                            includeTop={true}
+                            excludeID={0}
+                            multiple={false}
+                            multiSize={1}/>
                         <input className="w-24 text-xl bg-slate-300 text-right" type="text"
                                name={props.name+"Amount" + index}
                                defaultValue={formatCurrencyNoSign(transaction.transactionDCAmount)}/>

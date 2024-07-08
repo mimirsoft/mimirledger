@@ -72,7 +72,9 @@ export default function TransactionAccounts(){
                         </label>
                         <label className="my-4 text-xl font-bold mr-4 bg-slate-200">
                             AccountParent:
-                            <AccountSelector name={"accountParent"} id={0} includeTop={true} excludeID={0}/>
+                            <AccountSelector name={"accountParent"} id={0} includeTop={true} excludeID={0}
+                                 multiple={false}
+                                 multiSize={1}/>
                         </label>
                         <label className="my-4 mr-4 text-xl font-bold">AccountType:
                             <AccountTypeSelector selectedName=""/>

@@ -1,12 +1,12 @@
 import React from 'react'
-import ReportsRunForm from '../components/organisms/ReportsRunForm';
+import ReportsListForm from '../components/organisms/ReportsListForm';
 import ReportsSubNav from "../components/organisms/ReportsSubNav";
 
-export default function ReportsPage() {
+export default function ReportsListPage() {
     return (
         <div>
             <ReportsSubNav />
-            <ReportsRunForm />
+            <ReportsListForm />
         </div>
     );
 }

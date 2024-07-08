@@ -114,7 +114,9 @@ export default function TransactionAccountLedger() {
                     <label className="my-4 text-xl font-bold mx-4 bg-slate-200">
                         To Account:
                         <AccountSelector name={"otherAccountID"} id={0} includeTop={false}
-                                         excludeID={data?.accountID}/>
+                             excludeID={data?.accountID}
+                             multiple={false}
+                             multiSize={1}/>
                     </label>
                     <div className="bg-slate-300 flex">
                         <input className=" bg-slate-300" type="hidden" name="accountID"

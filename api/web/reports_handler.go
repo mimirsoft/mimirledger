@@ -78,6 +78,7 @@ func PutReportUpdate(reportsCtl *ReportsController) func(res http.ResponseWriter
 		}
 
 		var report request.Report
+
 		err = json.NewDecoder(req.Body).Decode(&report)
 		if err != nil {
 			return fmt.Errorf("json.NewDecoder(r.Body).Decode:%w", err)

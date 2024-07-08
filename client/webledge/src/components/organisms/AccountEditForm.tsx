@@ -50,7 +50,9 @@ export default function AccountEditForm(){
             </label>
             <label className="my-4 text-xl font-bold mx-4 bg-slate-200">
                 AccountParent:
-                <AccountSelector name={"accountParent"} id={data?.accountParent} includeTop={true} excludeID={0}/>
+                <AccountSelector name={"accountParent"} id={data?.accountParent} includeTop={true} excludeID={0}
+                     multiple={false}
+                     multiSize={1}/>
             </label>
             <label className="my-4 text-xl font-bold">AccountType:
                 <AccountTypeSelector selectedName={data?.accountType} />

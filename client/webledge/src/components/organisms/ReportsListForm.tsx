@@ -121,7 +121,7 @@ export default function ReportsForm(){
             {data?.reports && data.reports.map((report: Report, index: number) => {
                 return (
                     <Link to={{
-                        pathname: '/reports/' + report.reportID,
+                        pathname: '/reports/edit/' + report.reportID,
                     }} className={`font-bold`}>
                         <div className={'flex '} key={index}>
                             <div className="w-32">

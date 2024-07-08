@@ -13,6 +13,7 @@ import AccountEditPage from "./pages/AccountEditPage";
 import AccountReconcilePage from "./pages/AccountReconcilePage";
 import TransactionEditPage from "./pages/TransactionEditPage";
 import ReportsPage from "./pages/ReportsPage";
+import ReportsListPage from "./pages/ReportsListPage";
 import ReportEditPage from "./pages/ReportEditPage";
 
 const fetcher = (...args: Parameters<typeof fetch>) => fetch(...args).then(res => res.json())
@@ -29,7 +30,8 @@ function App() {
             <Route path="accounttypes" element={<AccountTypesPage />} />
             <Route path="reconcile/:accountID" element={<AccountReconcilePage/>} />
             <Route path="reports" element={<ReportsPage/>} />
-            <Route path="reports/:reportID" element={<ReportEditPage/>} />
+            <Route path="reports/list" element={<ReportsListPage/>} />
+            <Route path="reports/edit/:reportID" element={<ReportEditPage/>} />
             <Route path="transactions/:transactionID" element={<TransactionEditPage/>} />
             <Route path="transactions/account/:accountID" element={<TransactionsAccount />} />
             <Route path="*" element={<NoPage />} />

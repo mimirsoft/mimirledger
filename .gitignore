@@ -19,3 +19,21 @@
 
 # Go workspace file
 go.work
+
+.DS_Store
+.requirements
+gin-bin
+tmp
+local.env
+.env.local
+certs
+data-model
+dev/.var
+coverage.out
+c.out
+.idea
+.vscode
+
+.var
+.postgres-data
+db/mimir_dump.sql

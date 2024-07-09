@@ -1,0 +1,5 @@
+FROM postgres:16
+
+RUN apt update -yy
+RUN apt install -yy postgresql-16-similarity
+RUN apt install -yy postgresql-16-cron

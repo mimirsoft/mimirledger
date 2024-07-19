@@ -1,39 +1,8 @@
-import React, {FormEvent, ReactElement} from "react";
-import {ReportPostRequest, ReportBody, Report} from "../../lib/definitions";
-import { useGetReports} from "../../lib/data";
+import React, {FormEvent} from "react";
 import Modal from "../molecules/Modal";
 import ReportSelector from "../molecules/ReportSelector";
 import AccountSelector from "../molecules/AccountSelector";
 
-const postFormData = async (formData: FormData) => {
-    try {
-        const myURL = new URL('/reports', process.env.REACT_APP_MIMIRLEDGER_API_URL);
-        // Do a bit of work to convert the entries to a plain JS object
-        const formEntries = Object.fromEntries(formData);
-        console.log(formEntries.accountParent)
-
-        const newReportBody : ReportBody = {
-            accountSetType:  String(formEntries.accountSetType),
-            accountGroup:  String(formEntries.accountGroup),
-            predefinedAccounts: [],
-            recurseSubAccounts: 0,
-            dataSetType:  String(formEntries.dataSetType),
-        }
-        const newReport : ReportPostRequest = {
-            reportName : String(formEntries.reportName),
-            reportBody:newReportBody,
-        };
-        var json = JSON.stringify(newReport);
-        console.log(json)
-        const settings :RequestInit = {
-            method: 'POST',
-            body: json,
-        };
-        return await fetch(myURL, settings);
-    } catch (error) {
-        console.error('Error making POST request:', error);
-    }
-}
 type ErrResponse = {
     statusCode: number
     err: string
@@ -47,19 +16,14 @@ export default function ReportsRunForm(){
         // open report render in new window
         event.preventDefault()
         const formData = new FormData(event.currentTarget)
-        const myResponse = await postFormData(formData);
-        if (myResponse?.status == 200) {
-            window.location.reload();
-        } else {
-            setModalTitle("ERROR SAVING REPORT")
-            let errMsg= ""
-            let errData = await myResponse?.json()
-
-            setModalBody("<h1>"+errData.err+"</h1>")
-            setShowModal(true)
-        }
+        const formEntries = Object.fromEntries(formData);
+        let reportID = Number(formEntries.reportID)
+        let startDate =  String(formEntries.startDate)
+        window.open("/reports/"+reportID+"?startDate="+startDate,"_self");
     };
-
+    let todayDate: Date = new Date()
+    let lastMonthDate: Date = new Date()
+    lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
     return (
     <div>
         <div className="flex w-full flex-col md:col-span-4 bg-slate-100 p-4">
@@ -69,7 +33,15 @@ export default function ReportsRunForm(){
             <form className="mb-2" onSubmit={handleSubmit}>
                 <div className="flex-col w-fit">
                     <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Report Name:
-                        <input className="bg-slate-300 font-normal" type="text" name="reportName"/>
+                        <ReportSelector name={"reportID"} id={0} />
+                    </div>
+                    <div className="my-4 mx-2 text-xl font-bold bg-slate-200">Start Date:
+                        <input className="bg-slate-300 text-xl font-normal" type="date" name="startDate"
+                        defaultValue={lastMonthDate.toISOString().split('T')[0]}/>
+                    </div>
+                    <div className="my-4 mx-2 text-xl font-bold bg-slate-200">End Date:
+                        <input className="bg-slate-300 text-xl font-normal" type="date" name="startDate"
+                               defaultValue={todayDate.toISOString().split('T')[0]}/>
                     </div>
                     <div className="my-4 mr-4 text-xl font-bold bg-slate-200">On Accounts:
                         <AccountSelector name={"userSuppliedAccounts"} id={0}

@@ -5,6 +5,7 @@ export default function ReportRunOutput() {
     const {reportID} = useParams();
     let [searchParams] = useSearchParams();
     let startDate = searchParams.get("startDate");
+    let endDate = searchParams.get("endDate");
     let searchDateStr = String(startDate)
 
     return (
@@ -15,6 +16,7 @@ export default function ReportRunOutput() {
                 </div>
                 <div className="w-80 my-0 font-bold mx-0 bg-slate-200">
                     {searchDateStr}
+                    {endDate}
                 </div>
             </div>
         </div>

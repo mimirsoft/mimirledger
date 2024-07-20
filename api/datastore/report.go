@@ -20,11 +20,12 @@ type Report struct {
 	ReportBody ReportBody `db:"report_body"`
 }
 type ReportBody struct {
-	AccountSetType     ReportAccountSetType `json:"accountSetType"`
-	AccountGroup       AccountType          `json:"accountGroup,omitempty"`
-	PredefinedAccounts []uint64             `json:"predefinedAccounts"`
-	RecurseSubAccounts int                  `json:"recurseSubAccounts"` // how many layers deep to recurse
-	DataSetType        ReportDataSetType    `json:"dataSetType"`
+	AccountSetType          ReportAccountSetType `json:"accountSetType"`
+	AccountGroup            AccountType          `json:"accountGroup,omitempty"`
+	PredefinedAccounts      []uint64             `json:"predefinedAccounts"`
+	RecurseSubAccounts      bool                 `json:"recurseSubAccounts"`
+	RecurseSubAccountsDepth int                  `json:"recurseSubAccountsDepth"` // how many accounts deep to recurse
+	DataSetType             ReportDataSetType    `json:"dataSetType"`
 }
 
 // AccountType is an enum for account type.

@@ -19,7 +19,8 @@ export default function ReportsRunForm(){
         const formEntries = Object.fromEntries(formData);
         let reportID = Number(formEntries.reportID)
         let startDate =  String(formEntries.startDate)
-        window.open("/reports/"+reportID+"?startDate="+startDate,"_self");
+        let endDate =  String(formEntries.endDate)
+        window.open("/reports/"+reportID+"?startDate="+startDate+"&endDate="+endDate,"_blank");
     };
     let todayDate: Date = new Date()
     let lastMonthDate: Date = new Date()
@@ -31,27 +32,31 @@ export default function ReportsRunForm(){
                 Run Report
             </div>
             <form className="mb-2" onSubmit={handleSubmit}>
-                <div className="flex-col w-fit">
-                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Report Name:
+                <div className="flex-col w-80">
+                    <div className="my-4 text-xl font-bold bg-slate-200 w-80 flex flex-row">
+                        <div className="w-32 mr-2 text-right">Report:</div>
                         <ReportSelector name={"reportID"} id={0} />
                     </div>
-                    <div className="my-4 mx-2 text-xl font-bold bg-slate-200">Start Date:
+                    <div className="my-4 text-xl font-bold bg-slate-200  w-80 flex flex-row">
+                        <div className="w-32 mr-2 text-right">Start Date:</div>
                         <input className="bg-slate-300 text-xl font-normal" type="date" name="startDate"
-                        defaultValue={lastMonthDate.toISOString().split('T')[0]}/>
+                               defaultValue={lastMonthDate.toISOString().split('T')[0]}/>
                     </div>
-                    <div className="my-4 mx-2 text-xl font-bold bg-slate-200">End Date:
-                        <input className="bg-slate-300 text-xl font-normal" type="date" name="startDate"
+                    <div className="my-4 text-xl font-bold bg-slate-200  w-80 flex flex-row">
+                        <div className="w-32 mr-2 text-right">End Date:</div>
+                        <input className="bg-slate-300 text-xl font-normal" type="date" name="endDate"
                                defaultValue={todayDate.toISOString().split('T')[0]}/>
                     </div>
-                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">On Accounts:
+                    <div className="my-4 text-xl font-bold bg-slate-200  w-80 flex flex-row">
+                        <div className="w-32 mr-2 text-right">On Accounts:</div>
                         <AccountSelector name={"userSuppliedAccounts"} id={0}
                                          includeTop={false}
                                          excludeID={0}
                                          multiple={true}
                                          multiSize={10}/>
                     </div>
-                    <div className=" flex">
-                        <button className="p-3 font-bold bg-slate-300" type="submit">Run Report</button>
+                    <div className=" flex flex-row-reverse w-80">
+                    <button className="p-3 font-bold bg-slate-300" type="submit">Run Report</button>
                     </div>
                 </div>
             </form>

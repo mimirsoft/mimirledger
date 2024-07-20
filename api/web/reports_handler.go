@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/go-chi/chi/v5"
+
 	"github.com/mimirsoft/mimirledger/api/models"
 	"github.com/mimirsoft/mimirledger/api/web/request"
 	"github.com/mimirsoft/mimirledger/api/web/response"
@@ -53,6 +55,66 @@ func GetReport(reportsCtl *ReportsController) func(res http.ResponseWriter, req 
 		}
 
 		jsonResponse := response.ReportToRespReport(report)
+
+		return RespondOK(res, jsonResponse)
+	}
+}
+
+var ErrInvalidStartDate = errors.New("invalid startDate")
+var ErrInvalidEndDate = errors.New("invalid endDate")
+
+// GET /reports/{reportID}/run?date
+func GetReportRun(reportsCtl *ReportsController) func(res http.ResponseWriter, req *http.Request) error {
+	return func(res http.ResponseWriter, req *http.Request) error {
+		reportIDStr := chi.URLParam(req, "reportID")
+
+		reportID, err := strconv.ParseUint(reportIDStr, 10, 64)
+		if err != nil {
+			return NewRequestError(http.StatusBadRequest, err)
+		}
+
+		if reportID == 0 {
+			return NewRequestError(http.StatusBadRequest, ErrInvalidAccountID)
+		}
+
+		startDateStr := req.URL.Query().Get("startDate")
+
+		startDate, err := time.Parse("2006-01-02", startDateStr)
+		if err != nil {
+			return NewRequestError(http.StatusBadRequest, ErrInvalidStartDate)
+		}
+
+		endDateStr := req.URL.Query().Get("endDate")
+
+		endDate, err := time.Parse("2006-01-02", endDateStr)
+		if err != nil {
+			return NewRequestError(http.StatusBadRequest, ErrInvalidStartDate)
+		}
+
+		var accountSet []uint64
+
+		queryVals, ok := req.URL.Query()["account"]
+		if ok {
+			for _, str := range queryVals {
+				parsedUint, strConvErr := strconv.ParseUint(str, 10, 64)
+				if strConvErr != nil {
+					return NewRequestError(http.StatusBadRequest, strConvErr)
+				}
+
+				accountSet = append(accountSet, parsedUint)
+			}
+		}
+
+		reportOutput, err := reportsCtl.RunReport(req.Context(), reportID, startDate, endDate, accountSet)
+		if err != nil {
+			if errors.Is(err, models.ErrReportNotFound) {
+				return NewRequestError(http.StatusNotFound, err)
+			}
+
+			return NewRequestError(http.StatusServiceUnavailable, err)
+		}
+
+		jsonResponse := response.ReportOutputToRespReportOutput(reportOutput)
 
 		return RespondOK(res, jsonResponse)
 	}

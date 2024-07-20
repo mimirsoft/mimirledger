@@ -6,15 +6,15 @@ services:
     volumes:
       - ./webledge:/app:delegated
     working_dir: /app
-    networks:
-      - network1
     ports:
       - "3000:3000"
     command: npm start
     environment:
       NODE_ENV: development
+    networks:
+      - network1
 
 networks:
   network1:
-    name: db_default
+    name: db_network
     external: true

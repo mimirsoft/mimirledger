@@ -405,6 +405,51 @@ ORDER BY account_left`
 	return accountSet, nil
 }
 
+// Gets All Children of a given account, regardless of dept.
+func (store AccountStore) GetLevelsOfChildren(acctID uint64) ([]Account, error) {
+	query := `
+		WITH parent AS ( Select * from transaction_accounts where account_id = $1)
+		SELECT *
+          FROM (SELECT A2.account_id,
+                       A2.accounttype_id, 
+                       A2.account_name, 
+                       A2.account_parent, 
+                       A2.account_left,
+                       A2.account_right, 
+                       (Count(A1.account_id))-1 AS level
+                   FROM transactions_accounts AS A1,
+                   transactions_accounts AS A2
+                            WHERE A2.account_left BETWEEN A1.account_left AND A1.account_right
+                            GROUP BY A2.account_id
+                            ORDER BY A2.account_left)
+            AS accounts
+         WHERE accounts.account_left
+       BETWEEN parent.account_left AND parent.account_right`
+
+	rows, err := store.Client.Queryx(query, acctID)
+	if err != nil {
+		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
+	}
+	defer rows.Close()
+
+	var accountSet []Account
+
+	for rows.Next() {
+		var acct Account
+		if err = rows.StructScan(&acct); err != nil {
+			return nil, fmt.Errorf("rows.StructScan:%w", err)
+		}
+
+		accountSet = append(accountSet, acct)
+	}
+
+	if len(accountSet) == 0 {
+		return nil, sql.ErrNoRows
+	}
+
+	return accountSet, nil
+}
+
 // OpenSpotInTree opens a spot in our nested set.
 func (store AccountStore) OpenSpotInTree(afterValue, spread uint64) error {
 	query := `UPDATE transaction_accounts

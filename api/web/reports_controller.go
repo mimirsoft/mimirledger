@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/mimirsoft/mimirledger/api/datastore"
 	"github.com/mimirsoft/mimirledger/api/models"
@@ -22,8 +23,8 @@ func NewReportsController(ds *datastore.Datastores) *ReportsController {
 }
 
 // GET /reports
-func (ac *ReportsController) ReportList(_ context.Context) ([]*models.Report, error) {
-	reports, err := models.RetrieveReports(ac.DataStores)
+func (rc *ReportsController) ReportList(_ context.Context) ([]*models.Report, error) {
+	reports, err := models.RetrieveReports(rc.DataStores)
 	if err != nil {
 		if errors.Is(err, models.ErrNoReports) {
 			return nil, nil
@@ -36,8 +37,8 @@ func (ac *ReportsController) ReportList(_ context.Context) ([]*models.Report, er
 }
 
 // GET /reports/:reportID
-func (ac *ReportsController) GetReportByID(_ context.Context, reportID uint64) (*models.Report, error) {
-	report, err := models.RetrieveReportByID(ac.DataStores, reportID)
+func (rc *ReportsController) GetReportByID(_ context.Context, reportID uint64) (*models.Report, error) {
+	report, err := models.RetrieveReportByID(rc.DataStores, reportID)
 	if err != nil {
 		return nil, fmt.Errorf("models.RetrieveReportByID:%w", err)
 	}
@@ -45,9 +46,25 @@ func (ac *ReportsController) GetReportByID(_ context.Context, reportID uint64) (
 	return report, nil
 }
 
+// GET /reports/:reportID/run
+func (rc *ReportsController) RunReport(_ context.Context, reportID uint64,
+	startDate time.Time, endDate time.Time, accounts []uint64) (*models.ReportOutput, error) {
+	report, err := models.RetrieveReportByID(rc.DataStores, reportID)
+	if err != nil {
+		return nil, fmt.Errorf("models.RetrieveReportByID:%w", err)
+	}
+
+	reportOutPut, err := report.Run(rc.DataStores, startDate, endDate, accounts)
+	if err != nil {
+		return nil, fmt.Errorf("report.Run:%w", err)
+	}
+
+	return reportOutPut, nil
+}
+
 // POST /reports
-func (ac *ReportsController) CreateReport(_ context.Context, report *models.Report) (*models.Report, error) {
-	err := report.Store(ac.DataStores)
+func (rc *ReportsController) CreateReport(_ context.Context, report *models.Report) (*models.Report, error) {
+	err := report.Store(rc.DataStores)
 	if err != nil {
 		return nil, fmt.Errorf("report.Store:%w", err)
 	}
@@ -56,10 +73,10 @@ func (ac *ReportsController) CreateReport(_ context.Context, report *models.Repo
 }
 
 // PUT /reports/{reportID}
-func (ac *ReportsController) UpdateReport(_ context.Context, report *models.Report) (*models.Report, error) {
-	err := report.Update(ac.DataStores)
+func (rc *ReportsController) UpdateReport(_ context.Context, report *models.Report) (*models.Report, error) {
+	err := report.Update(rc.DataStores)
 	if err != nil {
-		return nil, fmt.Errorf("account.Update:%w", err)
+		return nil, fmt.Errorf("report.Update:%w", err)
 	}
 
 	return report, nil

@@ -49,7 +49,6 @@ stop-web:
 	${WEB_DOCKER_COMPOSE} stop ${WEB_SERVICE_NAME}
 	${WEB_DOCKER_COMPOSE} down
 
-
 restart: stop start
 
 test: drop-testdb create-testdb # run unit tests
@@ -71,10 +70,8 @@ logs:
 logs-db:
 	${DB_DOCKER_COMPOSE} logs --tail $(LOG_TAIL_LENGTH) -f ${DB_SERVICE_NAME}
 
-
 logs-web:
 	${WEB_DOCKER_COMPOSE} logs --tail $(LOG_TAIL_LENGTH) -f ${WEB_SERVICE_NAME}
-
 
 docker-clean: # clean out all containers (does NOT require a full rebuild)
 	${DOCKER_COMPOSE} down || true
@@ -85,7 +82,6 @@ docker-clean: # clean out all containers (does NOT require a full rebuild)
 #
 # Database utilities
 #
-
 create-devdb:
 	$(MAKE) -C db -e create-devdb
 
@@ -98,18 +94,20 @@ create-testdb:
 drop-testdb:
 	$(MAKE) -C db -e drop-testdb
 
-api-shell:
-	docker exec -it dev_mimirledger_1  /bin/ash
-
-postgres-shell:
-	docker exec -it dev_postgres_1  /bin/bash
-
 psql:
 	$(MAKE) -C db -e psql
-
 
 dumpdatabase:
 	$(MAKE) -C db -e dumpdatabase
 
 loaddatabase:
 	$(MAKE) -C db -e loaddatabase
+
+#
+# Container Shell tools
+#
+api-shell:
+	docker exec -it dev_mimirledger_1  /bin/ash
+
+postgres-shell:
+	docker exec -it dev_postgres_1  /bin/bash

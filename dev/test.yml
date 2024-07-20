@@ -18,5 +18,5 @@ services:
 
 networks:
   network1:
-    name: db_default
+    name: db_network
     external: true

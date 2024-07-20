@@ -15,6 +15,7 @@ import TransactionEditPage from "./pages/TransactionEditPage";
 import ReportsPage from "./pages/ReportsPage";
 import ReportsListPage from "./pages/ReportsListPage";
 import ReportEditPage from "./pages/ReportEditPage";
+import ReportRunPage from "./pages/ReportRunPage";
 
 const fetcher = (...args: Parameters<typeof fetch>) => fetch(...args).then(res => res.json())
 
@@ -23,6 +24,7 @@ function App() {
     <SWRConfig value={{ fetcher }}>
       <BrowserRouter>
         <Routes>
+          <Route path="/reports/:reportID" element={<ReportRunPage/>} />
           <Route path="/" element={<OuterContainer />}>
             <Route index element={<Home />} />
             <Route path="accounts" element={<AccountsPage />} />
@@ -32,7 +34,7 @@ function App() {
             <Route path="reports" element={<ReportsPage/>} />
             <Route path="reports/list" element={<ReportsListPage/>} />
             <Route path="reports/edit/:reportID" element={<ReportEditPage/>} />
-            <Route path="transactions/:transactionID" element={<TransactionEditPage/>} />
+             <Route path="transactions/:transactionID" element={<TransactionEditPage/>} />
             <Route path="transactions/account/:accountID" element={<TransactionsAccount />} />
             <Route path="*" element={<NoPage />} />
           </Route>

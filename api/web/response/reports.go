@@ -15,11 +15,12 @@ type Report struct {
 	ReportBody ReportBody `json:"reportBody"`
 }
 type ReportBody struct {
-	AccountSetType     datastore.ReportAccountSetType `json:"accountSetType"`
-	AccountGroup       *datastore.AccountType         `json:"accountGroup,omitempty"`
-	PredefinedAccounts []uint64                       `json:"predefinedAccounts,omitempty"`
-	RecurseSubAccounts int                            `json:"recurseSubAccounts"` // how many layers deep to recurse
-	DataSetType        datastore.ReportDataSetType    `json:"dataSetType"`
+	AccountSetType          datastore.ReportAccountSetType `json:"accountSetType"`
+	AccountGroup            *datastore.AccountType         `json:"accountGroup,omitempty"`
+	PredefinedAccounts      []uint64                       `json:"predefinedAccounts,omitempty"`
+	RecurseSubAccounts      bool                           `json:"recurseSubAccounts"`
+	RecurseSubAccountsDepth int                            `json:"recurseSubAccountsDepth"`
+	DataSetType             datastore.ReportDataSetType    `json:"dataSetType"`
 }
 
 func ReportToRespReport(rpt *models.Report) *Report {
@@ -32,11 +33,12 @@ func ReportToRespReport(rpt *models.Report) *Report {
 		ReportID:   rpt.ReportID,
 		ReportName: rpt.ReportName,
 		ReportBody: ReportBody{
-			AccountSetType:     rpt.ReportBody.AccountSetType,
-			AccountGroup:       accountGroup,
-			PredefinedAccounts: rpt.ReportBody.PredefinedAccounts,
-			RecurseSubAccounts: rpt.ReportBody.RecurseSubAccounts,
-			DataSetType:        rpt.ReportBody.DataSetType,
+			AccountSetType:          rpt.ReportBody.AccountSetType,
+			AccountGroup:            accountGroup,
+			PredefinedAccounts:      rpt.ReportBody.PredefinedAccounts,
+			RecurseSubAccounts:      rpt.ReportBody.RecurseSubAccounts,
+			RecurseSubAccountsDepth: rpt.ReportBody.RecurseSubAccountsDepth,
+			DataSetType:             rpt.ReportBody.DataSetType,
 		},
 	}
 

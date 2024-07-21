@@ -7,7 +7,7 @@ const postFormData = async (formData: FormData) => {
         // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);
         const reportID = Number(formEntries.reportID)
-        const myURL = new URL('/reports/'+reportID, process.env.REACT_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/reports/'+reportID, import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
         const newReportBody : ReportBody = {
             accountSetType:  String(formEntries.accountSetType),
             accountGroup:  String(formEntries.accountGroup),

@@ -9,7 +9,7 @@ const postFormData = async (formData: FormData) => {
         // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);
         const accountID = Number(formEntries.accountID)
-        const myURL = new URL('/accounts/'+accountID, process.env.REACT_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/accounts/'+accountID, import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
 
         const newAccount : TransactionAccountPostRequest = {
             accountParent : Number(formEntries.accountParent),

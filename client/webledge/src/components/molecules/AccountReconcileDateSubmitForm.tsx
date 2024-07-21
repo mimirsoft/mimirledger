@@ -8,7 +8,7 @@ const updateReconcileDate= async (formData: FormData) => {
         let dStr = String(formEntries.reconcileDate)
         let txnDate: Date = new Date(dStr);
 
-        const myURL = new URL('/accounts/'+accountID+"/reconciled", process.env.REACT_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/accounts/'+accountID+"/reconciled", import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
 
         const reconciledPostRequest : AccountReconcileDatePostRequest = {
             accountID : accountID,

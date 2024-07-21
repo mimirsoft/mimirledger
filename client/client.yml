@@ -4,7 +4,7 @@ services:
       context: ./
       dockerfile: Dockerfile.dev
     volumes:
-      - ./webledge:/app
+      - ./webledge:/app:delegated
       - /app/node_modules
     working_dir: /app
     ports:

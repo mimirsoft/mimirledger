@@ -13,7 +13,7 @@ import {formatCurrency} from "../../lib/utils";
 
 const postFormData = async (formData: FormData) => {
     try {
-        const myURL = new URL('/accounts', process.env.REACT_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/accounts', import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
         console.log(myURL)
         // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);

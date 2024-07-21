@@ -11,7 +11,7 @@ import {formatCurrency, parseCurrency} from "../../lib/utils";
 const postFormData = async (formData: FormData) => {
     try {
         // Do a bit of work to convert the entries to a plain JS object
-        const myURL = new URL('/transactions', process.env.REACT_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/transactions', import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
 
         // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);

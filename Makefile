@@ -59,8 +59,8 @@ test: drop-testdb create-testdb # run unit tests
 lint: # Run go lint
 	${DOCKER_COMPOSE_TEST} run test_mimirledger ash -c "GOGC=50 make -e lint-direct"
 
-lint-web: # Run go lint
-	${WEB_DOCKER_COMPOSE} run web ash -c "eslint"
+lint-web: # Run eslint
+	${WEB_DOCKER_COMPOSE} run ${WEB_SERVICE_NAME} ash -c "npm run lint"
 
 update: stop-api docker-clean # rebuild image and restart service
 	${DOCKER_COMPOSE} rm --force ${SERVICE_NAME}

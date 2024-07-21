@@ -2,7 +2,7 @@ import {TransactionAccountType} from "../../lib/definitions";
 import React from "react";
 
 const AccountTypeSelector = ( props:{selectedName:string|undefined} ) => {
-    let accountTypes: TransactionAccountType[] = [
+    const accountTypes: TransactionAccountType[] = [
         { "name": "ASSET", "sign": "DEBIT" },
         { "name": "LIABILITY", "sign": "CREDIT" },
         { "name": "EQUITY", "sign": "CREDIT" },

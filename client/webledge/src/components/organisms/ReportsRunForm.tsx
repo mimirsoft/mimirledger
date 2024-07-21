@@ -17,13 +17,13 @@ export default function ReportsRunForm(){
         event.preventDefault()
         const formData = new FormData(event.currentTarget)
         const formEntries = Object.fromEntries(formData);
-        let reportID = Number(formEntries.reportID)
-        let startDate =  String(formEntries.startDate)
-        let endDate =  String(formEntries.endDate)
+        const reportID = Number(formEntries.reportID)
+        const startDate =  String(formEntries.startDate)
+        const endDate =  String(formEntries.endDate)
         window.open("/reports/"+reportID+"?startDate="+startDate+"&endDate="+endDate,"_blank");
-    };
-    let todayDate: Date = new Date()
-    let lastMonthDate: Date = new Date()
+    }
+    const todayDate: Date = new Date()
+    const lastMonthDate: Date = new Date()
     lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
     return (
     <div>

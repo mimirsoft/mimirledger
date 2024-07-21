@@ -62,6 +62,9 @@ lint: # Run go lint
 lint-web: # Run eslint
 	${WEB_DOCKER_COMPOSE} run ${WEB_SERVICE_NAME} ash -c "npm run lint"
 
+lint-web-fix: # Run eslint
+	${WEB_DOCKER_COMPOSE} run ${WEB_SERVICE_NAME} ash -c "npm run lint-fix"
+
 update: stop-api docker-clean # rebuild image and restart service
 	${DOCKER_COMPOSE} rm --force ${SERVICE_NAME}
 	${DOCKER_COMPOSE} build ${SERVICE_NAME}

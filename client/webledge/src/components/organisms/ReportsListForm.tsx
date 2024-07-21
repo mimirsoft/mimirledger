@@ -22,7 +22,7 @@ const postFormData = async (formData: FormData) => {
             reportName : String(formEntries.reportName),
             reportBody:newReportBody,
         };
-        var json = JSON.stringify(newReport);
+        const json = JSON.stringify(newReport);
         console.log(json)
         const settings :RequestInit = {
             method: 'POST',
@@ -52,13 +52,13 @@ export default function ReportsForm(){
             window.location.reload();
         } else {
             setModalTitle("ERROR SAVING REPORT")
-            let errMsg= ""
-            let errData = await myResponse?.json()
+            const errMsg= ""
+            const errData = await myResponse?.json()
 
             setModalBody("<h1>"+errData.err+"</h1>")
             setShowModal(true)
         }
-    };
+    }
 
     return (
     <div>

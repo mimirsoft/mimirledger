@@ -25,7 +25,7 @@ const postFormData = async (formData: FormData) => {
             accountType : String(formEntries.accountType),
             accountMemo : String(formEntries.accountMemo),
         };
-        var json = JSON.stringify(newAccount);
+        const json = JSON.stringify(newAccount);
         console.log(json)
         const settings :RequestInit = {
             method: 'POST',
@@ -42,22 +42,22 @@ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     const formData = new FormData(event.currentTarget)
     const result = await postFormData(formData);
     window.location.reload();
-};
+}
 
 
 export default function TransactionAccounts(){
     const { data, error, isLoading } = useGetAccounts()
 
-    let [searchParams] = useSearchParams();
-    let returnAccountID = searchParams.get("returnAccount");
+    const [searchParams] = useSearchParams();
+    const returnAccountID = searchParams.get("returnAccount");
 
     if (isLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>
     let rowColor = "bg-slate-200"
-    var minDate = new Date('0001-01-01T00:00:00Z');
+    const minDate = new Date('0001-01-01T00:00:00Z');
     minDate.setDate(minDate.getDate() + 1);
-    let reconcileDate: Date = new Date();
-    let reconcileDateStr = reconcileDate.toISOString().split('T')[0]
+    const reconcileDate: Date = new Date();
+    const reconcileDateStr = reconcileDate.toISOString().split('T')[0]
 
     return (
         <div className="flex w-full flex-col md:col-span-4">
@@ -129,7 +129,7 @@ export default function TransactionAccounts(){
                     if (account.accountBalance < 0) {
                         textColor = "text-red-500"
                     }
-                    let acctReconciledDate: Date = new Date(account.accountReconcileDate);
+                    const acctReconciledDate: Date = new Date(account.accountReconcileDate);
 
                     let acctReconciledDateStr :string
                     if (acctReconciledDate < minDate) {

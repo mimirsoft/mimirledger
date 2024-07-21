@@ -19,7 +19,7 @@ const postFormData = async (formData: FormData) => {
             reportName : String(formEntries.reportName),
             reportBody:newReportBody,
         };
-        var json = JSON.stringify(newReport);
+        const json = JSON.stringify(newReport);
         const settings :RequestInit = {
             method: 'PUT',
             body: json,
@@ -35,7 +35,7 @@ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     const formData = new FormData(event.currentTarget)
     const result = await postFormData(formData);
     window.location.reload();
-};
+}
 
 export default function ReportEditForm(){
     const { reportID } = useParams();

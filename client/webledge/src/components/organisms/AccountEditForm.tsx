@@ -17,7 +17,7 @@ const postFormData = async (formData: FormData) => {
             accountType : String(formEntries.accountType),
             accountMemo : String(formEntries.accountMemo),
         };
-        var json = JSON.stringify(newAccount);
+        const json = JSON.stringify(newAccount);
         const settings :RequestInit = {
             method: 'PUT',
             body: json,
@@ -33,7 +33,7 @@ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     const formData = new FormData(event.currentTarget)
     const result = await postFormData(formData);
     window.location.reload();
-};
+}
 
 export default function AccountEditForm(){
     const { accountID } = useParams();

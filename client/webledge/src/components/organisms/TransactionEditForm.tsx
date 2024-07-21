@@ -1,4 +1,4 @@
-import {useParams, useSearchParams, useNavigate, Link} from "react-router-dom";
+import {useParams, useSearchParams, useNavigate} from "react-router-dom";
 import {
     TransactionDebitCreditRequest,
     TransactionDebitCreditResponse,
@@ -13,14 +13,13 @@ const postFormData = async (formData: FormData, debitsCount: number, creditsCoun
         // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);
         const transactionID = Number(formEntries.transactionID)
-        const accountID = Number(formEntries.accountID)
-        let dStr = String(formEntries.transactionDate)
-        let txnDate: Date = new Date(dStr);
+        const dStr = String(formEntries.transactionDate)
+        const txnDate: Date = new Date(dStr);
 
         console.log("debitscount"+debitsCount);
         console.log("creditsCount"+creditsCount);
 
-        let dcSet: Array<TransactionDebitCreditRequest> = []
+        const dcSet: Array<TransactionDebitCreditRequest> = []
         //iterate over all the debit/credit inputs
         // get debits
         for (let step = 0; step < debitsCount; step++) {
@@ -31,7 +30,7 @@ const postFormData = async (formData: FormData, debitsCount: number, creditsCoun
                 tdcAmount = -tdcAmount
                 tdcSign = "CREDIT"
             }
-            let tdc = {accountID: tdcAccount, transactionDCAmount: tdcAmount, debitOrCredit:  tdcSign}
+            const tdc = {accountID: tdcAccount, transactionDCAmount: tdcAmount, debitOrCredit:  tdcSign}
             console.log(tdc)
             dcSet.push(tdc)
         }
@@ -44,7 +43,7 @@ const postFormData = async (formData: FormData, debitsCount: number, creditsCoun
                 tdcAmount = -tdcAmount
                 tdcSign = "DEBIT"
             }
-            let tdc = {accountID: tdcAccount, transactionDCAmount: tdcAmount, debitOrCredit: tdcSign}
+            const tdc = {accountID: tdcAccount, transactionDCAmount: tdcAmount, debitOrCredit: tdcSign}
             console.log(tdc)
             dcSet.push(tdc)
         }
@@ -74,8 +73,8 @@ export default function TransactionEditForm(){
     const { transactionID } = useParams();
     const { data, isLoading, error ,
     mutate} = useGetTransaction(transactionID);
-    let [searchParams] = useSearchParams();
-    let returnAccountID = searchParams.get("returnAccount");
+    const [searchParams] = useSearchParams();
+    const returnAccountID = searchParams.get("returnAccount");
 
     let debitsCount = 0
     let creditsCount = 0

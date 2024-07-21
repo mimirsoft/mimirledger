@@ -1,11 +1,11 @@
 import React,  {useState, FormEvent} from 'react'
-import {Link, useParams, useSearchParams} from "react-router-dom";
+import {useParams, useSearchParams} from "react-router-dom";
 import {useGetAccounts, useGetUnreconciledTransactionOnAccount} from "../../lib/data";
 import {
     Account,
     TransactionLedgerEntry,
 } from "../../lib/definitions";
-import {formatCurrency, formatCurrencyNoSign, parseCurrency} from "../../lib/utils";
+import {formatCurrency, parseCurrency} from "../../lib/utils";
 import TransactionToggleReconcileForm from "../molecules/TransactionToggleReconcileForm";
 import AccountReconcileDateSubmitForm from "../molecules/AccountReconcileDateSubmitForm";
 
@@ -44,7 +44,7 @@ export default function AccountReconcileForm() {
     if (error) return <div>Failed to load</div>
     if (acctError) return <div>Failed to load</div>
     const acctMap = new Map<number, string>
-    acctData?.accounts.map((acct: Account, index: number) => {
+    acctData?.accounts.map((acct: Account) => {
         acctMap.set(acct.accountID, acct.accountFullName)
     })
 
@@ -52,9 +52,8 @@ export default function AccountReconcileForm() {
     const minDate = new Date('0001-01-01T00:00:00Z');
     minDate.setDate(minDate.getDate() + 1);
 
-    const startingBalance =  Number(data?.priorReconciledBalance)
     let reconciledTotal = Number(data?.priorReconciledBalance)
-    {data?.transactions && data.transactions.map((transaction: TransactionLedgerEntry, index: number) => {
+    {data?.transactions && data.transactions.map((transaction: TransactionLedgerEntry) => {
         let txnAmount = transaction.transactionDCAmount
         if (transaction.debitOrCredit != data.accountSign) {
             txnAmount = -txnAmount

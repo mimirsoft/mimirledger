@@ -34,7 +34,13 @@ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const result = await postFormData(formData);
-    window.location.reload();
+    if (result?.status == 200) {
+        window.location.reload();
+    }
+    else {
+        console.log("ERROR"+result)
+    }
+
 }
 
 export default function ReportEditForm(){

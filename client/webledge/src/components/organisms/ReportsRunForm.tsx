@@ -1,17 +1,9 @@
-import React, {FormEvent} from "react";
-import Modal from "../molecules/Modal";
+import {FormEvent} from "react";
 import ReportSelector from "../molecules/ReportSelector";
 import AccountSelector from "../molecules/AccountSelector";
 
-type ErrResponse = {
-    statusCode: number
-    err: string
-}
-export default function ReportsRunForm(){
-    const [showModal, setShowModal] = React.useState(false);
-    const [modalBody, setModalBody] = React.useState("");
-    const [modalTitle, setModalTitle] = React.useState("");
 
+export default function ReportsRunForm(){
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         // open report render in new window
         event.preventDefault()
@@ -61,8 +53,6 @@ export default function ReportsRunForm(){
                 </div>
             </form>
         </div>
-        {modalBody}
-        <Modal showModal={showModal} setShowModal={setShowModal} title={modalTitle} body={modalBody}/>
     </div>
     );
 }

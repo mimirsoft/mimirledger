@@ -1,4 +1,4 @@
-import React, {FormEvent, ReactElement} from "react";
+import React, {FormEvent} from "react";
 import {ReportPostRequest, ReportBody, Report} from "../../lib/definitions";
 import { useGetReports} from "../../lib/data";
 import {Link} from "react-router-dom";
@@ -33,16 +33,16 @@ const postFormData = async (formData: FormData) => {
         console.error('Error making POST request:', error);
     }
 }
-type ErrResponse = {
-    statusCode: number
-    err: string
-}
+
 export default function ReportsForm(){
     const { data, error, isLoading } = useGetReports()
-
     const [showModal, setShowModal] = React.useState(false);
     const [modalBody, setModalBody] = React.useState("");
     const [modalTitle, setModalTitle] = React.useState("");
+
+    if (isLoading) return <div className="Loading">Loading...</div>
+    if (error) return <div>Failed to load</div>
+
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -52,7 +52,6 @@ export default function ReportsForm(){
             window.location.reload();
         } else {
             setModalTitle("ERROR SAVING REPORT")
-            const errMsg= ""
             const errData = await myResponse?.json()
 
             setModalBody("<h1>"+errData.err+"</h1>")

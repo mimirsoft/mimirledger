@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import NavButton from "../molecules/NavButton";
 import NavTitle from "../molecules/NavTitle";
 
@@ -17,7 +16,7 @@ const NavBar = () => {
                 <div className={`flex bg-slate-200`}>
                     {MENU_LIST.map((menu, idx) => (
                         <div className={`bg-blue-500 p-4 font-bold text-white text-xl`}
-                            key={menu.text} >
+                            key={menu.text+idx} >
                             <NavButton text={menu.text} href={menu.href}/>
                         </div>
                     ))}

@@ -1,4 +1,4 @@
-import React, { useEffect} from 'react';
+import React from 'react';
 import TransactionAccountTypes from "../components/organisms/TransactionAccountTypes";
 import AccountsSubNav from "../components/organisms/AccountsSubNav";
 

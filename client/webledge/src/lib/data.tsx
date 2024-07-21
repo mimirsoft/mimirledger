@@ -1,7 +1,7 @@
 import useSWR from "swr";
 import {
     Account, AccountReconcileResponse,
-    AccountSet, TransactionAccountType, TransactionAccountTypeSet,
+    AccountSet, TransactionAccountTypeSet,
     TransactionLedgerResponse, TransactionResponse,
     ReportSet, Report
 } from "./definitions";

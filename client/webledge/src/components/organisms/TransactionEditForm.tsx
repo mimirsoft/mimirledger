@@ -57,8 +57,7 @@ const postFormData = async (formData: FormData, debitsCount: number, creditsCoun
             transactionComment : String(formEntries.transactionComment),
             debitCreditSet : dcSet,
         };
-        var json = JSON.stringify(editTransaction);
-        console.log(json);
+        const json = JSON.stringify(editTransaction);
 
         const settings :RequestInit = {
             method: 'PUT',
@@ -92,7 +91,7 @@ export default function TransactionEditForm(){
         else {
             console.log("ERROR"+response)
         }
-    };
+    }
     async function deleteTransaction(event:  MouseEvent<HTMLButtonElement>) {
         event.preventDefault()
         const myURL = new URL('/transactions/' + transactionID, import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
@@ -105,17 +104,16 @@ export default function TransactionEditForm(){
         } else {
             console.log("ERROR" + response)
         }
-    };
+    }
 
-    let initialCredits: Array<TransactionDebitCreditResponse> = []
-    let initialDebits: Array<TransactionDebitCreditResponse> = []
+    const initialCredits: Array<TransactionDebitCreditResponse> = []
+    const initialDebits: Array<TransactionDebitCreditResponse> = []
 
     if (isLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>
 
     // sort debitCreditSet into debits and credits
-    {data?.debitCreditSet && data.debitCreditSet.map((transaction: TransactionDebitCreditResponse,
-                                                      index: number) => {
+    {data?.debitCreditSet && data.debitCreditSet.map((transaction: TransactionDebitCreditResponse) => {
         if (transaction.debitOrCredit == "CREDIT"){
             initialCredits.push(transaction)
             creditsCount++
@@ -133,7 +131,7 @@ export default function TransactionEditForm(){
     }
     console.log(data)
     // render debits and credits
-    let txnDate: Date = new Date(String(data?.transactionDate))
+    const txnDate: Date = new Date(String(data?.transactionDate))
      return (
          <div className="flex w-full flex-col md:col-span-4 grow justify-between rounded-xl bg-slate-100 p-4">
              <div className="text-xl font-bold">

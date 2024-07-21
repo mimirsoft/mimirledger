@@ -59,6 +59,9 @@ test: drop-testdb create-testdb # run unit tests
 lint: # Run go lint
 	${DOCKER_COMPOSE_TEST} run test_mimirledger ash -c "GOGC=50 make -e lint-direct"
 
+lint-web: # Run go lint
+	${WEB_DOCKER_COMPOSE} run web ash -c "eslint"
+
 update: stop-api docker-clean # rebuild image and restart service
 	${DOCKER_COMPOSE} rm --force ${SERVICE_NAME}
 	${DOCKER_COMPOSE} build ${SERVICE_NAME}
@@ -108,6 +111,9 @@ loaddatabase:
 #
 api-shell:
 	docker exec -it dev_mimirledger_1  /bin/ash
+
+web-shell:
+	docker exec -it client-web-1  /bin/ash
 
 postgres-shell:
 	docker exec -it dev_postgres_1  /bin/bash

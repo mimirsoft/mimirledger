@@ -1,4 +1,4 @@
-import {useParams, useSearchParams, useNavigate, Link} from "react-router-dom";
+import {useParams, Link} from "react-router-dom";
 import React, {FormEvent} from "react";
 import {
     Account,
@@ -60,7 +60,12 @@ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const result = await postFormData(formData);
-    window.location.reload();
+    if (result?.status == 200) {
+        window.location.reload();
+    }
+    else {
+        console.log("ERROR"+result)
+    }
 }
 
 
@@ -76,7 +81,7 @@ export default function TransactionAccountLedger() {
     if (acctError) return <div>Failed to load</div>
 
     const acctMap = new Map<number, string>
-    acctData?.accounts.map((acct: Account, index: number) => {
+    acctData?.accounts.map((acct: Account) => {
         acctMap.set(acct.accountID, acct.accountFullName)
     })
     const minDate = new Date('0001-01-01T00:00:00Z');

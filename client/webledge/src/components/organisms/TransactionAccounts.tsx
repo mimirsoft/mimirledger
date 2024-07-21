@@ -2,10 +2,8 @@ import {
     Account,
     TransactionAccountPostRequest,
 } from '../../lib/definitions';
-import {useState} from "react";
-import Modal from '../molecules/Modal'
 import React, {FormEvent} from "react";
-import {Link, useSearchParams} from "react-router-dom";
+import {Link} from "react-router-dom";
 import AccountSelector from "../molecules/AccountSelector";
 import AccountTypeSelector from "../molecules/AccountTypeSelector";
 import {useGetAccounts} from "../../lib/data";
@@ -40,16 +38,20 @@ const postFormData = async (formData: FormData) => {
 async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
+
     const result = await postFormData(formData);
-    window.location.reload();
+    if (result?.status == 200) {
+        window.location.reload();
+    }
+    else {
+        console.log("ERROR"+result)
+    }
+
 }
 
 
 export default function TransactionAccounts(){
     const { data, error, isLoading } = useGetAccounts()
-
-    const [searchParams] = useSearchParams();
-    const returnAccountID = searchParams.get("returnAccount");
 
     if (isLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>

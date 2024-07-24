@@ -405,20 +405,21 @@ ORDER BY account_left`
 	return accountSet, nil
 }
 
-// Gets All Children of a given account, regardless of dept.
-func (store AccountStore) GetLevelsOfChildren(acctID uint64) ([]Account, error) {
+type AccountWithLevel struct {
+	Account
+	Level uint64 `db:"level"`
+}
+
+// Gets the Account and Children with Levels
+func (store AccountStore) GetAccountWithChildrenByLevel(acctID uint64) ([]AccountWithLevel, error) {
 	query := `
 		WITH parent AS ( Select * from transaction_accounts where account_id = $1)
 		SELECT *
-          FROM (SELECT A2.account_id,
-                       A2.accounttype_id, 
-                       A2.account_name, 
-                       A2.account_parent, 
-                       A2.account_left,
-                       A2.account_right, 
+          FROM parent,
+               (SELECT A2.*,
                        (Count(A1.account_id))-1 AS level
-                   FROM transactions_accounts AS A1,
-                   transactions_accounts AS A2
+                   FROM transaction_accounts AS A1,
+                   transaction_accounts AS A2
                             WHERE A2.account_left BETWEEN A1.account_left AND A1.account_right
                             GROUP BY A2.account_id
                             ORDER BY A2.account_left)
@@ -432,10 +433,10 @@ func (store AccountStore) GetLevelsOfChildren(acctID uint64) ([]Account, error) 
 	}
 	defer rows.Close()
 
-	var accountSet []Account
+	var accountSet []AccountWithLevel
 
 	for rows.Next() {
-		var acct Account
+		var acct AccountWithLevel
 		if err = rows.StructScan(&acct); err != nil {
 			return nil, fmt.Errorf("rows.StructScan:%w", err)
 		}

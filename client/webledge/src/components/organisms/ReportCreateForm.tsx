@@ -1,7 +1,6 @@
 import React, {FormEvent} from "react";
-import {ReportPostRequest, ReportBody, Report} from "../../lib/definitions";
-import { useGetReports} from "../../lib/data";
-import {Link} from "react-router-dom";
+import {ReportPostRequest, ReportBody} from "../../lib/definitions";
+import ReportsList from "../molecules/ReportsList"
 import Modal from "../molecules/Modal";
 
 const postFormData = async (formData: FormData) => {
@@ -34,14 +33,10 @@ const postFormData = async (formData: FormData) => {
     }
 }
 
-export default function ReportsForm(){
-    const { data, error, isLoading } = useGetReports()
+export default function ReportCreateForm(){
     const [showModal, setShowModal] = React.useState(false);
     const [modalBody, setModalBody] = React.useState("");
     const [modalTitle, setModalTitle] = React.useState("");
-
-    if (isLoading) return <div className="Loading">Loading...</div>
-    if (error) return <div>Failed to load</div>
 
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -106,34 +101,9 @@ export default function ReportsForm(){
                     </div>
                 </div>
             </form>
-            <div className="text-xl font-bold">
-                My Reports
-            </div>
-            <div className="flex">
-                <div className="w-32 font-bold">
-                    Name
-                </div>
-                <div className="w-20 font-bold">
-                    Body
-                </div>
-            </div>
-            {data?.reports && data.reports.map((report: Report, index: number) => {
-                return (
-                    <Link to={{
-                        pathname: '/reports/edit/' + report.reportID,
-                    }} className={`font-bold`}>
-                        <div className={'flex '} key={index}>
-                            <div className="w-32">
-                                {report.reportName}
-                            </div>
-                            <div className="w-20">
-                            {JSON.stringify(report.reportBody)}
-                        </div>
-                    </div>
-                    </Link>
-                );
-            })}
+
         </div>
+        <ReportsList/>
         {modalBody}
         <Modal showModal={showModal} setShowModal={setShowModal} title={modalTitle} body={modalBody}/>
     </div>

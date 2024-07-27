@@ -2,7 +2,7 @@ import {
     Account,
     TransactionAccountPostRequest,
 } from '../../lib/definitions';
-import React, {FormEvent} from "react";
+import {FormEvent} from "react";
 import {Link} from "react-router-dom";
 import AccountSelector from "../molecules/AccountSelector";
 import AccountTypeSelector from "../molecules/AccountTypeSelector";

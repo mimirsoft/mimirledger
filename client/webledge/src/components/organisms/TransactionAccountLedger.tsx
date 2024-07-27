@@ -1,5 +1,5 @@
 import {useParams, Link} from "react-router-dom";
-import React, {FormEvent} from "react";
+import {FormEvent} from "react";
 import {
     Account,
     TransactionDebitCreditRequest, TransactionLedgerEntry,

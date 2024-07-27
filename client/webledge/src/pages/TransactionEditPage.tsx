@@ -1,4 +1,3 @@
-import React from 'react'
 import TransactionEditForm from '../components/organisms/TransactionEditForm';
 
 export default function TransactionEditPage() {

@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import { TransactionAccountPostRequest } from '../../lib/definitions';
-import React, {FormEvent} from "react";
+import { FormEvent } from "react";
 import AccountSelector from "../molecules/AccountSelector";
 import AccountTypeSelector from "../molecules/AccountTypeSelector";
 import {useGetAccount} from "../../lib/data";

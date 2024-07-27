@@ -1,4 +1,3 @@
-import React from 'react'
 import ReportCreateForm from '../components/organisms/ReportCreateForm';
 import ReportsSubNav from "../components/molecules/ReportsSubNav";
 

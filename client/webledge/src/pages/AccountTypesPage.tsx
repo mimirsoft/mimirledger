@@ -1,4 +1,3 @@
-import React from 'react';
 import TransactionAccountTypes from "../components/organisms/TransactionAccountTypes";
 import AccountsSubNav from "../components/molecules/AccountsSubNav";
 

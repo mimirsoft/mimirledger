@@ -1,5 +1,4 @@
 import {Report} from "../../lib/definitions";
-import React from "react";
 import { useGetReports} from "../../lib/data";
 
 const ReportSelector = ( props:{name:string; id:number|undefined; } ) => {

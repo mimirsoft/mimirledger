@@ -1,4 +1,4 @@
-import React from 'react'
+
 type MainContainerProps = {
     children:  React.ReactNode
 }

@@ -4,7 +4,7 @@ import {
     TransactionDebitCreditResponse,
     TransactionEditPostRequest
 } from '../../lib/definitions';
-import React, {FormEvent, MouseEvent} from "react";
+import {FormEvent, MouseEvent} from "react";
 import DebitsCreditsColumn from "../molecules/DebitsCreditsColumn";
 import {useGetTransaction} from "../../lib/data";
 import {parseCurrency} from "../../lib/utils";

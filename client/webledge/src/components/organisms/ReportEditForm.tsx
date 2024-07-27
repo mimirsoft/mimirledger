@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom";
 import {ReportBody, ReportPostRequest} from '../../lib/definitions';
-import React, {FormEvent} from "react";
+import {FormEvent} from "react";
 import {useGetReport} from "../../lib/data";
 const postFormData = async (formData: FormData) => {
     try {

@@ -1,4 +1,3 @@
-import React from 'react'
 import TransactionAccountLedger from '../components/organisms/TransactionAccountLedger';
 
 

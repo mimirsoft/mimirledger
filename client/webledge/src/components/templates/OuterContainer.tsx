@@ -1,4 +1,4 @@
-import React from 'react'
+
 import NavBar from "../organisms/NavBar";
 import MainContainer from "../organisms/MainContainer";
 import Footer from "../organisms/Footer";

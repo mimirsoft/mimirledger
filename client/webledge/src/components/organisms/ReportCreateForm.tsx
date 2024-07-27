@@ -68,10 +68,12 @@ export default function ReportCreateForm(){
             </div>
             <form className="mb-2" onSubmit={handleSubmit}>
                 <div className="flex-col w-fit">
-                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Report Name:
+                    <div className="my-4 text-xl font-bold bg-slate-200 flex flex-row">
+                        <div className="w-64 mr-2 text-right">ReportName:</div>
                         <input className="bg-slate-300 font-normal" type="text" name="reportName"/>
                     </div>
-                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Source Account Set Type:
+                    <div className="my-4 text-xl font-bold bg-slate-200 flex flex-row">
+                        <div className="w-64 mr-2 text-right">Source Account Set Type:</div>
                         <select name="sourceAccountSetType" className="font-normal">
                             <option value="NONE">NONE</option>
                             <option value="GROUP">GROUP</option>
@@ -79,7 +81,8 @@ export default function ReportCreateForm(){
                             <option value="USER_SUPPLIED">USER_SUPPLIED</option>
                         </select>
                     </div>
-                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Source Account Group:
+                    <div className="my-4 text-xl font-bold bg-slate-200 flex flex-row">
+                        <div className="w-64 mr-2 text-right">Source Account Group:</div>
                         <select name="sourceAccountGroup" className="font-normal">
                             <option value="null">NULL</option>
                             <option value="ASSET">ASSET</option>
@@ -89,7 +92,8 @@ export default function ReportCreateForm(){
                             <option value="EXPENSE">EXPENSE</option>
                         </select>
                     </div>
-                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Filter Account Set Type:
+                    <div className="my-4 text-xl font-bold bg-slate-200 flex flex-row">
+                        <div className="w-64 mr-2 text-right">Filter Account Set Type:</div>
                         <select name="filterAccountSetType" className="font-normal">
                             <option value="NONE">NONE</option>
                             <option value="GROUP">GROUP</option>
@@ -97,7 +101,8 @@ export default function ReportCreateForm(){
                             <option value="USER_SUPPLIED">USER_SUPPLIED</option>
                         </select>
                     </div>
-                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Source Account Group:
+                    <div className="my-4 text-xl font-bold bg-slate-200 flex flex-row">
+                        <div className="w-64 mr-2 text-right">Filter Account Group:</div>
                         <select name="filterAccountGroup" className="font-normal">
                             <option value="null">NULL</option>
                             <option value="ASSET">ASSET</option>
@@ -107,7 +112,8 @@ export default function ReportCreateForm(){
                             <option value="EXPENSE">EXPENSE</option>
                         </select>
                     </div>
-                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Data Set Type:
+                    <div className="my-4 text-xl font-bold bg-slate-200 flex flex-row">
+                        <div className="w-64 mr-2 text-right">Data Set Type:</div>
                         <select name="dataSetType">
                             <option value="AGING">Aging Summary</option>
                             <option value="SUMGROUPLINE">Sum/Group/Line</option>
@@ -121,8 +127,9 @@ export default function ReportCreateForm(){
                             <option value="RECONCILIATION">Reconciliation</option>
                         </select>
                     </div>
-                    <div className=" flex">
-                        <button className="p-3 font-bold bg-slate-300" type="submit">Create Report</button>
+                    <div className="my-4 text-xl font-bold bg-slate-200 flex flex-row">
+                        <div className="w-64 mr-2 text-right"/>
+                        <button className="p-3 font-bold bg-blue-500 text-white" type="submit">Create Report</button>
                     </div>
                 </div>
             </form>

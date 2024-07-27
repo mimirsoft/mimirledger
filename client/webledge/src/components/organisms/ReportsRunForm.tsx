@@ -19,7 +19,7 @@ export default function ReportsRunForm(){
     lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
     return (
     <div>
-        <div className="flex w-full flex-col md:col-span-4 bg-slate-100 p-4">
+        <div className="flex w-full flex-col bg-slate-100 p-4">
             <div className="text-xl font-bold">
                 Run Report
             </div>
@@ -48,7 +48,7 @@ export default function ReportsRunForm(){
                                          multiSize={10}/>
                     </div>
                     <div className=" flex flex-row-reverse w-80">
-                    <button className="p-3 font-bold bg-slate-300" type="submit">Run Report</button>
+                    <button className="p-3 font-bold bg-blue-500 text-white text-xl " type="submit">Run Report</button>
                     </div>
                 </div>
             </form>

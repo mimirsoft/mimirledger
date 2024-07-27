@@ -8,8 +8,8 @@ export default function ReportsList() {
     if (error) return <div>Failed to load</div>
 
     return (
-        <div>
-            <div className="text-xl font-bold">
+        <div className="flex w-full flex-col p-4 bg-slate-200">
+            <div className="text-xl font-bold mb-2">
                 My Reports
             </div>
             <div className="flex">
@@ -19,7 +19,7 @@ export default function ReportsList() {
                 <div className="w-20 font-bold">
                     Body
                 </div>
-             </div>
+            </div>
             {
                 data?.reports && data.reports.map((report: Report, index: number) => {
                     return (
@@ -30,7 +30,7 @@ export default function ReportsList() {
                                 <div className="w-32">
                                     {report.reportName}
                                 </div>
-                                <div className="w-20">
+                                <div className="w-20 font-normal">
                                     {JSON.stringify(report.reportBody)}
                                 </div>
                             </div>
@@ -38,6 +38,6 @@ export default function ReportsList() {
                     );
                 })
             }
-            </div>
+        </div>
     )
 }

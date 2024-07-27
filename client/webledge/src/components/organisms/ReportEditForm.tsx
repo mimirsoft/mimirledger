@@ -9,10 +9,16 @@ const postFormData = async (formData: FormData) => {
         const reportID = Number(formEntries.reportID)
         const myURL = new URL('/reports/'+reportID, import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
         const newReportBody : ReportBody = {
-            accountSetType:  String(formEntries.accountSetType),
-            accountGroup:  String(formEntries.accountGroup),
-            predefinedAccounts: [],
-            recurseSubAccounts: 0,
+            sourceAccountSetType:  String(formEntries.sourceAccountSetType),
+            sourceAccountGroup:  String(formEntries.sourceAccountGroup),
+            sourcePredefinedAccounts: [],
+            sourceRecurseSubAccounts: false,
+            sourceRecurseSubAccountsDepth: 0,
+            filterAccountSetType:  String(formEntries.filterAccountSetType),
+            filterAccountGroup:  String(formEntries.filterAccountGroup),
+            filterPredefinedAccounts: [],
+            filterRecurseSubAccounts: false,
+            filterRecurseSubAccountsDepth: 0,
             dataSetType:  String(formEntries.dataSetType),
         }
         const newReport : ReportPostRequest = {
@@ -60,16 +66,36 @@ export default function ReportEditForm(){
                      <input className="bg-slate-300 font-normal" type="text" name="reportName"
                             defaultValue={data?.reportName}/>
                  </label>
-                 <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Account Set Type:
-                     <select name="accountSetType" defaultValue={data?.reportBody.accountSetType}
+                 <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Source Account Set Type:
+                     <select name="sourceAccountSetType" defaultValue={data?.reportBody.sourceAccountSetType}
                              className="font-normal">
+                         <option value="NONE">NONE</option>
                          <option value="GROUP">GROUP</option>
                          <option value="PREDEFINED">PREDEFINED</option>
                          <option value="USER_SUPPLIED">USER_SUPPLIED</option>
                      </select>
                  </div>
-                 <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Account Group:
-                     <select name="accountGroup" defaultValue={data?.reportBody.accountGroup} className="font-normal">
+                 <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Source Account Group:
+                     <select name="sourceAccountGroup" defaultValue={data?.reportBody.sourceAccountGroup} className="font-normal">
+                         <option value="null">NULL</option>
+                         <option value="ASSET">ASSET</option>
+                         <option value="LIABILITY">LIABILITY</option>
+                         <option value="EQUITY">EQUITY</option>
+                         <option value="INCOME">INCOME</option>
+                         <option value="EXPENSE">EXPENSE</option>
+                     </select>
+                 </div>
+                 <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Filter Account Set Type:
+                     <select name="filterAccountSetType" defaultValue={data?.reportBody.filterAccountSetType}
+                             className="font-normal">
+                         <option value="NONE">NONE</option>
+                         <option value="GROUP">GROUP</option>
+                         <option value="PREDEFINED">PREDEFINED</option>
+                         <option value="USER_SUPPLIED">USER_SUPPLIED</option>
+                     </select>
+                 </div>
+                 <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Filter Account Group:
+                     <select name="filterAccountGroup" defaultValue={data?.reportBody.filterAccountGroup} className="font-normal">
                          <option value="null">NULL</option>
                          <option value="ASSET">ASSET</option>
                          <option value="LIABILITY">LIABILITY</option>

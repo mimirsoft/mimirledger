@@ -20,18 +20,24 @@ type Report struct {
 	ReportBody ReportBody `db:"report_body"`
 }
 type ReportBody struct {
-	AccountSetType          ReportAccountSetType `json:"accountSetType"`
-	AccountGroup            AccountType          `json:"accountGroup,omitempty"`
-	PredefinedAccounts      []uint64             `json:"predefinedAccounts"`
-	RecurseSubAccounts      bool                 `json:"recurseSubAccounts"`
-	RecurseSubAccountsDepth int                  `json:"recurseSubAccountsDepth"` // how many accounts deep to recurse
-	DataSetType             ReportDataSetType    `json:"dataSetType"`
+	SourceAccountSetType          ReportAccountSetType `json:"sourceAccountSetType"`
+	SourceAccountGroup            AccountType          `json:"sourceAccountGroup,omitempty"`
+	SourcePredefinedAccounts      []uint64             `json:"sourcePredefinedAccounts"`
+	SourceRecurseSubAccounts      bool                 `json:"sourceRecurseSubAccounts"`
+	SourceRecurseSubAccountsDepth int                  `json:"sourceRecurseSubAccountsDepth"`
+	FilterAccountSetType          ReportAccountSetType `json:"filterAccountSetType"`
+	FilterAccountGroup            AccountType          `json:"filterAccountGroup,omitempty"`
+	FilterPredefinedAccounts      []uint64             `json:"filterPredefinedAccounts"`
+	FilterRecurseSubAccounts      bool                 `json:"filterRecurseSubAccounts"`
+	FilterRecurseSubAccountsDepth int                  `json:"filterRecurseSubAccountsDepth"`
+	DataSetType                   ReportDataSetType    `json:"dataSetType"`
 }
 
 // AccountType is an enum for account type.
 type ReportAccountSetType string
 
 const (
+	ReportAccountSetNone         = ReportAccountSetType("NONE")
 	ReportAccountSetGroup        = ReportAccountSetType("GROUP")
 	ReportAccountSetPredefined   = ReportAccountSetType("PREDEFINED")
 	ReportAccountSetUserSupplied = ReportAccountSetType("USER_SUPPLIED")

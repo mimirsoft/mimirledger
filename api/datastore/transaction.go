@@ -288,3 +288,9 @@ func (store TransactionStore) GetTransactionsForAccount(accountID uint64) ([]*Tr
 
 	return txnSet, nil
 }
+
+func (store TransactionStore) GetExpensesForAccount(accountID uint64) ([]*Transaction, error) {
+	var txnSet []*Transaction
+
+	return txnSet, nil
+}

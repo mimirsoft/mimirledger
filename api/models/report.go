@@ -16,12 +16,17 @@ type Report struct {
 	ReportBody ReportBody
 }
 type ReportBody struct {
-	AccountSetType          datastore.ReportAccountSetType
-	AccountGroup            datastore.AccountType
-	PredefinedAccounts      []uint64
-	RecurseSubAccounts      bool
-	RecurseSubAccountsDepth int
-	DataSetType             datastore.ReportDataSetType
+	SourceAccountSetType          datastore.ReportAccountSetType
+	SourceAccountGroup            datastore.AccountType
+	SourcePredefinedAccounts      []uint64
+	SourceRecurseSubAccounts      bool
+	SourceRecurseSubAccountsDepth int
+	FilterAccountSetType          datastore.ReportAccountSetType
+	FilterAccountGroup            datastore.AccountType
+	FilterPredefinedAccounts      []uint64
+	FilterRecurseSubAccounts      bool
+	FilterRecurseSubAccountsDepth int
+	DataSetType                   datastore.ReportDataSetType
 }
 
 // Store inserts a Report
@@ -62,27 +67,69 @@ func (c *Report) Run(dStores *datastore.Datastores, startDate time.Time,
 		EndDate:   endDate}
 	// check type of account set
 	// build the set of accountIDs to process
-	switch c.ReportBody.AccountSetType {
+	accountSet := make(map[uint64]bool)
+	switch c.ReportBody.SourceAccountSetType {
 	case datastore.ReportAccountSetGroup:
 		// get all accounts in group
 
 	case datastore.ReportAccountSetPredefined:
 
 	case datastore.ReportAccountSetUserSupplied:
+		// build total account set
 		// get userSuppliedAccountIDs
 		// include sub-accounts
-		if c.ReportBody.RecurseSubAccounts {
-			// how many levels to recurse
-			if c.ReportBody.RecurseSubAccountsDepth > 0 {
-				// for idx := range runTimeTargetAccounts {
-
-				//}
-			} // otherwise no limit to depth
+		if c.ReportBody.SourceRecurseSubAccounts {
+			for _, account := range runTimeTargetAccounts {
+				accountAndChildren, err := dStores.AccountStore().GetAccountWithChildrenByLevel(account)
+				if err != nil {
+					return nil, fmt.Errorf("dStores.AccountStore().GetAccountWithChildrenByLevel:%w", err)
+				}
+				// how many levels to recurse
+				if c.ReportBody.SourceRecurseSubAccountsDepth > 0 {
+					for idx := range accountAndChildren {
+						if accountAndChildren[idx].Level < c.ReportBody.SourceRecurseSubAccountsDepth {
+							accountSet[accountAndChildren[idx].AccountID] = true
+						}
+					}
+				} else { // otherwise no limit to depth add all accounts to the accountSet
+					for idx := range accountAndChildren {
+						accountSet[accountAndChildren[idx].AccountID] = true
+					}
+				}
+			}
+		} else {
+			// otherwise we just use the runTimeTargetAccounts
+			for idx := range runTimeTargetAccounts {
+				accountSet[runTimeTargetAccounts[idx]] = true
+			}
 		}
 	}
-	// build total account set
+
+	switch c.ReportBody.DataSetType {
+	case datastore.ReportDataSetTypeBalance:
+	case datastore.ReportDataSetTypeLedger:
+	case datastore.ReportDataSetTypeIncome:
+	case datastore.ReportDataSetTypeExpense:
+	}
 	// build data set from account set
 	return &myReportOutput, nil
+}
+
+func buildDataSetExpense(dStores *datastore.Datastores, accountSet map[uint64]bool) ([]*Transaction, error) {
+	var dataSet []*Transaction
+
+	for idx := range accountSet {
+		expenseTransactions, err := dStores.TransactionStore().GetExpensesForAccount(idx)
+		if err != nil {
+			return nil, fmt.Errorf("dStores.TransactionStore().GetExpensesForAccount:%w", err)
+		}
+
+		for kdx := range expenseTransactions {
+			reportTxn := entTransactionToTransaction(expenseTransactions[kdx])
+			dataSet = append(dataSet, reportTxn)
+		}
+	}
+	return dataSet, nil
 }
 
 var ErrReportNotFound = errors.New("report not found")
@@ -130,12 +177,17 @@ func reportToEntReport(myReport *Report) *datastore.Report {
 		ReportID:   myReport.ReportID,
 		ReportName: myReport.ReportName,
 		ReportBody: datastore.ReportBody{
-			AccountSetType:          myReport.ReportBody.AccountSetType,
-			AccountGroup:            myReport.ReportBody.AccountGroup,
-			PredefinedAccounts:      myReport.ReportBody.PredefinedAccounts,
-			RecurseSubAccounts:      myReport.ReportBody.RecurseSubAccounts,
-			RecurseSubAccountsDepth: myReport.ReportBody.RecurseSubAccountsDepth,
-			DataSetType:             myReport.ReportBody.DataSetType,
+			SourceAccountSetType:          myReport.ReportBody.SourceAccountSetType,
+			SourceAccountGroup:            myReport.ReportBody.SourceAccountGroup,
+			SourcePredefinedAccounts:      myReport.ReportBody.SourcePredefinedAccounts,
+			SourceRecurseSubAccounts:      myReport.ReportBody.SourceRecurseSubAccounts,
+			SourceRecurseSubAccountsDepth: myReport.ReportBody.SourceRecurseSubAccountsDepth,
+			FilterAccountSetType:          myReport.ReportBody.FilterAccountSetType,
+			FilterAccountGroup:            myReport.ReportBody.FilterAccountGroup,
+			FilterPredefinedAccounts:      myReport.ReportBody.FilterPredefinedAccounts,
+			FilterRecurseSubAccounts:      myReport.ReportBody.FilterRecurseSubAccounts,
+			FilterRecurseSubAccountsDepth: myReport.ReportBody.FilterRecurseSubAccountsDepth,
+			DataSetType:                   myReport.ReportBody.DataSetType,
 		},
 	}
 
@@ -157,12 +209,17 @@ func entReportToReport(entReport *datastore.Report) *Report {
 		ReportID:   entReport.ReportID,
 		ReportName: entReport.ReportName,
 		ReportBody: ReportBody{
-			AccountSetType:          entReport.ReportBody.AccountSetType,
-			AccountGroup:            entReport.ReportBody.AccountGroup,
-			PredefinedAccounts:      entReport.ReportBody.PredefinedAccounts,
-			RecurseSubAccounts:      entReport.ReportBody.RecurseSubAccounts,
-			RecurseSubAccountsDepth: entReport.ReportBody.RecurseSubAccountsDepth,
-			DataSetType:             entReport.ReportBody.DataSetType,
+			SourceAccountSetType:          entReport.ReportBody.SourceAccountSetType,
+			SourceAccountGroup:            entReport.ReportBody.SourceAccountGroup,
+			SourcePredefinedAccounts:      entReport.ReportBody.SourcePredefinedAccounts,
+			SourceRecurseSubAccounts:      entReport.ReportBody.SourceRecurseSubAccounts,
+			SourceRecurseSubAccountsDepth: entReport.ReportBody.SourceRecurseSubAccountsDepth,
+			FilterAccountSetType:          entReport.ReportBody.FilterAccountSetType,
+			FilterAccountGroup:            entReport.ReportBody.FilterAccountGroup,
+			FilterPredefinedAccounts:      entReport.ReportBody.FilterPredefinedAccounts,
+			FilterRecurseSubAccounts:      entReport.ReportBody.FilterRecurseSubAccounts,
+			FilterRecurseSubAccountsDepth: entReport.ReportBody.FilterRecurseSubAccountsDepth,
+			DataSetType:                   entReport.ReportBody.DataSetType,
 		},
 	}
 

@@ -15,30 +15,45 @@ type Report struct {
 	ReportBody ReportBody `json:"reportBody"`
 }
 type ReportBody struct {
-	AccountSetType          datastore.ReportAccountSetType `json:"accountSetType"`
-	AccountGroup            *datastore.AccountType         `json:"accountGroup,omitempty"`
-	PredefinedAccounts      []uint64                       `json:"predefinedAccounts,omitempty"`
-	RecurseSubAccounts      bool                           `json:"recurseSubAccounts"`
-	RecurseSubAccountsDepth int                            `json:"recurseSubAccountsDepth"`
-	DataSetType             datastore.ReportDataSetType    `json:"dataSetType"`
+	SourceAccountSetType          datastore.ReportAccountSetType `json:"sourceAccountSetType"`
+	SourceAccountGroup            *datastore.AccountType         `json:"sourceAccountGroup,omitempty"`
+	SourcePredefinedAccounts      []uint64                       `json:"sourcePredefinedAccounts"`
+	SourceRecurseSubAccounts      bool                           `json:"sourceRecurseSubAccounts"`
+	SourceRecurseSubAccountsDepth int                            `json:"sourceRecurseSubAccountsDepth"`
+	FilterAccountSetType          datastore.ReportAccountSetType `json:"filterAccountSetType"`
+	FilterAccountGroup            *datastore.AccountType         `json:"filterAccountGroup,omitempty"`
+	FilterPredefinedAccounts      []uint64                       `json:"filterPredefinedAccounts"`
+	FilterRecurseSubAccounts      bool                           `json:"filterRecurseSubAccounts"`
+	FilterRecurseSubAccountsDepth int                            `json:"filterRecurseSubAccountsDepth"`
+	DataSetType                   datastore.ReportDataSetType    `json:"dataSetType"`
 }
 
 func ReportToRespReport(rpt *models.Report) *Report {
 	var accountGroup *datastore.AccountType
-	if rpt.ReportBody.AccountGroup != "" {
-		accountGroup = &rpt.ReportBody.AccountGroup
+	if rpt.ReportBody.SourceAccountGroup != "" {
+		accountGroup = &rpt.ReportBody.SourceAccountGroup
+	}
+
+	var filterAccountGroup *datastore.AccountType
+	if rpt.ReportBody.FilterAccountGroup != "" {
+		filterAccountGroup = &rpt.ReportBody.FilterAccountGroup
 	}
 
 	myReport := &Report{
 		ReportID:   rpt.ReportID,
 		ReportName: rpt.ReportName,
 		ReportBody: ReportBody{
-			AccountSetType:          rpt.ReportBody.AccountSetType,
-			AccountGroup:            accountGroup,
-			PredefinedAccounts:      rpt.ReportBody.PredefinedAccounts,
-			RecurseSubAccounts:      rpt.ReportBody.RecurseSubAccounts,
-			RecurseSubAccountsDepth: rpt.ReportBody.RecurseSubAccountsDepth,
-			DataSetType:             rpt.ReportBody.DataSetType,
+			SourceAccountSetType:          rpt.ReportBody.SourceAccountSetType,
+			SourceAccountGroup:            accountGroup,
+			SourcePredefinedAccounts:      rpt.ReportBody.SourcePredefinedAccounts,
+			SourceRecurseSubAccounts:      rpt.ReportBody.SourceRecurseSubAccounts,
+			SourceRecurseSubAccountsDepth: rpt.ReportBody.SourceRecurseSubAccountsDepth,
+			FilterAccountSetType:          rpt.ReportBody.FilterAccountSetType,
+			FilterAccountGroup:            filterAccountGroup,
+			FilterPredefinedAccounts:      rpt.ReportBody.FilterPredefinedAccounts,
+			FilterRecurseSubAccounts:      rpt.ReportBody.FilterRecurseSubAccounts,
+			FilterRecurseSubAccountsDepth: rpt.ReportBody.FilterRecurseSubAccountsDepth,
+			DataSetType:                   rpt.ReportBody.DataSetType,
 		},
 	}
 

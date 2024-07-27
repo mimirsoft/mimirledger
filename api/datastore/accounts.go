@@ -407,7 +407,7 @@ ORDER BY account_left`
 
 type AccountWithLevel struct {
 	Account
-	Level uint64 `db:"level"`
+	Level int `db:"level"`
 }
 
 // Gets the Account and Children with Levels

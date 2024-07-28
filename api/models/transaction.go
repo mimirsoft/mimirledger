@@ -357,7 +357,7 @@ func transactionToEntTransaction(txn *Transaction) datastore.Transaction {
 
 func entTransactionToTransaction(eTxn *datastore.Transaction) *Transaction {
 	myTransCore := TransactionCore(*eTxn)
-	myTrans := Transaction{TransactionCore: myTransCore}
+	myTrans := Transaction{TransactionCore: myTransCore} //nolint:exhaustruct
 
 	return &myTrans
 }

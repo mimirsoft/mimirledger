@@ -62,13 +62,19 @@ func (c *Report) Update(dStores *datastore.Datastores) error {
 // Run executes a report and generates an output
 func (c *Report) Run(dStores *datastore.Datastores, startDate time.Time,
 	endDate time.Time, runTimeTargetAccounts []uint64) (*ReportOutput, error) {
-	myReportOutput := ReportOutput{ReportName: c.ReportName,
+	myReportOutput := ReportOutput{ReportName: c.ReportName, //nolint:exhaustruct
 		StartDate: startDate,
 		EndDate:   endDate}
 	// check type of account set
 	// build the set of accountIDs to process
-	accountSet := make(map[uint64]bool)
+	sourceAccountMap := make(map[uint64]bool)
+
+	var sourceAccountSet []uint64
+
+	var reportDataSet []*ReportData
+
 	switch c.ReportBody.SourceAccountSetType {
+	case datastore.ReportAccountSetNone:
 	case datastore.ReportAccountSetGroup:
 		// get all accounts in group
 
@@ -88,20 +94,26 @@ func (c *Report) Run(dStores *datastore.Datastores, startDate time.Time,
 				if c.ReportBody.SourceRecurseSubAccountsDepth > 0 {
 					for idx := range accountAndChildren {
 						if accountAndChildren[idx].Level < c.ReportBody.SourceRecurseSubAccountsDepth {
-							accountSet[accountAndChildren[idx].AccountID] = true
+							sourceAccountMap[accountAndChildren[idx].AccountID] = true
 						}
 					}
 				} else { // otherwise no limit to depth add all accounts to the accountSet
 					for idx := range accountAndChildren {
-						accountSet[accountAndChildren[idx].AccountID] = true
+						sourceAccountMap[accountAndChildren[idx].AccountID] = true
 					}
 				}
 			}
 		} else {
 			// otherwise we just use the runTimeTargetAccounts
 			for idx := range runTimeTargetAccounts {
-				accountSet[runTimeTargetAccounts[idx]] = true
+				sourceAccountMap[runTimeTargetAccounts[idx]] = true
 			}
+		}
+
+		sourceAccountSet = make([]uint64, 0, len(sourceAccountMap))
+
+		for idx := range sourceAccountMap {
+			sourceAccountSet = append(sourceAccountSet, idx)
 		}
 	}
 
@@ -110,25 +122,40 @@ func (c *Report) Run(dStores *datastore.Datastores, startDate time.Time,
 	case datastore.ReportDataSetTypeLedger:
 	case datastore.ReportDataSetTypeIncome:
 	case datastore.ReportDataSetTypeExpense:
+		var err error
+
+		reportDataSet, err = buildDataSetExpense(dStores, sourceAccountSet, nil)
+		if err != nil {
+			return nil, fmt.Errorf("buildDataSetExpense:%w", err)
+		}
 	}
+
+	myReportOutput.ReportDataSet = reportDataSet
 	// build data set from account set
 	return &myReportOutput, nil
 }
 
-func buildDataSetExpense(dStores *datastore.Datastores, accountSet map[uint64]bool) ([]*Transaction, error) {
-	var dataSet []*Transaction
+func buildDataSetExpense(dStores *datastore.Datastores, sourceAccountSet []uint64, filterAccountSet []uint64) ([]*ReportData, error) {
+	var dataSet []*ReportData
 
-	for idx := range accountSet {
-		expenseTransactions, err := dStores.TransactionStore().GetExpensesForAccount(idx)
+	if len(filterAccountSet) == 0 {
+		expenses, err := dStores.TransactionStore().GetDebitsForAccounts(sourceAccountSet)
 		if err != nil {
 			return nil, fmt.Errorf("dStores.TransactionStore().GetExpensesForAccount:%w", err)
 		}
 
-		for kdx := range expenseTransactions {
-			reportTxn := entTransactionToTransaction(expenseTransactions[kdx])
-			dataSet = append(dataSet, reportTxn)
+		dataRaw := ReportData{Expense: expenses} //nolint:exhaustruct
+		dataSet = append(dataSet, &dataRaw)
+	} else {
+		expenses, err := dStores.TransactionStore().GetDebitsForAccountsFiltered(sourceAccountSet, filterAccountSet)
+		if err != nil {
+			return nil, fmt.Errorf("dStores.TransactionStore().GetExpensesForAccount:%w", err)
 		}
+
+		dataRaw := ReportData{Expense: expenses} //nolint:exhaustruct
+		dataSet = append(dataSet, &dataRaw)
 	}
+
 	return dataSet, nil
 }
 

@@ -289,8 +289,16 @@ func (store TransactionStore) GetTransactionsForAccount(accountID uint64) ([]*Tr
 	return txnSet, nil
 }
 
-func (store TransactionStore) GetExpensesForAccount(accountID uint64) ([]*Transaction, error) {
-	var txnSet []*Transaction
+func (store TransactionStore) GetDebitsForAccounts(accountIDs []uint64) (int64, error) {
+	return 0, nil
+}
+func (store TransactionStore) GetDebitsForAccountsFiltered(accountID []uint64, filteredAccounts []uint64) (int64, error) {
+	return 0, nil
+}
 
-	return txnSet, nil
+func (store TransactionStore) GetCreditsForAccounts(accountID []uint64) (int64, error) {
+	return 0, nil
+}
+func (store TransactionStore) GetCreditsForAccountsFiltered(accountID []uint64, filteredAccounts []uint64) (int64, error) {
+	return 0, nil
 }

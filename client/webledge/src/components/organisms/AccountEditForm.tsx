@@ -48,28 +48,29 @@ export default function AccountEditForm(){
     if (error) return <div>Failed to load</div>
 
      return (
-        <div className="flex">
-         <form className="flex" onSubmit={handleSubmit}>
-            <label className="my-4 text-xl font-bold mx-4 bg-slate-200">AccountName:
-                <input className="bg-slate-300 font-normal" type="text" name="accountName" defaultValue={data?.accountName}/>
-            </label>
-            <label className="my-4 text-xl font-bold mx-4 bg-slate-200">
-                AccountParent:
-                <AccountSelector name={"accountParent"} id={data?.accountParent} includeTop={true} excludeID={0}
-                     multiple={false}
-                     multiSize={1}/>
-            </label>
-            <label className="my-4 text-xl font-bold">AccountType:
-                <AccountTypeSelector selectedName={data?.accountType} />
-            </label>
-            <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Memo:
-                <input className=" bg-slate-300" type="text" name="accountMemo" defaultValue={data?.accountMemo}/>
-            </label>
-             <div className="bg-slate-300 flex">
-                 <input className=" bg-slate-300" type="hidden" name="accountID" defaultValue={data?.accountID}/>
-                 <button className="p-3 font-bold" type="submit">Update</button>
-             </div>
-         </form>
-        </div>
+         <div className="flex w-full flex-col p-4 bg-slate-200">
+             <form className="flex" onSubmit={handleSubmit}>
+                 <label className="my-4 text-xl font-bold mx-4 bg-slate-200">AccountName:
+                     <input className="bg-slate-300 font-normal" type="text" name="accountName"
+                            defaultValue={data?.accountName}/>
+                 </label>
+                 <label className="my-4 text-xl font-bold mx-4 bg-slate-200">
+                     AccountParent:
+                     <AccountSelector name={"accountParent"} id={data?.accountParent} includeTop={true} excludeID={0}
+                                      multiple={false}
+                                      multiSize={1}/>
+                 </label>
+                 <label className="my-4 text-xl font-bold">AccountType:
+                     <AccountTypeSelector selectedName={data?.accountType}/>
+                 </label>
+                 <label className="my-4 text-xl font-bold mx-4 bg-slate-200">Memo:
+                     <input className="font-normal bg-slate-300" type="text" name="accountMemo" defaultValue={data?.accountMemo}/>
+                 </label>
+                 <div className="bg-slate-300 flex">
+                     <input className=" bg-slate-300" type="hidden" name="accountID" defaultValue={data?.accountID}/>
+                     <button className="p-3 font-bold bg-blue-500 text-white font-bold" type="submit">Update</button>
+                 </div>
+             </form>
+         </div>
      );
 }

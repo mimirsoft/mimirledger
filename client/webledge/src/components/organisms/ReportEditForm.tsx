@@ -46,7 +46,6 @@ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     else {
         console.log("ERROR"+result)
     }
-
 }
 
 export default function ReportEditForm(){

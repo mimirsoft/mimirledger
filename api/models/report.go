@@ -135,11 +135,13 @@ func (c *Report) Run(dStores *datastore.Datastores, startDate time.Time,
 	return &myReportOutput, nil
 }
 
-func buildDataSetExpense(dStores *datastore.Datastores, sourceAccountSet []uint64, filterAccountSet []uint64) ([]*ReportData, error) {
+func buildDataSetExpense(dStores *datastore.Datastores, sourceAccountSet []uint64,
+	filterAccountSet []uint64) ([]*ReportData, error) {
 	var dataSet []*ReportData
 
+	// to do, at add switch on accountType "which are expenses, DEBITS or CREDIT"
 	if len(filterAccountSet) == 0 {
-		expenses, err := dStores.TransactionStore().GetDebitsForAccounts(sourceAccountSet)
+		expenses, err := dStores.TransactionStore().GetDebitTotalForAccounts(sourceAccountSet)
 		if err != nil {
 			return nil, fmt.Errorf("dStores.TransactionStore().GetExpensesForAccount:%w", err)
 		}
@@ -147,7 +149,7 @@ func buildDataSetExpense(dStores *datastore.Datastores, sourceAccountSet []uint6
 		dataRaw := ReportData{Expense: expenses} //nolint:exhaustruct
 		dataSet = append(dataSet, &dataRaw)
 	} else {
-		expenses, err := dStores.TransactionStore().GetDebitsForAccountsFiltered(sourceAccountSet, filterAccountSet)
+		expenses, err := dStores.TransactionStore().GetDebitTotalForAccountsFiltered(sourceAccountSet, filterAccountSet)
 		if err != nil {
 			return nil, fmt.Errorf("dStores.TransactionStore().GetExpensesForAccount:%w", err)
 		}

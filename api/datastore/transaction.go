@@ -344,16 +344,36 @@ func (store TransactionStore) RetrieveTransactionsNetForDates(accountIDSet []uin
 	return txnSet, nil
 }
 
-func (store TransactionStore) GetDebitsForAccounts(accountIDs []uint64) (int64, error) {
+func (store TransactionStore) GetDebitTotalForAccounts(accountIDs []uint64) (int64, error) {
 	return 0, nil
 }
-func (store TransactionStore) GetDebitsForAccountsFiltered(accountID []uint64, filteredAccounts []uint64) (int64, error) {
+func (store TransactionStore) GetDebitTotalForAccountsForDates(accountIDs []uint64,
+	startDate time.Time, endDate time.Time) (int64, error) {
+	return 0, nil
+}
+func (store TransactionStore) GetDebitTotalForAccountsFiltered(accountID []uint64,
+	filteredAccounts []uint64) (int64, error) {
+	return 0, nil
+}
+
+func (store TransactionStore) GetDebitTotalForAccountsFilteredForDates(accountID []uint64,
+	filteredAccounts []uint64, startDate time.Time, endDate time.Time) (int64, error) {
 	return 0, nil
 }
 
 func (store TransactionStore) GetCreditsForAccounts(accountID []uint64) (int64, error) {
 	return 0, nil
 }
-func (store TransactionStore) GetCreditsForAccountsFiltered(accountID []uint64, filteredAccounts []uint64) (int64, error) {
+func (store TransactionStore) GetCreditsForAccountsForDates(accountID []uint64,
+	startDate time.Time, endDate time.Time) (int64, error) {
+	return 0, nil
+}
+func (store TransactionStore) GetCreditsForAccountsFiltered(accountID []uint64,
+	filteredAccounts []uint64) (int64, error) {
+	return 0, nil
+}
+
+func (store TransactionStore) GetCreditsForAccountsFilteredForDates(accountID []uint64,
+	filteredAccounts []uint64, startDate time.Time, endDate time.Time) (int64, error) {
 	return 0, nil
 }

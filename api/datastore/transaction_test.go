@@ -417,11 +417,11 @@ func TestTransactionStore_RetrieveTransactionsNetForDates(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(myDCSet).To(gomega.HaveLen(2))
 
-	testSearchLimitDateoldDate1, err := time.Parse("2006-01-02", "2015-07-08")
+	testSearchLimitDate1, err := time.Parse("2006-01-02", "2015-07-08")
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	// should return nothing, as we cut off the search before the date on the transaction
 	unreconciledTransaction, err := transStore.RetrieveTransactionsNetForDates([]uint64{myAcct.AccountID},
-		time.Time{}, testSearchLimitDateoldDate1)
+		time.Time{}, testSearchLimitDate1)
 	g.Expect(err).To(gomega.HaveOccurred())
 	g.Expect(errors.Is(err, sql.ErrNoRows)).To(gomega.BeTrue())
 	g.Expect(unreconciledTransaction).To(gomega.HaveLen(0))
@@ -432,19 +432,9 @@ func TestTransactionStore_RetrieveTransactionsNetForDates(t *testing.T) {
 	g.Expect(unreconciledTransaction).To(gomega.HaveLen(1))
 	g.Expect(unreconciledTransaction[0].TransactionID).To(gomega.Equal(myTrans.TransactionID))
 
-	// set is_reconciled and the reconciled_date on myTrans1
-	myTrans.IsReconciled = true
-	err = transStore.SetIsReconciled(&myTrans)
-	g.Expect(err).NotTo(gomega.HaveOccurred())
-	reconciledDate, err := time.Parse("2006-01-02", "2016-07-11")
-	g.Expect(err).NotTo(gomega.HaveOccurred())
-	myTrans.TransactionReconcileDate = sql.NullTime{Time: reconciledDate, Valid: true}
-	err = transStore.SetTransactionReconcileDate(&myTrans)
-	g.Expect(err).NotTo(gomega.HaveOccurred())
-
-	// should still return nothing, as the reconciled date greater than the search limit date
+	// should  return nothing, because end date is later than start date
 	unreconciledTransaction, err = transStore.RetrieveTransactionsNetForDates([]uint64{myAcct.AccountID},
-		testSearchLimitDateoldDate1, time.Time{})
+		testSearchLimitDate1, time.Time{})
 	g.Expect(err).To(gomega.HaveOccurred())
 	g.Expect(errors.Is(err, sql.ErrNoRows)).To(gomega.BeTrue())
 	g.Expect(unreconciledTransaction).To(gomega.HaveLen(0))
@@ -458,12 +448,12 @@ func TestTransactionStore_RetrieveTransactionsNetForDates(t *testing.T) {
 
 	// succeed
 	myDC2a := TransactionDebitCredit{DebitOrCredit: AccountSignDebit, TransactionDCAmount: 10000,
-		TransactionID: myTrans2.TransactionID, AccountID: myAcct.AccountID}
+		TransactionID: myTrans2.TransactionID, AccountID: myAcct2.AccountID}
 	err = dcStore.Store(&myDC2a)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	myDC2b := TransactionDebitCredit{DebitOrCredit: AccountSignCredit, TransactionDCAmount: 20000,
-		TransactionID: myTrans2.TransactionID, AccountID: myAcct2.AccountID}
+		TransactionID: myTrans2.TransactionID, AccountID: myAcct.AccountID}
 	err = dcStore.Store(&myDC2b)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
@@ -474,4 +464,13 @@ func TestTransactionStore_RetrieveTransactionsNetForDates(t *testing.T) {
 	g.Expect(unreconciledTransaction2).To(gomega.HaveLen(2))
 	g.Expect(unreconciledTransaction2[0].TransactionID).To(gomega.Equal(myTrans.TransactionID))
 	g.Expect(unreconciledTransaction2[1].TransactionID).To(gomega.Equal(myTrans2.TransactionID))
+
+	testSearchLimitDate2, err := time.Parse("2006-01-02", "2017-08-31")
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	// get unreconciled transactions , there are now two of them
+	unreconciledTransaction2, err = transStore.RetrieveTransactionsNetForDates([]uint64{myAcct.AccountID},
+		testSearchLimitDate2, time.Now().Add(time.Hour))
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(unreconciledTransaction2).To(gomega.HaveLen(1))
+	g.Expect(unreconciledTransaction2[0].TransactionID).To(gomega.Equal(myTrans2.TransactionID))
 }

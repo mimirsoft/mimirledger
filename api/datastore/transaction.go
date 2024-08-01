@@ -289,16 +289,91 @@ func (store TransactionStore) GetTransactionsForAccount(accountID uint64) ([]*Tr
 	return txnSet, nil
 }
 
-func (store TransactionStore) GetDebitsForAccounts(accountIDs []uint64) (int64, error) {
+func (store TransactionStore) RetrieveTransactionsNetForDates(accountIDSet []uint64,
+	startDate time.Time, endDate time.Time) ([]*TransactionLedger, error) {
+	query := `SELECT workingDC.transaction_dc_amount, 
+    							  workingDC.debit_or_credit, 
+    							  tm.transaction_id, 
+    							  tm.transaction_reference, 
+    							  tm.transaction_date, 
+    							  tm.transaction_reconcile_date, 
+    							  tm.transaction_comment, 
+    							  tm.is_reconciled, 
+    							  string_agg(odc.account_id::text, ',') AS split
+                             FROM transaction_debit_credit AS workingDC
+                        LEFT JOIN transaction_debit_credit AS odc
+                               ON workingDC.transaction_id=odc.transaction_id 
+    				   INNER JOIN transaction_main AS tm
+                               ON tm.transaction_id=workingDC.transaction_id
+                            WHERE workingDC.account_id = ANY($1::int[])
+                              AND odc.account_id != ANY($1::int[])
+						  AND  EXTRACT(EPOCH FROM tm.transaction_date) >= EXTRACT(EPOCH FROM $2::timestamp) 
+               	 		  AND  EXTRACT(EPOCH FROM tm.transaction_date) <= EXTRACT(EPOCH FROM $3::timestamp) 
+                         GROUP BY  workingDC.transaction_dc_amount, 
+    							  workingDC.debit_or_credit, 
+    							  tm.transaction_id, 
+    							  tm.transaction_reference, 
+    							  tm.transaction_date, 
+    							  tm.transaction_reconcile_date, 
+    							  tm.transaction_comment, 
+    							  tm.is_reconciled
+                         ORDER BY tm.transaction_date, tm.transaction_id`
+
+	rows, err := store.Client.Queryx(query, accountIDSet, startDate, endDate)
+	if err != nil {
+		return nil, fmt.Errorf("store.Client.Queryx:%w", err)
+	}
+
+	defer rows.Close()
+
+	var txnSet []*TransactionLedger
+
+	for rows.Next() {
+		var txn TransactionLedger
+		if err = rows.StructScan(&txn); err != nil {
+			return nil, fmt.Errorf("rows.StructScan:%w", err)
+		}
+
+		txnSet = append(txnSet, &txn)
+	}
+
+	if len(txnSet) == 0 {
+		return nil, sql.ErrNoRows
+	}
+
+	return txnSet, nil
+}
+
+func (store TransactionStore) GetDebitTotalForAccounts(accountIDs []uint64) (int64, error) {
 	return 0, nil
 }
-func (store TransactionStore) GetDebitsForAccountsFiltered(accountID []uint64, filteredAccounts []uint64) (int64, error) {
+func (store TransactionStore) GetDebitTotalForAccountsForDates(accountIDs []uint64,
+	startDate time.Time, endDate time.Time) (int64, error) {
+	return 0, nil
+}
+func (store TransactionStore) GetDebitTotalForAccountsFiltered(accountID []uint64,
+	filteredAccounts []uint64) (int64, error) {
+	return 0, nil
+}
+
+func (store TransactionStore) GetDebitTotalForAccountsFilteredForDates(accountID []uint64,
+	filteredAccounts []uint64, startDate time.Time, endDate time.Time) (int64, error) {
 	return 0, nil
 }
 
 func (store TransactionStore) GetCreditsForAccounts(accountID []uint64) (int64, error) {
 	return 0, nil
 }
-func (store TransactionStore) GetCreditsForAccountsFiltered(accountID []uint64, filteredAccounts []uint64) (int64, error) {
+func (store TransactionStore) GetCreditsForAccountsForDates(accountID []uint64,
+	startDate time.Time, endDate time.Time) (int64, error) {
+	return 0, nil
+}
+func (store TransactionStore) GetCreditsForAccountsFiltered(accountID []uint64,
+	filteredAccounts []uint64) (int64, error) {
+	return 0, nil
+}
+
+func (store TransactionStore) GetCreditsForAccountsFilteredForDates(accountID []uint64,
+	filteredAccounts []uint64, startDate time.Time, endDate time.Time) (int64, error) {
 	return 0, nil
 }

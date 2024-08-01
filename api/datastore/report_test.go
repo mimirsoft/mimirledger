@@ -1,6 +1,8 @@
 package datastore
 
 import (
+	"database/sql"
+	"errors"
 	"github.com/onsi/ginkgo"
 	"github.com/onsi/gomega"
 	"testing"
@@ -192,4 +194,39 @@ func TestReportStore_StoreAndUpdate(t *testing.T) {
 	g.Expect(myReport.ReportBody.SourceRecurseSubAccountsDepth).To(gomega.Equal(2))
 	g.Expect(updatedRetrieve.ReportBody.SourceAccountGroup).To(gomega.Equal(AccountType("")))
 	g.Expect(updatedRetrieve.ReportBody.DataSetType).To(gomega.Equal(ReportDataSetTypeIncome))
+}
+
+func TestReportStore_StoreAndDelete(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDB(g)
+	store := createReportStore()
+
+	a1 := Report{
+		ReportName: "test",
+		ReportBody: ReportBody{
+			SourceAccountSetType:          ReportAccountSetGroup,
+			SourcePredefinedAccounts:      []uint64{1, 2, 3},
+			SourceRecurseSubAccounts:      false,
+			SourceRecurseSubAccountsDepth: 0,
+		},
+	}
+	err := store.Store(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myReport, err := store.RetrieveByID(a1.ReportID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myReport.ReportName).To(gomega.Equal("test"))
+	g.Expect(myReport.ReportBody.SourceAccountSetType).To(gomega.Equal(ReportAccountSetGroup))
+	g.Expect(myReport.ReportBody.SourcePredefinedAccounts).To(gomega.ConsistOf([]uint64{1, 2, 3}))
+	g.Expect(myReport.ReportBody.SourceRecurseSubAccounts).To(gomega.BeFalse())
+	g.Expect(myReport.ReportBody.SourceRecurseSubAccountsDepth).To(gomega.Equal(0))
+
+	err = store.Delete(&a1)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myReport, err = store.RetrieveByID(a1.ReportID)
+	g.Expect(err).To(gomega.HaveOccurred())
+	g.Expect(errors.Is(err, sql.ErrNoRows)).To(gomega.BeTrue())
+	g.Expect(myReport).To(gomega.BeNil())
 }

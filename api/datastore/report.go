@@ -161,3 +161,16 @@ func (store ReportStore) Retrieve() ([]*Report, error) {
 
 	return set, nil
 }
+
+// Delete a Report
+func (store ReportStore) Delete(rpt *Report) error {
+	query := `Delete FROM reports 
+		         where report_id = $1`
+
+	_, err := store.Client.Exec(query, rpt.ReportID)
+	if err != nil {
+		return fmt.Errorf("store.Client.Exec:%w", err)
+	}
+
+	return nil
+}

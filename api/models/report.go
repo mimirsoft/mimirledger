@@ -59,6 +59,17 @@ func (c *Report) Update(dStores *datastore.Datastores) error {
 	return nil
 }
 
+func (c *Report) Delete(dStores *datastore.Datastores) error {
+	eReport := reportToEntReport(c)
+
+	// delete the existing report
+	err := dStores.ReportStore().Delete(eReport)
+	if err != nil {
+		return fmt.Errorf("ds.ReportStore().Delete:%w [Report:%+v]", err, c)
+	}
+	return nil
+}
+
 // Run executes a report and generates an output
 func (c *Report) Run(dStores *datastore.Datastores, startDate time.Time,
 	endDate time.Time, runTimeTargetAccounts []uint64) (*ReportOutput, error) {

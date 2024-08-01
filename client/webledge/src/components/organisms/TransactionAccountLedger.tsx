@@ -1,5 +1,5 @@
-import {useParams, useSearchParams, useNavigate, Link} from "react-router-dom";
-import React, {FormEvent} from "react";
+import {useParams, Link} from "react-router-dom";
+import {FormEvent} from "react";
 import {
     Account,
     TransactionDebitCreditRequest, TransactionLedgerEntry,
@@ -11,7 +11,7 @@ import {formatCurrency, parseCurrency} from "../../lib/utils";
 const postFormData = async (formData: FormData) => {
     try {
         // Do a bit of work to convert the entries to a plain JS object
-        const myURL = new URL('/transactions', process.env.REACT_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/transactions', import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
 
         // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);
@@ -20,8 +20,8 @@ const postFormData = async (formData: FormData) => {
         let otherAccountSign = accountSign == "DEBIT"  ? "CREDIT" : "DEBIT";
         const otherAccountID = Number(formEntries.otherAccountID)
         let amount = parseCurrency(formEntries.amount)
-        let dStr = String(formEntries.transactionDate)
-        let txnDate: Date = new Date(dStr);
+        const dStr = String(formEntries.transactionDate)
+        const txnDate: Date = new Date(dStr);
         // if amount is negative, swap debgits and credits
         console.log(amount, accountSign, otherAccountSign, txnDate)
         if (amount < 0 ) {
@@ -31,7 +31,7 @@ const postFormData = async (formData: FormData) => {
         }
         console.log(amount, accountSign, otherAccountSign, txnDate)
         // make debitAndCreditSet of two from this account and the selected account
-        let dcSet: Array<TransactionDebitCreditRequest> = [
+        const dcSet: Array<TransactionDebitCreditRequest> = [
             {accountID: accountID, transactionDCAmount: amount, debitOrCredit: accountSign },
             {accountID: otherAccountID, transactionDCAmount: amount, debitOrCredit: otherAccountSign },
         ];
@@ -44,7 +44,7 @@ const postFormData = async (formData: FormData) => {
             transactionComment: comment,
             debitCreditSet : dcSet,
         };
-        var json = JSON.stringify(newTransaction);
+        const json = JSON.stringify(newTransaction);
         console.log(json)
         const settings :RequestInit = {
             method: 'POST',
@@ -60,8 +60,13 @@ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const result = await postFormData(formData);
-    window.location.reload();
-};
+    if (result?.status == 200) {
+        window.location.reload();
+    }
+    else {
+        console.log("ERROR"+result)
+    }
+}
 
 
 export default function TransactionAccountLedger() {
@@ -75,19 +80,19 @@ export default function TransactionAccountLedger() {
     if (error) return <div>Failed to load</div>
     if (acctError) return <div>Failed to load</div>
 
-    let acctMap = new Map<number, string>
-    acctData?.accounts.map((acct: Account, index: number) => {
+    const acctMap = new Map<number, string>
+    acctData?.accounts.map((acct: Account) => {
         acctMap.set(acct.accountID, acct.accountFullName)
     })
-    var minDate = new Date('0001-01-01T00:00:00Z');
+    const minDate = new Date('0001-01-01T00:00:00Z');
     minDate.setDate(minDate.getDate() + 1);
 
     let runningTotal = 0
     console.log(acctMap)
     let rowColor = "bg-slate-200"
 
-    let reconcileDate: Date = new Date();
-    let reconcileDateStr = reconcileDate.toISOString().split('T')[0]
+    const reconcileDate: Date = new Date();
+    const reconcileDateStr = reconcileDate.toISOString().split('T')[0]
 
     return (
         <div className="flex w-full flex-col md:col-span-4 grow justify-between rounded-xl bg-slate-100 p-4">
@@ -178,8 +183,8 @@ export default function TransactionAccountLedger() {
                     runningTotalColor = "text-red-500"
                 }
 
-                let txnDate: Date = new Date(transaction.transactionDate);
-                let txnReconciledDate: Date = new Date(transaction.transactionReconcileDate);
+                const txnDate: Date = new Date(transaction.transactionDate);
+                const txnReconciledDate: Date = new Date(transaction.transactionReconcileDate);
 
                 let txnReconciledDateStr :string
                 if (txnReconciledDate < minDate) {
@@ -188,11 +193,11 @@ export default function TransactionAccountLedger() {
                     txnReconciledDateStr = txnReconciledDate.toISOString().split('T')[0]
                 }
 
-                let otherAccounts= [];
+                const otherAccounts= [];
                 let otherAccountStr = ""
                 // if the transaction split has a comma, we have a split transaction
                 if (transaction.split.indexOf(',') != -1) {
-                    var segments = transaction.split.split(',');
+                    const segments = transaction.split.split(',');
                     for(let i=0; i<segments.length; i++){
                         // add to the array
                         otherAccounts.push(acctMap.get(Number(segments[i])))
@@ -201,7 +206,7 @@ export default function TransactionAccountLedger() {
                 } else {
                     otherAccountStr = String(acctMap.get(Number(transaction.split)))
                 }
-                let txnReconciled = transaction.isReconciled ? "Y" : "N";
+                const txnReconciled = transaction.isReconciled ? "Y" : "N";
 
                 return (
                     <Link to={{

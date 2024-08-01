@@ -1,6 +1,5 @@
 import type { TransactionAccountType} from  "../../lib/definitions"
 import {useGetTransactionAccountTypes} from "../../lib/data";
-import React from "react";
 
 export default function TransactionAccountTypes() {
     const { data, error, isLoading } = useGetTransactionAccountTypes()

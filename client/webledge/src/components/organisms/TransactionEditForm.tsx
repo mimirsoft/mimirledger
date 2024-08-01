@@ -1,10 +1,10 @@
-import {useParams, useSearchParams, useNavigate, Link} from "react-router-dom";
+import {useParams, useSearchParams, useNavigate} from "react-router-dom";
 import {
     TransactionDebitCreditRequest,
     TransactionDebitCreditResponse,
     TransactionEditPostRequest
 } from '../../lib/definitions';
-import React, {FormEvent, MouseEvent} from "react";
+import {FormEvent, MouseEvent} from "react";
 import DebitsCreditsColumn from "../molecules/DebitsCreditsColumn";
 import {useGetTransaction} from "../../lib/data";
 import {parseCurrency} from "../../lib/utils";
@@ -13,14 +13,13 @@ const postFormData = async (formData: FormData, debitsCount: number, creditsCoun
         // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);
         const transactionID = Number(formEntries.transactionID)
-        const accountID = Number(formEntries.accountID)
-        let dStr = String(formEntries.transactionDate)
-        let txnDate: Date = new Date(dStr);
+        const dStr = String(formEntries.transactionDate)
+        const txnDate: Date = new Date(dStr);
 
         console.log("debitscount"+debitsCount);
         console.log("creditsCount"+creditsCount);
 
-        let dcSet: Array<TransactionDebitCreditRequest> = []
+        const dcSet: Array<TransactionDebitCreditRequest> = []
         //iterate over all the debit/credit inputs
         // get debits
         for (let step = 0; step < debitsCount; step++) {
@@ -31,7 +30,7 @@ const postFormData = async (formData: FormData, debitsCount: number, creditsCoun
                 tdcAmount = -tdcAmount
                 tdcSign = "CREDIT"
             }
-            let tdc = {accountID: tdcAccount, transactionDCAmount: tdcAmount, debitOrCredit:  tdcSign}
+            const tdc = {accountID: tdcAccount, transactionDCAmount: tdcAmount, debitOrCredit:  tdcSign}
             console.log(tdc)
             dcSet.push(tdc)
         }
@@ -44,12 +43,12 @@ const postFormData = async (formData: FormData, debitsCount: number, creditsCoun
                 tdcAmount = -tdcAmount
                 tdcSign = "DEBIT"
             }
-            let tdc = {accountID: tdcAccount, transactionDCAmount: tdcAmount, debitOrCredit: tdcSign}
+            const tdc = {accountID: tdcAccount, transactionDCAmount: tdcAmount, debitOrCredit: tdcSign}
             console.log(tdc)
             dcSet.push(tdc)
         }
 
-        const myURL = new URL('/transactions/'+transactionID, process.env.REACT_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/transactions/'+transactionID, import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
 
         const editTransaction : TransactionEditPostRequest = {
             transactionID : transactionID,
@@ -57,8 +56,7 @@ const postFormData = async (formData: FormData, debitsCount: number, creditsCoun
             transactionComment : String(formEntries.transactionComment),
             debitCreditSet : dcSet,
         };
-        var json = JSON.stringify(editTransaction);
-        console.log(json);
+        const json = JSON.stringify(editTransaction);
 
         const settings :RequestInit = {
             method: 'PUT',
@@ -75,8 +73,8 @@ export default function TransactionEditForm(){
     const { transactionID } = useParams();
     const { data, isLoading, error ,
     mutate} = useGetTransaction(transactionID);
-    let [searchParams] = useSearchParams();
-    let returnAccountID = searchParams.get("returnAccount");
+    const [searchParams] = useSearchParams();
+    const returnAccountID = searchParams.get("returnAccount");
 
     let debitsCount = 0
     let creditsCount = 0
@@ -92,10 +90,10 @@ export default function TransactionEditForm(){
         else {
             console.log("ERROR"+response)
         }
-    };
+    }
     async function deleteTransaction(event:  MouseEvent<HTMLButtonElement>) {
         event.preventDefault()
-        const myURL = new URL('/transactions/' + transactionID, process.env.REACT_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/transactions/' + transactionID, import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
         const settings: RequestInit = {
             method: 'DELETE',
         };
@@ -105,17 +103,16 @@ export default function TransactionEditForm(){
         } else {
             console.log("ERROR" + response)
         }
-    };
+    }
 
-    let initialCredits: Array<TransactionDebitCreditResponse> = []
-    let initialDebits: Array<TransactionDebitCreditResponse> = []
+    const initialCredits: Array<TransactionDebitCreditResponse> = []
+    const initialDebits: Array<TransactionDebitCreditResponse> = []
 
     if (isLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>
 
     // sort debitCreditSet into debits and credits
-    {data?.debitCreditSet && data.debitCreditSet.map((transaction: TransactionDebitCreditResponse,
-                                                      index: number) => {
+    {data?.debitCreditSet && data.debitCreditSet.map((transaction: TransactionDebitCreditResponse) => {
         if (transaction.debitOrCredit == "CREDIT"){
             initialCredits.push(transaction)
             creditsCount++
@@ -133,7 +130,7 @@ export default function TransactionEditForm(){
     }
     console.log(data)
     // render debits and credits
-    let txnDate: Date = new Date(String(data?.transactionDate))
+    const txnDate: Date = new Date(String(data?.transactionDate))
      return (
          <div className="flex w-full flex-col md:col-span-4 grow justify-between rounded-xl bg-slate-100 p-4">
              <div className="text-xl font-bold">

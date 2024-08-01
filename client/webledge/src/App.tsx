@@ -1,4 +1,3 @@
-import React from 'react';
 import { SWRConfig } from 'swr'
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import './App.css';

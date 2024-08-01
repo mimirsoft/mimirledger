@@ -1,4 +1,4 @@
-import React, {FormEvent} from "react";
+import  {FormEvent} from "react";
 import {AccountReconcileResponse, TransactionReconciledPostRequest} from "../../lib/definitions";
 import {KeyedMutator} from "swr/_internal";
 
@@ -7,16 +7,16 @@ const updateReconcileTransaction = async (formData: FormData) => {
         // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);
         const transactionID = Number(formEntries.transactionID)
-        let dStr = String(formEntries.reconcileDate)
-        let txnDate: Date = new Date(dStr);
+        const dStr = String(formEntries.reconcileDate)
+        const txnDate: Date = new Date(dStr);
 
-        const myURL = new URL('/transactions/'+transactionID+"/reconciled", process.env.REACT_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/transactions/'+transactionID+"/reconciled", import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
 
         const reconciledPostRequest : TransactionReconciledPostRequest = {
             transactionID : transactionID,
             transactionReconcileDate: txnDate.toISOString(),
         };
-        var json = JSON.stringify(reconciledPostRequest);
+        const json = JSON.stringify(reconciledPostRequest);
         console.log(json);
 
         const settings :RequestInit = {
@@ -34,7 +34,7 @@ const updateUnreconcileTransaction = async (formData: FormData) => {
         const formEntries = Object.fromEntries(formData);
         const transactionID = Number(formEntries.transactionID)
 
-        const myURL = new URL('/transactions/'+transactionID+"/unreconciled", process.env.REACT_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/transactions/'+transactionID+"/unreconciled", import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
 
 
         const settings :RequestInit = {
@@ -61,7 +61,7 @@ export default function TransactionToggleReconcileForm(props:{
         else {
             console.log("ERROR"+response)
         }
-    };
+    }
 
     async function toggleUnreconciled(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -73,7 +73,7 @@ export default function TransactionToggleReconcileForm(props:{
         else {
             console.log("ERROR"+response)
         }
-    };
+    }
 
     if (props.isReconciled) {
         return (

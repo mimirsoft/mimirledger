@@ -1,33 +1,25 @@
-import React, {FormEvent} from "react";
-import Modal from "../molecules/Modal";
+import {FormEvent} from "react";
 import ReportSelector from "../molecules/ReportSelector";
 import AccountSelector from "../molecules/AccountSelector";
 
-type ErrResponse = {
-    statusCode: number
-    err: string
-}
-export default function ReportsRunForm(){
-    const [showModal, setShowModal] = React.useState(false);
-    const [modalBody, setModalBody] = React.useState("");
-    const [modalTitle, setModalTitle] = React.useState("");
 
+export default function ReportsRunForm(){
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         // open report render in new window
         event.preventDefault()
         const formData = new FormData(event.currentTarget)
         const formEntries = Object.fromEntries(formData);
-        let reportID = Number(formEntries.reportID)
-        let startDate =  String(formEntries.startDate)
-        let endDate =  String(formEntries.endDate)
+        const reportID = Number(formEntries.reportID)
+        const startDate =  String(formEntries.startDate)
+        const endDate =  String(formEntries.endDate)
         window.open("/reports/"+reportID+"?startDate="+startDate+"&endDate="+endDate,"_blank");
-    };
-    let todayDate: Date = new Date()
-    let lastMonthDate: Date = new Date()
+    }
+    const todayDate: Date = new Date()
+    const lastMonthDate: Date = new Date()
     lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
     return (
     <div>
-        <div className="flex w-full flex-col md:col-span-4 bg-slate-100 p-4">
+        <div className="flex w-full flex-col bg-slate-100 p-4">
             <div className="text-xl font-bold">
                 Run Report
             </div>
@@ -56,13 +48,11 @@ export default function ReportsRunForm(){
                                          multiSize={10}/>
                     </div>
                     <div className=" flex flex-row-reverse w-80">
-                    <button className="p-3 font-bold bg-slate-300" type="submit">Run Report</button>
+                    <button className="p-3 font-bold bg-blue-500 text-white text-xl " type="submit">Run Report</button>
                     </div>
                 </div>
             </form>
         </div>
-        {modalBody}
-        <Modal showModal={showModal} setShowModal={setShowModal} title={modalTitle} body={modalBody}/>
     </div>
     );
 }

@@ -355,6 +355,13 @@ func transactionToEntTransaction(txn *Transaction) datastore.Transaction {
 	return etxn
 }
 
+func entTransactionToTransaction(eTxn *datastore.Transaction) *Transaction {
+	myTransCore := TransactionCore(*eTxn)
+	myTrans := Transaction{TransactionCore: myTransCore} //nolint:exhaustruct
+
+	return &myTrans
+}
+
 func entTransactionsDCToTransactionsDC(eTxn []*datastore.TransactionDebitCredit) []*TransactionDebitCredit {
 	tdcSet := make([]*TransactionDebitCredit, len(eTxn))
 

@@ -1,11 +1,11 @@
 import React,  {useState, FormEvent} from 'react'
-import {Link, useParams, useSearchParams} from "react-router-dom";
+import {useParams, useSearchParams} from "react-router-dom";
 import {useGetAccounts, useGetUnreconciledTransactionOnAccount} from "../../lib/data";
 import {
     Account,
     TransactionLedgerEntry,
 } from "../../lib/definitions";
-import {formatCurrency, formatCurrencyNoSign, parseCurrency} from "../../lib/utils";
+import {formatCurrency, parseCurrency} from "../../lib/utils";
 import TransactionToggleReconcileForm from "../molecules/TransactionToggleReconcileForm";
 import AccountReconcileDateSubmitForm from "../molecules/AccountReconcileDateSubmitForm";
 
@@ -16,14 +16,14 @@ async function updateReconcileSearchDate(event: FormEvent<HTMLFormElement>) {
     const searchDateString = String(formEntries.accountReconcileSearchDate)
     const accountID = Number(formEntries.accountID)
     window.open("/reconcile/"+accountID+"?date="+searchDateString,"_self");
-};
+}
 
 
 export default function AccountReconcileForm() {
     const {accountID} = useParams();
-    let [searchParams] = useSearchParams();
-    let date = searchParams.get("date");
-    let searchDate = String(date)
+    const [searchParams] = useSearchParams();
+    const date = searchParams.get("date");
+    const searchDate = String(date)
     const { data:acctData, error:acctError,
         isLoading:acctIsLoading } = useGetAccounts()
     const {
@@ -43,18 +43,17 @@ export default function AccountReconcileForm() {
     if (acctIsLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>
     if (acctError) return <div>Failed to load</div>
-    let acctMap = new Map<number, string>
-    acctData?.accounts.map((acct: Account, index: number) => {
+    const acctMap = new Map<number, string>
+    acctData?.accounts.map((acct: Account) => {
         acctMap.set(acct.accountID, acct.accountFullName)
     })
 
     let rowColor = "bg-slate-200"
-    var minDate = new Date('0001-01-01T00:00:00Z');
+    const minDate = new Date('0001-01-01T00:00:00Z');
     minDate.setDate(minDate.getDate() + 1);
 
-    let startingBalance =  Number(data?.priorReconciledBalance)
     let reconciledTotal = Number(data?.priorReconciledBalance)
-    {data?.transactions && data.transactions.map((transaction: TransactionLedgerEntry, index: number) => {
+    {data?.transactions && data.transactions.map((transaction: TransactionLedgerEntry) => {
         let txnAmount = transaction.transactionDCAmount
         if (transaction.debitOrCredit != data.accountSign) {
             txnAmount = -txnAmount
@@ -62,11 +61,11 @@ export default function AccountReconcileForm() {
         if (transaction.isReconciled) {
             reconciledTotal += txnAmount
         }
-    })};
-    let reconciledDifferenceRemaining = reconciledTotal-expectedEndingBalance
+    })}
+    const reconciledDifferenceRemaining = reconciledTotal-expectedEndingBalance
     let runningTotal = Number(data?.priorReconciledBalance)
 
-    let acctDate: Date = new Date(String(data?.accountReconcileDate))
+    const acctDate: Date = new Date(String(data?.accountReconcileDate))
 
     return (
         <div className="flex w-full flex-col md:col-span-4 grow justify-between rounded-xl bg-slate-100 p-4">
@@ -165,8 +164,8 @@ export default function AccountReconcileForm() {
                     runningTotalColor = "text-red-500"
                 }
 
-                let txnDate: Date = new Date(transaction.transactionDate);
-                let txnReconciledDate: Date = new Date(transaction.transactionReconcileDate);
+                const txnDate: Date = new Date(transaction.transactionDate);
+                const txnReconciledDate: Date = new Date(transaction.transactionReconcileDate);
 
                 let txnReconciledDateStr: string
                 if (txnReconciledDate < minDate) {
@@ -175,11 +174,11 @@ export default function AccountReconcileForm() {
                     txnReconciledDateStr = txnReconciledDate.toISOString().split('T')[0]
                 }
 
-                let otherAccounts = [];
+                const otherAccounts = [];
                 let otherAccountStr = ""
                 // if the transaction split has a comma, we have a split transaction
                 if (transaction.split.indexOf(',') != -1) {
-                    var segments = transaction.split.split(',');
+                    const segments = transaction.split.split(',');
                     for (let i = 0; i < segments.length; i++) {
                         // add to the array
                         otherAccounts.push(acctMap.get(Number(segments[i])))
@@ -188,7 +187,7 @@ export default function AccountReconcileForm() {
                 } else {
                     otherAccountStr = String(acctMap.get(Number(transaction.split)))
                 }
-                let txnReconciled = transaction.isReconciled ? "Y" : "N";
+                const txnReconciled = transaction.isReconciled ? "Y" : "N";
                 return (
                     <div className={'flex ' + rowColor} key={index}>
                         <div className="w-8">

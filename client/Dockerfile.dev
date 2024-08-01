@@ -4,8 +4,9 @@ WORKDIR /app
 
 COPY webledge/package.json ./
 
-RUN npm install
+ENV NODE_ENV=development
+RUN NODE_ENV=development npm install
 
 COPY webledge .
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]

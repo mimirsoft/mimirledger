@@ -1,4 +1,4 @@
-import React, {Dispatch, SetStateAction} from 'react'
+import  {Dispatch, SetStateAction} from 'react'
 
 export default function Modal(props:{ showModal:boolean, setShowModal:Dispatch<SetStateAction<boolean>>,
 title:string, body:string}) {

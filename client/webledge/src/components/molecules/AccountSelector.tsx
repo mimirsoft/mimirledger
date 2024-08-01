@@ -1,5 +1,4 @@
 import {Account} from "../../lib/definitions";
-import React from "react";
 import {useGetAccounts} from "../../lib/data";
 
 const AccountSelector = ( props:{name:string; id:number|undefined;

@@ -1,7 +1,7 @@
 import React , { MouseEvent }from "react";
 import {TransactionDebitCreditResponse} from "../../lib/definitions";
 import AccountSelector from "./AccountSelector";
-import {formatCurrency, formatCurrencyNoSign} from "../../lib/utils";
+import { formatCurrencyNoSign} from "../../lib/utils";
 
 
 const DebitsCreditsColumn = ( props:{name:string;

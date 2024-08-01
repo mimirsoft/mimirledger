@@ -1,20 +1,20 @@
-import React, {FormEvent} from "react";
+import  {FormEvent} from "react";
 import {AccountReconcileDatePostRequest} from "../../lib/definitions";
 const updateReconcileDate= async (formData: FormData) => {
     try {
         // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);
         const accountID = Number(formEntries.accountID)
-        let dStr = String(formEntries.reconcileDate)
-        let txnDate: Date = new Date(dStr);
+        const dStr = String(formEntries.reconcileDate)
+        const txnDate: Date = new Date(dStr);
 
-        const myURL = new URL('/accounts/'+accountID+"/reconciled", process.env.REACT_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/accounts/'+accountID+"/reconciled", import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
 
         const reconciledPostRequest : AccountReconcileDatePostRequest = {
             accountID : accountID,
             accountReconcileDate: txnDate.toISOString(),
         };
-        var json = JSON.stringify(reconciledPostRequest);
+        const json = JSON.stringify(reconciledPostRequest);
         console.log(json);
 
         const settings :RequestInit = {
@@ -42,7 +42,7 @@ export default function AccountReconcileDateSubmitForm ( props:{
         else {
             console.log("ERROR"+response)
         }
-    };
+    }
 
 
     if (props.reconciledDifferenceRemaining != 0){

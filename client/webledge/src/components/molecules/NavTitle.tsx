@@ -1,4 +1,3 @@
-import React from 'react'
 
 export default function NavTitle( props:{navLogo:string})  {
     return (

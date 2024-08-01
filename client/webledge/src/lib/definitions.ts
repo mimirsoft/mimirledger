@@ -118,10 +118,16 @@ export type Report = {
     reportBody: ReportBody;
 };
 export type ReportBody = {
-    accountSetType: string;
-    accountGroup: string;
-    predefinedAccounts: number[];
-    recurseSubAccounts: number;
+    sourceAccountSetType: string;
+    sourceAccountGroup: string;
+    sourcePredefinedAccounts: number[];
+    sourceRecurseSubAccounts: boolean;
+    sourceRecurseSubAccountsDepth: number;
+    filterAccountSetType: string;
+    filterAccountGroup: string;
+    filterPredefinedAccounts: number[];
+    filterRecurseSubAccounts: boolean;
+    filterRecurseSubAccountsDepth: number;
     dataSetType: string;
 };
 

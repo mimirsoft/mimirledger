@@ -1,5 +1,3 @@
-import React from "react";
-
 const DebitCreditSelector = ( props:{name:string;selectedValue:string|undefined} ) => {
     return (
         <select name={props.name} defaultValue={props.selectedValue}>

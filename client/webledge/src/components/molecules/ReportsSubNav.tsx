@@ -1,4 +1,3 @@
-import React from 'react'
 import {Link, useMatch, useResolvedPath} from "react-router-dom";
 
 
@@ -8,8 +7,8 @@ export default function ReportsSubNav() {
     return (
         <>
             <div className="flex">
-                <div className={`${isActive ? "underline" : ""} bg-blue-600 p-2 font-bold text-white`}>
-                    <Link to={'/reports/list'} >Edit Reports
+                <div className={` bg-blue-600 p-2 font-bold text-white`}>
+                    <Link to={'/reports/list'} className={`${isActive ? "underline" : ""} p-2 hover:underline`} >Edit Reports
                     </Link>
                 </div>
             </div>

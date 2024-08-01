@@ -1,28 +1,33 @@
-import React, {FormEvent, ReactElement} from "react";
-import {ReportPostRequest, ReportBody, Report} from "../../lib/definitions";
-import { useGetReports} from "../../lib/data";
-import {Link} from "react-router-dom";
+import React, {FormEvent} from "react";
+import {ReportPostRequest, ReportBody} from "../../lib/definitions";
+import ReportsList from "../molecules/ReportsList"
 import Modal from "../molecules/Modal";
 
 const postFormData = async (formData: FormData) => {
     try {
-        const myURL = new URL('/reports', process.env.REACT_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/reports', import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
         // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);
         console.log(formEntries.accountParent)
 
         const newReportBody : ReportBody = {
-            accountSetType:  String(formEntries.accountSetType),
-            accountGroup:  String(formEntries.accountGroup),
-            predefinedAccounts: [],
-            recurseSubAccounts: 0,
+            sourceAccountSetType:  String(formEntries.sourceAccountSetType),
+            sourceAccountGroup:  String(formEntries.sourceAccountGroup),
+            sourcePredefinedAccounts: [],
+            sourceRecurseSubAccounts: false,
+            sourceRecurseSubAccountsDepth: 0,
+            filterAccountSetType:  String(formEntries.filterAccountSetType),
+            filterAccountGroup:  String(formEntries.filterAccountGroup),
+            filterPredefinedAccounts: [],
+            filterRecurseSubAccounts: false,
+            filterRecurseSubAccountsDepth: 0,
             dataSetType:  String(formEntries.dataSetType),
         }
         const newReport : ReportPostRequest = {
             reportName : String(formEntries.reportName),
             reportBody:newReportBody,
         };
-        var json = JSON.stringify(newReport);
+        const json = JSON.stringify(newReport);
         console.log(json)
         const settings :RequestInit = {
             method: 'POST',
@@ -33,16 +38,12 @@ const postFormData = async (formData: FormData) => {
         console.error('Error making POST request:', error);
     }
 }
-type ErrResponse = {
-    statusCode: number
-    err: string
-}
-export default function ReportsForm(){
-    const { data, error, isLoading } = useGetReports()
 
+export default function ReportCreateForm(){
     const [showModal, setShowModal] = React.useState(false);
     const [modalBody, setModalBody] = React.useState("");
     const [modalTitle, setModalTitle] = React.useState("");
+
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault()
@@ -52,13 +53,12 @@ export default function ReportsForm(){
             window.location.reload();
         } else {
             setModalTitle("ERROR SAVING REPORT")
-            let errMsg= ""
-            let errData = await myResponse?.json()
+            const errData = await myResponse?.json()
 
             setModalBody("<h1>"+errData.err+"</h1>")
             setShowModal(true)
         }
-    };
+    }
 
     return (
     <div>
@@ -68,18 +68,22 @@ export default function ReportsForm(){
             </div>
             <form className="mb-2" onSubmit={handleSubmit}>
                 <div className="flex-col w-fit">
-                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Report Name:
+                    <div className="my-4 text-xl font-bold bg-slate-200 flex flex-row">
+                        <div className="w-64 mr-2 text-right">ReportName:</div>
                         <input className="bg-slate-300 font-normal" type="text" name="reportName"/>
                     </div>
-                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Account Set Type:
-                        <select name="accountSetType" className="font-normal">
+                    <div className="my-4 text-xl font-bold bg-slate-200 flex flex-row">
+                        <div className="w-64 mr-2 text-right">Source Account Set Type:</div>
+                        <select name="sourceAccountSetType" className="font-normal">
+                            <option value="NONE">NONE</option>
                             <option value="GROUP">GROUP</option>
                             <option value="PREDEFINED">PREDEFINED</option>
                             <option value="USER_SUPPLIED">USER_SUPPLIED</option>
                         </select>
                     </div>
-                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Account Group:
-                        <select name="accountGroup" className="font-normal">
+                    <div className="my-4 text-xl font-bold bg-slate-200 flex flex-row">
+                        <div className="w-64 mr-2 text-right">Source Account Group:</div>
+                        <select name="sourceAccountGroup" className="font-normal">
                             <option value="null">NULL</option>
                             <option value="ASSET">ASSET</option>
                             <option value="LIABILITY">LIABILITY</option>
@@ -88,7 +92,28 @@ export default function ReportsForm(){
                             <option value="EXPENSE">EXPENSE</option>
                         </select>
                     </div>
-                    <div className="my-4 mr-4 text-xl font-bold bg-slate-200">Data Set Type:
+                    <div className="my-4 text-xl font-bold bg-slate-200 flex flex-row">
+                        <div className="w-64 mr-2 text-right">Filter Account Set Type:</div>
+                        <select name="filterAccountSetType" className="font-normal">
+                            <option value="NONE">NONE</option>
+                            <option value="GROUP">GROUP</option>
+                            <option value="PREDEFINED">PREDEFINED</option>
+                            <option value="USER_SUPPLIED">USER_SUPPLIED</option>
+                        </select>
+                    </div>
+                    <div className="my-4 text-xl font-bold bg-slate-200 flex flex-row">
+                        <div className="w-64 mr-2 text-right">Filter Account Group:</div>
+                        <select name="filterAccountGroup" className="font-normal">
+                            <option value="null">NULL</option>
+                            <option value="ASSET">ASSET</option>
+                            <option value="LIABILITY">LIABILITY</option>
+                            <option value="EQUITY">EQUITY</option>
+                            <option value="INCOME">INCOME</option>
+                            <option value="EXPENSE">EXPENSE</option>
+                        </select>
+                    </div>
+                    <div className="my-4 text-xl font-bold bg-slate-200 flex flex-row">
+                        <div className="w-64 mr-2 text-right">Data Set Type:</div>
                         <select name="dataSetType">
                             <option value="AGING">Aging Summary</option>
                             <option value="SUMGROUPLINE">Sum/Group/Line</option>
@@ -102,39 +127,15 @@ export default function ReportsForm(){
                             <option value="RECONCILIATION">Reconciliation</option>
                         </select>
                     </div>
-                    <div className=" flex">
-                        <button className="p-3 font-bold bg-slate-300" type="submit">Create Report</button>
+                    <div className="my-4 text-xl font-bold bg-slate-200 flex flex-row">
+                        <div className="w-64 mr-2 text-right"/>
+                        <button className="p-3 font-bold bg-blue-500 text-white" type="submit">Create Report</button>
                     </div>
                 </div>
             </form>
-            <div className="text-xl font-bold">
-                My Reports
-            </div>
-            <div className="flex">
-                <div className="w-32 font-bold">
-                    Name
-                </div>
-                <div className="w-20 font-bold">
-                    Body
-                </div>
-            </div>
-            {data?.reports && data.reports.map((report: Report, index: number) => {
-                return (
-                    <Link to={{
-                        pathname: '/reports/edit/' + report.reportID,
-                    }} className={`font-bold`}>
-                        <div className={'flex '} key={index}>
-                            <div className="w-32">
-                                {report.reportName}
-                            </div>
-                            <div className="w-20">
-                            {JSON.stringify(report.reportBody)}
-                        </div>
-                    </div>
-                    </Link>
-                );
-            })}
+
         </div>
+        <ReportsList/>
         {modalBody}
         <Modal showModal={showModal} setShowModal={setShowModal} title={modalTitle} body={modalBody}/>
     </div>

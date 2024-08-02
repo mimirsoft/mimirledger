@@ -1,7 +1,7 @@
 import  {Dispatch, SetStateAction} from 'react'
 
 export default function Modal(props:{ showModal:boolean, setShowModal:Dispatch<SetStateAction<boolean>>,
-title:string, body:string}) {
+title:string, body:string, onClose: ()=>void}) {
 
     return (
         <>
@@ -20,7 +20,10 @@ title:string, body:string}) {
                                     </h3>
                                     <button
                                         className="p-1 ml-auto bg-transparent border-0 text-black  float-right text-3xl leading-none font-semibold outline-none focus:outline-none"
-                                        onClick={() => props.setShowModal(false)}
+                                        onClick={() => {props.setShowModal(false)
+                                            props.onClose()
+                                        }}
+
                                     >
                                         <span className="bg-transparent text-black opacity-80 h-6 w-6 text-2xl block outline-none focus:outline-none">
                                           ×
@@ -38,7 +41,9 @@ title:string, body:string}) {
                                     <button
                                         className="text-red-500 background-transparent font-bold uppercase px-6 py-2 text-sm outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                                         type="button"
-                                        onClick={() => props.setShowModal(false)}
+                                        onClick={() => {props.setShowModal(false)
+                                            props.onClose()
+                                        }}
                                     >
                                         Close
                                     </button>

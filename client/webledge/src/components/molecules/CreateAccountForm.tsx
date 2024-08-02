@@ -1,4 +1,3 @@
-import {useGetAccounts} from "../../lib/data.tsx";
 import AccountSelector from "./AccountSelector.tsx";
 import AccountTypeSelector from "./AccountTypeSelector.tsx";
 import {TransactionAccountPostRequest} from "../../lib/definitions.ts";

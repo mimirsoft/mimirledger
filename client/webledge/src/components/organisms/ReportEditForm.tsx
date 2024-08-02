@@ -1,7 +1,8 @@
 import {useNavigate, useParams} from "react-router-dom";
 import {ReportBody, ReportPostRequest} from '../../lib/definitions';
-import {FormEvent, MouseEvent} from "react";
+import React, {FormEvent, MouseEvent} from "react";
 import {useGetReport} from "../../lib/data";
+import Modal from "../molecules/Modal.tsx";
 const postFormData = async (formData: FormData) => {
     try {
         // Do a bit of work to convert the entries to a plain JS object
@@ -50,6 +51,10 @@ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
 
 
 export default function ReportEditForm(){
+    const [showModal, setShowModal] = React.useState(false);
+    const [modalBody, setModalBody] = React.useState("");
+    const [modalTitle, setModalTitle] = React.useState("");
+
     const navigate = useNavigate();
     const { reportID } = useParams();
     const { data, isLoading, error } = useGetReport(reportID);
@@ -65,10 +70,17 @@ export default function ReportEditForm(){
         };
         const response = await fetch(myURL, settings);
         if (response?.status == 200) {
-            navigate("/reports/list");
+            setModalTitle("Delete Success")
+            const deleteData = await response?.json()
+            console.log(deleteData)
+            setModalBody("<h1>"+deleteData.reportName+" Deleted</h1>")
+            setShowModal(true)
         } else {
             console.log("ERROR" + response)
         }
+    }
+    const onClose = () =>{
+        navigate("/reports/list");
     }
      return (
          <div className="flex w-full flex-col p-4 bg-slate-200">
@@ -159,6 +171,8 @@ export default function ReportEditForm(){
                      </div>
                  </div>
              </form>
+             {modalBody}
+             <Modal showModal={showModal} setShowModal={setShowModal} title={modalTitle} body={modalBody} onClose={onClose}/>
          </div>
      );
 }

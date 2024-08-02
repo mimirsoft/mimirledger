@@ -25,8 +25,8 @@ export default function ReportsList() {
                     return (
                         <Link to={{
                             pathname: '/reports/edit/' + report.reportID,
-                        }} className={`font-bold`}>
-                            <div className={'flex '} key={index}>
+                        }} className={`font-bold`} key={index} >
+                            <div className={'flex '} >
                                 <div className="w-32">
                                     {report.reportName}
                                 </div>

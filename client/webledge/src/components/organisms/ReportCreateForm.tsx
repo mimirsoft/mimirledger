@@ -137,7 +137,7 @@ export default function ReportCreateForm(){
         </div>
         <ReportsList/>
         {modalBody}
-        <Modal showModal={showModal} setShowModal={setShowModal} title={modalTitle} body={modalBody}/>
+        <Modal showModal={showModal} setShowModal={setShowModal} title={modalTitle} body={modalBody} onClose={()=>{}}/>
     </div>
     );
 }

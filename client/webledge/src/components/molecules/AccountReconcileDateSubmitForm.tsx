@@ -49,14 +49,16 @@ export default function AccountReconcileDateSubmitForm ( props:{
         return <></>
     }
     return (
+        <div className="bg-slate-300 flex mr-4">
         <form key={'reconcileDateForm' + props.accountID} onSubmit={updateReconciledDateOnAccount}>
             <input type="hidden" name="reconcileDate"
                    defaultValue={props.reconcileDate}/>
             <input  type="hidden" name="accountID"
                    defaultValue={props.accountID}/>
-            <button className="w-48 bg-blue-500 p-1 font-bold text-center"
+            <button className="w-48 bg-blue-500 font-bold text-center text-white h-16"
                     type="submit">Record Reconcile Date for Account
             </button>
         </form>
+        </div>
     )
 }

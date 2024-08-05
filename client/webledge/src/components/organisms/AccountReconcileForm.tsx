@@ -72,7 +72,7 @@ export default function AccountReconcileForm() {
             <div className="flex font-bold text-xl">Account Reconciliation Form</div>
             <div className="flex m-2">
                 <div className="w-80 my-0 font-bold mx-0 bg-slate-200">
-                    {data?.accountName}
+                    {data?.accountFullName}
                 </div>
             </div>
             <div className="flex m-2">
@@ -92,11 +92,11 @@ export default function AccountReconcileForm() {
                     <div className="bg-slate-300 flex  mr-4">
                         <input type="hidden" name="accountID"
                                defaultValue={accountID}/>
-                        <button className="p-3 font-bold bg-blue-500" type="submit">Search For Date</button>
+                        <button className="p-3 font-bold bg-blue-500 text-white" type="submit">Set Reconcile Filter Date</button>
                     </div>
                 </form>
-                <div className="flex justify-end">
-                    <label className="my-4 font-bold bg-slate-200">Ending Balance:
+                <div className="flex justify-end mr-4">
+                    <label className="my-4 text-xl font-bold bg-slate-200">Ending Balance:
                         <input className="w-20 bg-slate-300 text-right" type="text"
                                onChange={handleEndingBalanceChange}
                                defaultValue={"0"} name="endingBalance"/>

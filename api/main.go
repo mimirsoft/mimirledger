@@ -5,12 +5,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-
 	"github.com/mimirsoft/mimirledger/api/cfg"
 	"github.com/mimirsoft/mimirledger/api/datastore"
 	"github.com/mimirsoft/mimirledger/api/web"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 const readHeaderTimeout = time.Second * 3

@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-
 	"github.com/mimirsoft/mimirledger/api/models"
 	"github.com/mimirsoft/mimirledger/api/web/request"
 	"github.com/mimirsoft/mimirledger/api/web/response"
@@ -63,8 +62,8 @@ func GetReport(reportsCtl *ReportsController) func(res http.ResponseWriter, req 
 var ErrInvalidStartDate = errors.New("invalid startDate")
 var ErrInvalidEndDate = errors.New("invalid endDate")
 
-// GET /reports/{reportID}/run?date
-func GetReportRun(reportsCtl *ReportsController) func(res http.ResponseWriter, req *http.Request) error {
+// GET /reports/{reportID}/output?date
+func GetReportOutput(reportsCtl *ReportsController) func(res http.ResponseWriter, req *http.Request) error {
 	return func(res http.ResponseWriter, req *http.Request) error {
 		reportIDStr := chi.URLParam(req, "reportID")
 

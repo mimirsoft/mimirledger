@@ -6,10 +6,11 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	"github.com/mimirsoft/mimirledger/api/datastore"
-	"github.com/mimirsoft/mimirledger/api/middlewares"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	"github.com/mimirsoft/mimirledger/api/datastore"
+	"github.com/mimirsoft/mimirledger/api/middlewares"
 )
 
 const maxAgeSeconds = 300
@@ -68,7 +69,7 @@ func NewRouter(dStores *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 	r.Get("/reports/{reportID}", NewRootHandler(GetReport(reportsController)).ServeHTTP)
 	r.Put("/reports/{reportID}", NewRootHandler(PutReportUpdate(reportsController)).ServeHTTP)
 	r.Delete("/reports/{reportID}", NewRootHandler(DeleteReport(reportsController)).ServeHTTP)
-	r.Get("/reports/{reportID}/run", NewRootHandler(GetReportRun(reportsController)).ServeHTTP)
+	r.Get("/reports/{reportID}/output", NewRootHandler(GetReportOutput(reportsController)).ServeHTTP)
 
 	r.Post("/transactions", NewRootHandler(PostTransactions(transController)).ServeHTTP)
 	r.Get("/transactions/account/{accountID}", NewRootHandler(GetTransactionsOnAccount(transController)).ServeHTTP)

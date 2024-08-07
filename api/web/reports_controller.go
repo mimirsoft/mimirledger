@@ -83,14 +83,14 @@ func (rc *ReportsController) UpdateReport(_ context.Context, report *models.Repo
 }
 
 // DELETE /reports/{reportID}
-func (tc *ReportsController) DeleteReport(_ context.Context, reportID uint64) (*models.Report,
+func (rc *ReportsController) DeleteReport(_ context.Context, reportID uint64) (*models.Report,
 	error) {
-	myReport, err := models.RetrieveReportByID(tc.DataStores, reportID)
+	myReport, err := models.RetrieveReportByID(rc.DataStores, reportID)
 	if err != nil {
 		return nil, fmt.Errorf("models.RetrieveReportByID:%w", err)
 	}
 
-	err = myReport.Delete(tc.DataStores)
+	err = myReport.Delete(rc.DataStores)
 	if err != nil {
 		return nil, fmt.Errorf("myReport.Delete:%w", err)
 	}

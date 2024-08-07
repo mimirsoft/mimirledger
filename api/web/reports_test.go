@@ -222,3 +222,36 @@ func TestReports_PostReportUserSupplied(t *testing.T) {
 	g.Expect(reportRes.ReportBody.SourceRecurseSubAccountsDepth).To(gomega.Equal(1))
 	g.Expect(reportRes.ReportBody.DataSetType).To(gomega.Equal(datastore.ReportDataSetTypeLedger))
 }
+
+func TestReports_GetReportOutput(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDatastores(TestDataStore)
+
+	a1 := models.Report{ReportName: "testName",
+		ReportBody: models.ReportBody{
+			SourceAccountSetType:          datastore.ReportAccountSetGroup,
+			SourceAccountGroup:            datastore.AccountTypeExpense,
+			SourcePredefinedAccounts:      []uint64{1, 2, 3},
+			SourceRecurseSubAccounts:      true,
+			SourceRecurseSubAccountsDepth: 1,
+			DataSetType:                   datastore.ReportDataSetTypeExpense,
+		}}
+	err := a1.Store(TestDataStore)
+	g.Expect(err).NotTo(gomega.HaveOccurred())                                                // reset datastore
+	g.Expect(a1.ReportBody.SourceAccountGroup).To(gomega.Equal(datastore.AccountTypeExpense)) // reset datastore
+	g.Expect(a1.ReportBody.SourceRecurseSubAccounts).To(gomega.BeTrue())
+	g.Expect(a1.ReportBody.SourceRecurseSubAccountsDepth).To(gomega.Equal(1))
+
+	test := RouterTest{Request: Request{
+		Method:     http.MethodGet,
+		Router:     TestRouter,
+		RequestURL: fmt.Sprintf("/reports/%d/output?startDate=2020-01-01&endDate=2020-01-31", a1.ReportID),
+	}, GomegaWithT: g, Code: http.StatusOK}
+	var respReportOutput response.ReportOutput
+
+	test.ExecWithUnmarshal(&respReportOutput)
+	g.Expect(respReportOutput.ReportID).To(gomega.Equal(a1.ReportID))
+	g.Expect(respReportOutput.ReportName).To(gomega.Equal("testName"))
+	g.Expect(respReportOutput.ReportData).To(gomega.HaveLen(1))
+}

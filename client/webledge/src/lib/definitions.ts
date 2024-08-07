@@ -135,3 +135,18 @@ export type ReportPostRequest = {
     reportName: string;
     reportBody: ReportBody;
 };
+
+export type ReportOutput = {
+    reportID: number;
+    reportName: string;
+    startDate: string;
+    endDate: string;
+    reportBody: ReportBody;
+    dataSetType: string;
+};
+
+export type ReportOutputData = {
+    expense: number;
+    income: number;
+    netTransactions: TransactionLedgerEntry[];
+};

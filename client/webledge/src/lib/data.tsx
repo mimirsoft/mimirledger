@@ -3,7 +3,7 @@ import {
     Account, AccountReconcileResponse,
     AccountSet, TransactionAccountTypeSet,
     TransactionLedgerResponse, TransactionResponse,
-    ReportSet, Report
+    ReportSet, Report, ReportOutput
 } from "./definitions";
 import {KeyedMutator} from "swr/_internal";
 
@@ -14,6 +14,12 @@ export const  useGetAccounts = ():{data:AccountSet | undefined, isLoading:boolea
 
 export const useGetAccount = (accountID:string |undefined):{data:Account | undefined, isLoading:boolean, error: string|undefined} => {
     return useSWR<Account, string>(import.meta.env.VITE_APP_MIMIRLEDGER_API_URL+'/accounts/'+accountID);
+}
+export const useGetReportOutput = (reportID:string |undefined,startDate:string,endDate:string):{
+    data:ReportOutput | undefined, isLoading:boolean, error: string|undefined} => {
+    return useSWR<ReportOutput, string>(import.meta.env.VITE_APP_MIMIRLEDGER_API_URL+'/reports/'+reportID+
+        '/output?startDate='+
+        startDate+'&endDate='+endDate);
 }
 
 export const useGetTransaction = (transactionID:string |undefined):{

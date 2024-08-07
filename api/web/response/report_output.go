@@ -9,7 +9,7 @@ import (
 
 type ReportOutput struct {
 	ReportID    uint64                      `json:"reportID"`
-	ReportName  string                      `db:"reportName"`
+	ReportName  string                      `json:"reportName"`
 	StartDate   time.Time                   `json:"startDate"`
 	EndDate     time.Time                   `json:"endDate"`
 	DataSetType datastore.ReportDataSetType `json:"dataSetType"`

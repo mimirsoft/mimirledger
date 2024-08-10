@@ -59,6 +59,21 @@ func (c *Report) Update(dStores *datastore.Datastores) error {
 	return nil
 }
 
+// StoreOrUpdate stores a report, or updates if a report of the same name already existst
+func (c *Report) StoreOrUpdate(dStores *datastore.Datastores) error {
+	eReport := reportToEntReport(c)
+
+	err := dStores.ReportStore().StoreOrUpdate(eReport)
+	if err != nil {
+		return fmt.Errorf("ds.ReportStore().StoreOrUpdate:%w [Report:%+v]", err, eReport)
+	}
+
+	myReport := entReportToReport(eReport)
+	*c = *myReport
+
+	return nil
+}
+
 func (c *Report) Delete(dStores *datastore.Datastores) error {
 	eReport := reportToEntReport(c)
 

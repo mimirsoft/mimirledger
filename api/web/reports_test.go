@@ -255,3 +255,35 @@ func TestReports_GetReportOutput(t *testing.T) {
 	g.Expect(respReportOutput.ReportName).To(gomega.Equal("testName"))
 	g.Expect(respReportOutput.ReportData).To(gomega.HaveLen(1))
 }
+
+func TestReports_PostRestoreDefault(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDatastores(TestDataStore)
+
+	var test = RouterTest{Request: Request{
+		Method:     http.MethodGet,
+		Router:     TestRouter,
+		RequestURL: "/reports",
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	var reportSet response.ReportSet
+	test.ExecWithUnmarshal(&reportSet)
+	g.Expect(reportSet.Reports).To(gomega.HaveLen(0))
+
+	var test2 = RouterTest{Request: Request{
+		Method:     http.MethodPost,
+		Router:     TestRouter,
+		RequestURL: "/reports/restore",
+	}, GomegaWithT: g, Code: http.StatusOK}
+
+	test2.ExecWithUnmarshal(&reportSet)
+	g.Expect(reportSet.Reports).To(gomega.HaveLen(3))
+	g.Expect(reportSet.Reports[0].ReportName).To(gomega.Equal("LedgerReport"))
+	g.Expect(reportSet.Reports[0].ReportBody.SourceAccountSetType).To(gomega.Equal(datastore.ReportAccountSetUserSupplied))
+	g.Expect(reportSet.Reports[0].ReportBody.SourceAccountGroup).To(gomega.BeNil())
+	g.Expect(reportSet.Reports[0].ReportBody.SourcePredefinedAccounts).To(gomega.ConsistOf([]uint64{}))
+	g.Expect(reportSet.Reports[0].ReportBody.SourceRecurseSubAccounts).To(gomega.BeFalse())
+	g.Expect(reportSet.Reports[0].ReportBody.SourceRecurseSubAccountsDepth).To(gomega.Equal(0))
+	g.Expect(reportSet.Reports[0].ReportBody.DataSetType).To(gomega.Equal(datastore.ReportDataSetTypeLedger))
+}

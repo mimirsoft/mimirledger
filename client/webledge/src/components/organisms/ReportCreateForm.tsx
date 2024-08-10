@@ -1,6 +1,7 @@
 import React, {FormEvent} from "react";
 import {ReportPostRequest, ReportBody} from "../../lib/definitions";
 import ReportsList from "../molecules/ReportsList"
+import ReportRestoreForm from "../molecules/ReportRestoreForm"
 import Modal from "../molecules/Modal";
 
 const postFormData = async (formData: FormData) => {
@@ -136,6 +137,7 @@ export default function ReportCreateForm(){
 
         </div>
         <ReportsList/>
+        <ReportRestoreForm />
         {modalBody}
         <Modal showModal={showModal} setShowModal={setShowModal} title={modalTitle} body={modalBody} onClose={()=>{}}/>
     </div>

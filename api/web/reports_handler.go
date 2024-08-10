@@ -189,6 +189,18 @@ func PostReports(reportsCtl *ReportsController) func(res http.ResponseWriter, re
 	}
 }
 
+// POST /reports/restore
+func PostReportsRestore(reportsCtl *ReportsController) func(res http.ResponseWriter, req *http.Request) error {
+	return func(res http.ResponseWriter, req *http.Request) error {
+		Reports, err := reportsCtl.RestoreDefault(req.Context())
+		if err != nil {
+			return NewRequestError(http.StatusServiceUnavailable, err)
+		}
+		jsonResponse := response.ConvertReportsToRespReportsSet(Reports)
+		return RespondOK(res, jsonResponse)
+	}
+}
+
 // DELETE /reports/{reportID}
 func DeleteReport(reportsCtl *ReportsController) func(res http.ResponseWriter, req *http.Request) error {
 	return func(res http.ResponseWriter, req *http.Request) error {

@@ -230,3 +230,69 @@ func TestReportStore_StoreAndDelete(t *testing.T) {
 	g.Expect(errors.Is(err, sql.ErrNoRows)).To(gomega.BeTrue())
 	g.Expect(myReport).To(gomega.BeNil())
 }
+
+func TestReportStore_StoreDefault(t *testing.T) {
+	g := gomega.NewWithT(t)
+	gomega.RegisterFailHandler(ginkgo.Fail)
+	setupDB(g)
+	store := createReportStore()
+
+	ledgerReport := Report{
+		ReportID:   1,
+		ReportName: "Ledger Report",
+		ReportBody: ReportBody{
+			SourceAccountSetType:          ReportAccountSetUserSupplied,
+			SourcePredefinedAccounts:      []uint64{},
+			SourceRecurseSubAccounts:      false,
+			SourceRecurseSubAccountsDepth: 0,
+			DataSetType:                   ReportDataSetTypeLedger,
+		},
+	}
+	err := store.StoreOrUpdate(&ledgerReport)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	myReport, err := store.RetrieveByID(ledgerReport.ReportID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myReport.ReportName).To(gomega.Equal("Ledger Report"))
+	g.Expect(myReport.ReportBody.SourceAccountSetType).To(gomega.Equal(ReportAccountSetUserSupplied))
+	g.Expect(myReport.ReportBody.SourcePredefinedAccounts).To(gomega.ConsistOf([]uint64{}))
+	g.Expect(myReport.ReportBody.SourceRecurseSubAccounts).To(gomega.BeFalse())
+	g.Expect(myReport.ReportBody.SourceRecurseSubAccountsDepth).To(gomega.Equal(0))
+	g.Expect(myReport.ReportBody.DataSetType).To(gomega.Equal(ReportDataSetTypeLedger))
+
+	ledgerReportUpdate := Report{
+		ReportID:   myReport.ReportID,
+		ReportName: "Ledger Report",
+		ReportBody: ReportBody{
+			SourceAccountSetType:          ReportAccountSetGroup,
+			SourceAccountGroup:            AccountTypeExpense,
+			SourcePredefinedAccounts:      []uint64{},
+			SourceRecurseSubAccounts:      false,
+			SourceRecurseSubAccountsDepth: 0,
+			DataSetType:                   ReportDataSetTypeExpense,
+		},
+	}
+	err = store.Update(&ledgerReportUpdate)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(ledgerReport.ReportID).To(gomega.Equal(myReport.ReportID))
+
+	myReport, err = store.RetrieveByID(myReport.ReportID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myReport.ReportName).To(gomega.Equal("Ledger Report"))
+	g.Expect(myReport.ReportBody.SourceAccountSetType).To(gomega.Equal(ReportAccountSetGroup))
+	g.Expect(myReport.ReportBody.SourceAccountGroup).To(gomega.Equal(AccountTypeExpense))
+	g.Expect(myReport.ReportBody.SourcePredefinedAccounts).To(gomega.ConsistOf([]uint64{}))
+	g.Expect(myReport.ReportBody.SourceRecurseSubAccounts).To(gomega.BeFalse())
+	g.Expect(myReport.ReportBody.SourceRecurseSubAccountsDepth).To(gomega.Equal(0))
+	g.Expect(myReport.ReportBody.DataSetType).To(gomega.Equal(ReportDataSetTypeExpense))
+
+	err = store.StoreOrUpdate(&ledgerReport)
+	myReport, err = store.RetrieveByID(ledgerReport.ReportID)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(myReport.ReportName).To(gomega.Equal("Ledger Report"))
+	g.Expect(myReport.ReportBody.SourceAccountSetType).To(gomega.Equal(ReportAccountSetUserSupplied))
+	g.Expect(myReport.ReportBody.SourcePredefinedAccounts).To(gomega.ConsistOf([]uint64{}))
+	g.Expect(myReport.ReportBody.SourceRecurseSubAccounts).To(gomega.BeFalse())
+	g.Expect(myReport.ReportBody.SourceRecurseSubAccountsDepth).To(gomega.Equal(0))
+	g.Expect(myReport.ReportBody.DataSetType).To(gomega.Equal(ReportDataSetTypeLedger))
+}

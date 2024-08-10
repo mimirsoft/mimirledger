@@ -66,6 +66,7 @@ func NewRouter(dStores *datastore.Datastores, logger *zerolog.Logger) *chi.Mux {
 	r.Get("/accounttypes", NewRootHandler(GetAccountTypes(accountsController)).ServeHTTP)
 	r.Get("/reports", NewRootHandler(GetReports(reportsController)).ServeHTTP)
 	r.Post("/reports", NewRootHandler(PostReports(reportsController)).ServeHTTP)
+	r.Post("/reports/restore", NewRootHandler(PostReportsRestore(reportsController)).ServeHTTP)
 	r.Get("/reports/{reportID}", NewRootHandler(GetReport(reportsController)).ServeHTTP)
 	r.Put("/reports/{reportID}", NewRootHandler(PutReportUpdate(reportsController)).ServeHTTP)
 	r.Delete("/reports/{reportID}", NewRootHandler(DeleteReport(reportsController)).ServeHTTP)

@@ -72,6 +72,54 @@ func (rc *ReportsController) CreateReport(_ context.Context, report *models.Repo
 	return report, nil
 }
 
+// POST /reports/restore
+func (rc *ReportsController) RestoreDefault(_ context.Context) ([]*models.Report, error) {
+	ledgerReport := models.Report{
+		ReportName: "LedgerReport",
+		ReportBody: models.ReportBody{
+			SourceAccountSetType:          datastore.ReportAccountSetUserSupplied,
+			SourcePredefinedAccounts:      []uint64{},
+			SourceRecurseSubAccounts:      false,
+			SourceRecurseSubAccountsDepth: 0,
+			DataSetType:                   datastore.ReportDataSetTypeLedger,
+		},
+	}
+	err := ledgerReport.StoreOrUpdate(rc.DataStores)
+	if err != nil {
+		return nil, fmt.Errorf("report.StoreOrUpdate:%w", err)
+	}
+	expenseReport := models.Report{
+		ReportName: "ExpenseReport",
+		ReportBody: models.ReportBody{
+			SourceAccountSetType:          datastore.ReportAccountSetUserSupplied,
+			SourcePredefinedAccounts:      []uint64{},
+			SourceRecurseSubAccounts:      false,
+			SourceRecurseSubAccountsDepth: 0,
+			DataSetType:                   datastore.ReportDataSetTypeExpense,
+		},
+	}
+	err = expenseReport.StoreOrUpdate(rc.DataStores)
+	if err != nil {
+		return nil, fmt.Errorf("report.StoreOrUpdate:%w", err)
+	}
+	incomeReport := models.Report{
+		ReportName: "IncomeReport",
+		ReportBody: models.ReportBody{
+			SourceAccountSetType:          datastore.ReportAccountSetUserSupplied,
+			SourcePredefinedAccounts:      []uint64{},
+			SourceRecurseSubAccounts:      false,
+			SourceRecurseSubAccountsDepth: 0,
+			DataSetType:                   datastore.ReportDataSetTypeIncome,
+		},
+	}
+	err = incomeReport.StoreOrUpdate(rc.DataStores)
+	if err != nil {
+		return nil, fmt.Errorf("report.StoreOrUpdate:%w", err)
+	}
+	myReports := []*models.Report{&ledgerReport, &expenseReport, &incomeReport}
+	return myReports, nil
+}
+
 // PUT /reports/{reportID}
 func (rc *ReportsController) UpdateReport(_ context.Context, report *models.Report) (*models.Report, error) {
 	err := report.Update(rc.DataStores)

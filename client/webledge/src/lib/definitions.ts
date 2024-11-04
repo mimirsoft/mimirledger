@@ -14,7 +14,6 @@ export type Account = {
     accountMemo: string;
     accountBalance: number;
     accountReconcileDate: string;
-
 };
 
 export type TransactionAccountPostRequest = {

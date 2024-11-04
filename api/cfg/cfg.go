@@ -6,11 +6,16 @@ import (
 	"strings"
 
 	"github.com/joho/godotenv"
+	"github.com/mimirsoft/mimirledger/api/datastore"
 )
 
 const (
 	pathSeparator = "/"
 )
+
+type Config struct {
+	Postgres datastore.PostgresConfig
+}
 
 func LoadEnv() error {
 	appEnv := os.Getenv("APP_ENV")

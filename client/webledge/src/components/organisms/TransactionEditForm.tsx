@@ -48,7 +48,7 @@ const postFormData = async (formData: FormData, debitsCount: number, creditsCoun
             dcSet.push(tdc)
         }
 
-        const myURL = new URL('/transactions/'+transactionID, import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/transactions/'+transactionID, import.meta.env.VITE_APP_SERVER_API_URL);
 
         const editTransaction : TransactionEditPostRequest = {
             transactionID : transactionID,
@@ -93,7 +93,7 @@ export default function TransactionEditForm(){
     }
     async function deleteTransaction(event:  MouseEvent<HTMLButtonElement>) {
         event.preventDefault()
-        const myURL = new URL('/transactions/' + transactionID, import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/transactions/' + transactionID, import.meta.env.VITE_APP_SERVER_API_URL);
         const settings: RequestInit = {
             method: 'DELETE',
         };

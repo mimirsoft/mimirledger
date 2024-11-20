@@ -6,7 +6,7 @@ import Modal from "../molecules/Modal";
 
 const postFormData = async (formData: FormData) => {
     try {
-        const myURL = new URL('/reports', import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/reports', import.meta.env.VITE_APP_SERVER_API_URL);
         // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);
         console.log(formEntries.accountParent)

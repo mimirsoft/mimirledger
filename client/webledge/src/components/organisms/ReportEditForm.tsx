@@ -8,7 +8,7 @@ const postFormData = async (formData: FormData) => {
         // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);
         const reportID = Number(formEntries.reportID)
-        const myURL = new URL('/reports/'+reportID, import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/reports/'+reportID, import.meta.env.VITE_APP_SERVER_API_URL);
         const newReportBody : ReportBody = {
             sourceAccountSetType:  String(formEntries.sourceAccountSetType),
             sourceAccountGroup:  String(formEntries.sourceAccountGroup),
@@ -64,7 +64,7 @@ export default function ReportEditForm(){
 
     async function deleteReport(event:  MouseEvent<HTMLButtonElement>) {
         event.preventDefault()
-        const myURL = new URL('/reports/' + reportID, import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/reports/' + reportID, import.meta.env.VITE_APP_SERVER_API_URL);
         const settings: RequestInit = {
             method: 'DELETE',
         };

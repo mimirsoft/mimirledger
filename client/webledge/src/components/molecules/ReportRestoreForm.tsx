@@ -4,7 +4,7 @@ import Modal from "../molecules/Modal.tsx";
 
 const postFormData = async () => {
     try {
-        const myURL = new URL('/reports/restore', import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/reports/restore', import.meta.env.VITE_APP_SERVER_API_URL);
         const settings :RequestInit = {
             method: 'POST',
         };

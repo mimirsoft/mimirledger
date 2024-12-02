@@ -8,7 +8,7 @@ const updateReconcileDate= async (formData: FormData) => {
         const dStr = String(formEntries.reconcileDate)
         const txnDate: Date = new Date(dStr);
 
-        const myURL = new URL('/accounts/'+accountID+"/reconciled", import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/accounts/'+accountID+"/reconciled", import.meta.env.VITE_APP_SERVER_API_URL);
 
         const reconciledPostRequest : AccountReconcileDatePostRequest = {
             accountID : accountID,
@@ -49,14 +49,16 @@ export default function AccountReconcileDateSubmitForm ( props:{
         return <></>
     }
     return (
+        <div className="bg-slate-300 flex mr-4">
         <form key={'reconcileDateForm' + props.accountID} onSubmit={updateReconciledDateOnAccount}>
             <input type="hidden" name="reconcileDate"
                    defaultValue={props.reconcileDate}/>
             <input  type="hidden" name="accountID"
                    defaultValue={props.accountID}/>
-            <button className="w-48 bg-blue-500 p-1 font-bold text-center"
+            <button className="w-48 bg-blue-500 font-bold text-center text-white h-16"
                     type="submit">Record Reconcile Date for Account
             </button>
         </form>
+        </div>
     )
 }

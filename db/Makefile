@@ -15,7 +15,6 @@ DUMPFILENAME ?= mimir_dump.sql
 create-users:
 	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=postgres createuser -h ${PG_DB_HOST} -p ${PG_DB_PORT} -U postgres -s mimirledger || createuser -s mimirledger || true"
 	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=postgres psql -h ${PG_DB_HOST} -p ${PG_DB_PORT} -U postgres -d postgres -c \"ALTER USER mimirledger WITH PASSWORD 'mimirledger';\""
-	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=postgres psql -h ${PG_DB_HOST} -p ${PG_DB_PORT} -U postgres -d postgres -c \"ALTER USER mimirledger WITH PASSWORD 'mimirledger';\""
 	docker exec -it ${PG_CONTAINER} sh -c "PGPASSWORD=postgres psql -h ${PG_DB_HOST} -p ${PG_DB_PORT} -U postgres -d postgres -c \"ALTER USER mimirledger WITH SUPERUSER;\""
 
 create-devdb: create-users

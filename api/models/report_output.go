@@ -2,17 +2,22 @@ package models
 
 import (
 	"time"
+
+	"github.com/mimirsoft/mimirledger/api/datastore"
 )
 
 // the output of a report
 type ReportOutput struct {
-	ReportName    string
-	StartDate     time.Time
-	EndDate       time.Time
-	ReportDataSet []*ReportData
+	ReportID    uint64
+	ReportName  string
+	StartDate   time.Time
+	EndDate     time.Time
+	DataSetType datastore.ReportDataSetType
+	ReportData  []*ReportOutputData
 }
 
-type ReportData struct {
-	Expense int64
-	Income  int64
+type ReportOutputData struct {
+	Expense         int64
+	Income          int64
+	NetTransactions []*TransactionLedger
 }

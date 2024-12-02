@@ -62,8 +62,8 @@ func GetReport(reportsCtl *ReportsController) func(res http.ResponseWriter, req 
 var ErrInvalidStartDate = errors.New("invalid startDate")
 var ErrInvalidEndDate = errors.New("invalid endDate")
 
-// GET /reports/{reportID}/run?date
-func GetReportRun(reportsCtl *ReportsController) func(res http.ResponseWriter, req *http.Request) error {
+// GET /reports/{reportID}/output?date
+func GetReportOutput(reportsCtl *ReportsController) func(res http.ResponseWriter, req *http.Request) error {
 	return func(res http.ResponseWriter, req *http.Request) error {
 		reportIDStr := chi.URLParam(req, "reportID")
 
@@ -184,6 +184,43 @@ func PostReports(reportsCtl *ReportsController) func(res http.ResponseWriter, re
 		}
 
 		jsonResponse := response.ReportToRespReport(myReport)
+
+		return RespondOK(res, jsonResponse)
+	}
+}
+
+// POST /reports/restore
+func PostReportsRestore(reportsCtl *ReportsController) func(res http.ResponseWriter, req *http.Request) error {
+	return func(res http.ResponseWriter, req *http.Request) error {
+		Reports, err := reportsCtl.RestoreDefault(req.Context())
+		if err != nil {
+			return NewRequestError(http.StatusServiceUnavailable, err)
+		}
+		jsonResponse := response.ConvertReportsToRespReportsSet(Reports)
+		return RespondOK(res, jsonResponse)
+	}
+}
+
+// DELETE /reports/{reportID}
+func DeleteReport(reportsCtl *ReportsController) func(res http.ResponseWriter, req *http.Request) error {
+	return func(res http.ResponseWriter, req *http.Request) error {
+		idStr := chi.URLParam(req, "reportID")
+
+		reportID, err := strconv.ParseUint(idStr, 10, 64)
+		if err != nil {
+			return NewRequestError(http.StatusBadRequest, err)
+		}
+
+		if reportID == 0 {
+			return NewRequestError(http.StatusBadRequest, ErrInvalidTransactionID)
+		}
+
+		report, err := reportsCtl.DeleteReport(req.Context(), reportID)
+		if err != nil {
+			return NewRequestError(http.StatusBadRequest, err)
+		}
+
+		jsonResponse := response.ReportToRespReport(report)
 
 		return RespondOK(res, jsonResponse)
 	}

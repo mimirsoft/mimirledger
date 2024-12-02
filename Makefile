@@ -38,7 +38,7 @@ build-web:
 stop: stop-api stop-db stop-web
 
 stop-api:
-	${DOCKER_COMPOSE} stop --force ${SERVICE_NAME} || true
+	${DOCKER_COMPOSE} stop ${SERVICE_NAME} || true
 	${DOCKER_COMPOSE} down
 
 stop-db:

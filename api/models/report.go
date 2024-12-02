@@ -59,19 +59,79 @@ func (c *Report) Update(dStores *datastore.Datastores) error {
 	return nil
 }
 
+// StoreOrUpdate stores a report, or updates if a report of the same name already existst
+func (c *Report) StoreOrUpdate(dStores *datastore.Datastores) error {
+	eReport := reportToEntReport(c)
+
+	err := dStores.ReportStore().StoreOrUpdate(eReport)
+	if err != nil {
+		return fmt.Errorf("ds.ReportStore().StoreOrUpdate:%w [Report:%+v]", err, eReport)
+	}
+
+	myReport := entReportToReport(eReport)
+	*c = *myReport
+
+	return nil
+}
+
+func (c *Report) Delete(dStores *datastore.Datastores) error {
+	eReport := reportToEntReport(c)
+
+	// delete the existing report
+	err := dStores.ReportStore().Delete(eReport)
+	if err != nil {
+		return fmt.Errorf("ds.ReportStore().Delete:%w [Report:%+v]", err, c)
+	}
+
+	return nil
+}
+
 // Run executes a report and generates an output
 func (c *Report) Run(dStores *datastore.Datastores, startDate time.Time,
 	endDate time.Time, runTimeTargetAccounts []uint64) (*ReportOutput, error) {
-	myReportOutput := ReportOutput{ReportName: c.ReportName, //nolint:exhaustruct
-		StartDate: startDate,
-		EndDate:   endDate}
-	// check type of account set
-	// build the set of accountIDs to process
-	sourceAccountMap := make(map[uint64]bool)
+	myReportOutput := ReportOutput{
+		ReportID:   c.ReportID,
+		ReportName: c.ReportName, //nolint:exhaustruct
+		StartDate:  startDate,
+		EndDate:    endDate}
 
+	sourceAccountSet, err := c.buildAccountSet(dStores, runTimeTargetAccounts)
+	if err != nil {
+		return nil, fmt.Errorf("buildDataSetLedger:%w", err)
+	}
+
+	var reportDataSet []*ReportOutputData
+
+	switch c.ReportBody.DataSetType {
+	case datastore.ReportDataSetTypeBalance:
+	case datastore.ReportDataSetTypeLedger:
+		var err error
+
+		reportDataSet, err = buildDataSetLedger(dStores, sourceAccountSet, startDate, endDate)
+		if err != nil {
+			return nil, fmt.Errorf("buildDataSetLedger:%w", err)
+		}
+	case datastore.ReportDataSetTypeIncome:
+	case datastore.ReportDataSetTypeExpense:
+		var err error
+
+		reportDataSet, err = buildDataSetExpense(dStores, sourceAccountSet, nil)
+		if err != nil {
+			return nil, fmt.Errorf("buildDataSetExpense:%w", err)
+		}
+	}
+
+	myReportOutput.DataSetType = c.ReportBody.DataSetType
+	myReportOutput.ReportData = reportDataSet
+	// build data set from account set
+	return &myReportOutput, nil
+}
+
+// check type of account set
+// build the set of accountIDs to process
+func (c *Report) buildAccountSet(dStores *datastore.Datastores, runTimeTargetAccounts []uint64) ([]uint64, error) { //nolint:gocognit
 	var sourceAccountSet []uint64
-
-	var reportDataSet []*ReportData
+	sourceAccountMap := make(map[uint64]bool)
 
 	switch c.ReportBody.SourceAccountSetType {
 	case datastore.ReportAccountSetNone:
@@ -84,7 +144,7 @@ func (c *Report) Run(dStores *datastore.Datastores, startDate time.Time,
 		// build total account set
 		// get userSuppliedAccountIDs
 		// include sub-accounts
-		if c.ReportBody.SourceRecurseSubAccounts {
+		if c.ReportBody.SourceRecurseSubAccounts { //nolint:nestif
 			for _, account := range runTimeTargetAccounts {
 				accountAndChildren, err := dStores.AccountStore().GetAccountWithChildrenByLevel(account)
 				if err != nil {
@@ -116,28 +176,28 @@ func (c *Report) Run(dStores *datastore.Datastores, startDate time.Time,
 			sourceAccountSet = append(sourceAccountSet, idx)
 		}
 	}
-
-	switch c.ReportBody.DataSetType {
-	case datastore.ReportDataSetTypeBalance:
-	case datastore.ReportDataSetTypeLedger:
-	case datastore.ReportDataSetTypeIncome:
-	case datastore.ReportDataSetTypeExpense:
-		var err error
-
-		reportDataSet, err = buildDataSetExpense(dStores, sourceAccountSet, nil)
-		if err != nil {
-			return nil, fmt.Errorf("buildDataSetExpense:%w", err)
-		}
-	}
-
-	myReportOutput.ReportDataSet = reportDataSet
-	// build data set from account set
-	return &myReportOutput, nil
+	return sourceAccountSet, nil
 }
 
+func buildDataSetLedger(dStores *datastore.Datastores, sourceAccountSet []uint64,
+	startDate time.Time, endDate time.Time) ([]*ReportOutputData, error) {
+	var dataSet []*ReportOutputData
+
+	entNetTransactions, err := dStores.TransactionStore().RetrieveTransactionsNetForDates(sourceAccountSet,
+		startDate, endDate)
+	if err != nil {
+		return nil, fmt.Errorf("dStores.TransactionStore().GetExpensesForAccount:%w", err)
+	}
+	// convert to model
+	netTransactions := entTransactionsLedgerToTransactionsLedger(entNetTransactions)
+	dataRaw := ReportOutputData{NetTransactions: netTransactions} //nolint:exhaustruct
+	dataSet = append(dataSet, &dataRaw)
+
+	return dataSet, nil
+}
 func buildDataSetExpense(dStores *datastore.Datastores, sourceAccountSet []uint64,
-	filterAccountSet []uint64) ([]*ReportData, error) {
-	var dataSet []*ReportData
+	filterAccountSet []uint64) ([]*ReportOutputData, error) {
+	var dataSet []*ReportOutputData
 
 	// to do, at add switch on accountType "which are expenses, DEBITS or CREDIT"
 	if len(filterAccountSet) == 0 {
@@ -146,7 +206,7 @@ func buildDataSetExpense(dStores *datastore.Datastores, sourceAccountSet []uint6
 			return nil, fmt.Errorf("dStores.TransactionStore().GetExpensesForAccount:%w", err)
 		}
 
-		dataRaw := ReportData{Expense: expenses} //nolint:exhaustruct
+		dataRaw := ReportOutputData{Expense: expenses} //nolint:exhaustruct
 		dataSet = append(dataSet, &dataRaw)
 	} else {
 		expenses, err := dStores.TransactionStore().GetDebitTotalForAccountsFiltered(sourceAccountSet, filterAccountSet)
@@ -154,7 +214,7 @@ func buildDataSetExpense(dStores *datastore.Datastores, sourceAccountSet []uint6
 			return nil, fmt.Errorf("dStores.TransactionStore().GetExpensesForAccount:%w", err)
 		}
 
-		dataRaw := ReportData{Expense: expenses} //nolint:exhaustruct
+		dataRaw := ReportOutputData{Expense: expenses} //nolint:exhaustruct
 		dataSet = append(dataSet, &dataRaw)
 	}
 

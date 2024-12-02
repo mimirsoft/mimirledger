@@ -1,13 +1,14 @@
-import { useParams } from "react-router-dom";
+import {useNavigate, useParams} from "react-router-dom";
 import {ReportBody, ReportPostRequest} from '../../lib/definitions';
-import {FormEvent} from "react";
+import React, {FormEvent, MouseEvent} from "react";
 import {useGetReport} from "../../lib/data";
+import Modal from "../molecules/Modal.tsx";
 const postFormData = async (formData: FormData) => {
     try {
         // Do a bit of work to convert the entries to a plain JS object
         const formEntries = Object.fromEntries(formData);
         const reportID = Number(formEntries.reportID)
-        const myURL = new URL('/reports/'+reportID, import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/reports/'+reportID, import.meta.env.VITE_APP_SERVER_API_URL);
         const newReportBody : ReportBody = {
             sourceAccountSetType:  String(formEntries.sourceAccountSetType),
             sourceAccountGroup:  String(formEntries.sourceAccountGroup),
@@ -48,13 +49,39 @@ async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     }
 }
 
+
 export default function ReportEditForm(){
+    const [showModal, setShowModal] = React.useState(false);
+    const [modalBody, setModalBody] = React.useState("");
+    const [modalTitle, setModalTitle] = React.useState("");
+
+    const navigate = useNavigate();
     const { reportID } = useParams();
     const { data, isLoading, error } = useGetReport(reportID);
 
     if (isLoading) return <div className="Loading">Loading...</div>
     if (error) return <div>Failed to load</div>
 
+    async function deleteReport(event:  MouseEvent<HTMLButtonElement>) {
+        event.preventDefault()
+        const myURL = new URL('/reports/' + reportID, import.meta.env.VITE_APP_SERVER_API_URL);
+        const settings: RequestInit = {
+            method: 'DELETE',
+        };
+        const response = await fetch(myURL, settings);
+        if (response?.status == 200) {
+            setModalTitle("Delete Success")
+            const deleteData = await response?.json()
+            console.log(deleteData)
+            setModalBody("<h1>"+deleteData.reportName+" Deleted</h1>")
+            setShowModal(true)
+        } else {
+            console.log("ERROR" + response)
+        }
+    }
+    const onClose = () =>{
+        navigate("/reports/list");
+    }
      return (
          <div className="flex w-full flex-col p-4 bg-slate-200">
              <div className="text-xl font-bold mb-2">
@@ -134,11 +161,18 @@ export default function ReportEditForm(){
                      </div>
                      <div className="my-4 text-xl font-bold bg-slate-200 flex flex-row">
                          <div className="w-64 mr-2 text-right"/>
+                         <div className="w-64 mr-2">
                          <input className=" bg-slate-300" type="hidden" name="reportID" defaultValue={data?.reportID}/>
                          <button className="p-3 font-bold bg-blue-500 text-white" type="submit">Update</button>
+                         </div>
+                         <button onClick={deleteReport} className="bg-red-600 p-3 font-bold text-white"
+                                 type="submit">Delete
+                         </button>
                      </div>
                  </div>
              </form>
+             {modalBody}
+             <Modal showModal={showModal} setShowModal={setShowModal} title={modalTitle} body={modalBody} onClose={onClose}/>
          </div>
      );
 }

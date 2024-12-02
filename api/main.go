@@ -42,15 +42,11 @@ func main() {
 
 	err = server.ListenAndServe()
 	if err != nil {
-		log.Error().Err(err).Msg("server..ListenAndServe")
+		log.Error().Err(err).Msg("server.ListenAndServe")
 	}
 }
 
-type Config struct {
-	Postgres datastore.PostgresConfig
-}
-
-func LoadConfig() Config {
+func LoadConfig() cfg.Config {
 	err := cfg.LoadEnv()
 	if err != nil {
 		log.Error().Err(err).Msg("cfg.LoadEnv()")
@@ -58,7 +54,7 @@ func LoadConfig() Config {
 
 	postgresCfg := datastore.LoadPostgresConfigFromEnv()
 
-	myCfg := Config{Postgres: postgresCfg}
+	myCfg := cfg.Config{Postgres: postgresCfg}
 
 	return myCfg
 }

@@ -9,12 +9,12 @@ VALUES ('ASSETS','TOP LEVEL ASSETS SAMPLE',
         true, 1,2,
         0,0,
         'ASSETS', 'DEBIT', 'ASSET'),
-       ('LIABILITIES','TOP LEVEL LIABILITY SAMPLE',
+       ('EQUITY','TOP LEVEL EQUITY SAMPLE',
         true, 3,4,
         0,0,
-        'LIABILITIES', 'CREDIT', 'LIABILITY'),
-       ('EQUITY','TOP LEVEL EQUITY SAMPLE',
+        'EQUITY', 'CREDIT', 'EQUITY'),
+       ('LIABILITIES','TOP LEVEL LIABILITY SAMPLE',
         true, 5,6,
         0,0,
-        'EQUITY', 'CREDIT', 'EQUITY');
+        'LIABILITIES', 'CREDIT', 'LIABILITY');
 

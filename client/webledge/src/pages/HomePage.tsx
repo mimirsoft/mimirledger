@@ -1,6 +1,6 @@
 import  { useEffect} from 'react';
 
-export default function Home() {
+export default function HomePage() {
     useEffect(() => {
         document.title = "MimirLedger";
     }, []);

@@ -1,7 +1,7 @@
 import TransactionAccountLedger from '../components/organisms/TransactionAccountLedger';
 
 
-export default function TransactionsAccount() {
+export default function TransactionsAccountPage() {
     return (
         <div>
             <TransactionAccountLedger />

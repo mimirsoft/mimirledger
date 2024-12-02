@@ -10,7 +10,7 @@ const updateReconcileTransaction = async (formData: FormData) => {
         const dStr = String(formEntries.reconcileDate)
         const txnDate: Date = new Date(dStr);
 
-        const myURL = new URL('/transactions/'+transactionID+"/reconciled", import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/transactions/'+transactionID+"/reconciled", import.meta.env.VITE_APP_SERVER_API_URL);
 
         const reconciledPostRequest : TransactionReconciledPostRequest = {
             transactionID : transactionID,
@@ -34,7 +34,7 @@ const updateUnreconcileTransaction = async (formData: FormData) => {
         const formEntries = Object.fromEntries(formData);
         const transactionID = Number(formEntries.transactionID)
 
-        const myURL = new URL('/transactions/'+transactionID+"/unreconciled", import.meta.env.VITE_APP_MIMIRLEDGER_API_URL);
+        const myURL = new URL('/transactions/'+transactionID+"/unreconciled", import.meta.env.VITE_APP_SERVER_API_URL);
 
 
         const settings :RequestInit = {
@@ -82,7 +82,7 @@ export default function TransactionToggleReconcileForm(props:{
                        defaultValue={props.reconciledDate}/>
                 <input className="bg-slate-300" type="hidden" name="transactionID"
                        defaultValue={props.transactionID}/>
-                <button className="w-24 bg-red-600 p-1 font-bold text-center"
+                <button className="w-24 bg-red-600 p-1 text-white font-bold text-center"
                         type="submit">Unreconcile
                 </button>
             </form>
@@ -94,7 +94,7 @@ export default function TransactionToggleReconcileForm(props:{
                    defaultValue={props.reconciledDate}/>
             <input className="bg-slate-300" type="hidden" name="transactionID"
                    defaultValue={props.transactionID}/>
-            <button className="w-24 bg-blue-500 p-1 font-bold text-center"
+            <button className="w-24 bg-blue-500 p-1 text-white font-bold text-center"
                     type="submit">Reconcile
             </button>
         </form>

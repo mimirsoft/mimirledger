@@ -96,6 +96,33 @@ func (store ReportStore) Store(myReport *Report) error {
 	return nil
 }
 
+// StoreOrUpdate inserts a Report into postgres, or updates the existing record
+func (store ReportStore) StoreOrUpdate(myReport *Report) error {
+	query := `    INSERT INTO reports 
+		           (
+		            report_name,
+					report_body)
+							VALUES (
+					:report_name,
+					:report_body)
+					ON CONFLICT (report_name)
+					 DO UPDATE SET report_body = :report_body
+					 RETURNING *`
+
+	stmt, err := store.Client.PrepareNamed(query)
+	if err != nil {
+		return fmt.Errorf("error preparing report insert: %w", err)
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRow(myReport).StructScan(myReport) //nolint:musttag
+	if err != nil {
+		return fmt.Errorf("stmt.QueryRow().StructScan():%w", err)
+	}
+
+	return nil
+}
+
 // Store inserts a UserNotification into postgres, we do not include :report_id in our insert
 func (store ReportStore) Update(myReport *Report) error {
 	query := `UPDATE  reports 
